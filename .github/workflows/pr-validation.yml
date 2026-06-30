@@ -1,0 +1,98 @@
+name: PR Validation
+
+# Runs on every PR targeting main — validates before merge is allowed
+on:
+  pull_request:
+    branches: [main, master]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate:
+    name: Validate PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history so we can analyze commits
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ----------------------------------------------------------------
+      # Tests
+      # ----------------------------------------------------------------
+      - name: Run tests
+        run: npm test
+        # If you have coverage: npm test -- --coverage
+
+      # ----------------------------------------------------------------
+      # Lint
+      # ----------------------------------------------------------------
+      - name: Run linter
+        run: npm run lint
+        # Adjust if your lint script has a different name
+
+      # ----------------------------------------------------------------
+      # Type check
+      # ----------------------------------------------------------------
+      - name: Type check
+        run: npm run type-check
+        # If you use tsc directly: npx tsc --noEmit
+
+  code-review:
+    name: Automated Code Review
+    runs-on: ubuntu-latest
+    needs: validate  # only review if validation passed
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ----------------------------------------------------------------
+      # Security scan — look for hardcoded secrets in the diff
+      # ----------------------------------------------------------------
+      - name: Scan for secrets
+        run: |
+          echo "Scanning diff for potential secrets..."
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          DIFF=$(git diff "$BASE_SHA" "$HEAD_SHA")
+
+          # Patterns that should never appear in committed code
+          if echo "$DIFF" | grep -iE "(api[_-]?key|secret|password|token)\s*=\s*['\"][^'\"]{8,}" ; then
+            echo "::error::Potential hardcoded secret detected in diff"
+            exit 1
+          fi
+
+          if echo "$DIFF" | grep -E "ghp_[a-zA-Z0-9]{36}" ; then
+            echo "::error::GitHub token detected in diff"
+            exit 1
+          fi
+
+          echo "No secrets found in diff."
+
+      # ----------------------------------------------------------------
+      # Basic quality checks on changed files
+      # ----------------------------------------------------------------
+      - name: Check for leftover debug code
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          DIFF=$(git diff "$BASE_SHA" "$HEAD_SHA")
+
+          # Warn (don't block) on console.log / debugger / TODO
+          if echo "$DIFF" | grep -E "^\+.*\b(console\.log|debugger)\b" ; then
+            echo "::warning::Leftover debug code (console.log/debugger) found"
+          fi
+          echo "Quality check complete."

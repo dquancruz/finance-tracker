@@ -1,0 +1,11 @@
+---
+description: Reglas de seguridad para zonas sensibles
+globs: ["src/api/**", "src/auth/**", "infra/**", "cdk/**"]
+alwaysApply: false
+---
+- No commitear secretos ni credenciales.
+- argon2id/bcrypt para passwords; nunca MD5/SHA1.
+- Parametrizar queries MongoDB.
+- IAM con menor privilegio.
+- S3 sin buckets públicos por defecto.
+- Secretos en Secrets Manager o SSM.
