@@ -24,6 +24,10 @@ export function computeNextDueDate(current: Date, frequency: RecurringFrequency)
       return addMonths(d, 1);
     case 'yearly':
       return addMonths(d, 12);
+    default: {
+      const _exhaustive: never = frequency;
+      throw new Error(`Unhandled frequency: ${_exhaustive}`);
+    }
   }
 }
 
