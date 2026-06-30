@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# Pre-tag validation & automation
+# - Validate tag format (vX.Y.Z)
+# - Final tests
+# - Update CHANGELOG if needed
+
+set -e
+
+TAG=$1
+
+echo "🏷️  Pre-tag hook for: $TAG"
+
+if ! echo "$TAG" | grep -q "^v[0-9]\+\.[0-9]\+\.[0-9]\+"; then
+  echo "❌ Invalid tag format: $TAG"
+  echo "   Expected: vX.Y.Z (e.g., v2.2.0)"
+  exit 1
+fi
+echo "✅ Tag format valid: $TAG"
+
+echo "Running final tests before tag..."
+npm test -- --bail --silent 2>/dev/null || {
+  echo "❌ Tests failed, cannot tag"
+  exit 1
+}
+echo "✅ All tests passing"
+
+if ! git diff-index --quiet HEAD --; then
+  echo "❌ Uncommitted changes found, cannot tag"
+  exit 1
+fi
+echo "✅ No uncommitted changes"
+
+echo "✅ Pre-tag validation passed, ready to tag"
+exit 0

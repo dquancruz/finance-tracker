@@ -1,0 +1,228 @@
+name: On Merge to Main
+
+# Runs when a PR is merged into main — handles versioning, release, and Jira
+on:
+  pull_request:
+    branches: [main, master]
+    types: [closed]
+
+# Only run if the PR was actually MERGED (not just closed)
+jobs:
+  release:
+    name: Version, Release & Jira
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+
+    permissions:
+      contents: write  # needed to push tags and create releases
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history to analyze commits since last tag
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ================================================================
+      # STEP 1: Run tests one more time on main (safety)
+      # ================================================================
+      - name: Run tests
+        run: npm test
+
+      # ================================================================
+      # STEP 2: Detect version bump from commits
+      # ================================================================
+      - name: Detect version bump
+        id: bump
+        run: |
+          # Get the last tag (or default to v0.0.0 if none)
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Last tag: $LAST_TAG"
+
+          # Get commits since last tag
+          if [ "$LAST_TAG" = "v0.0.0" ]; then
+            COMMITS=$(git log --pretty=format:"%s")
+          else
+            COMMITS=$(git log "${LAST_TAG}..HEAD" --pretty=format:"%s")
+          fi
+
+          echo "Analyzing commits..."
+          echo "$COMMITS"
+
+          # Determine bump type
+          BUMP="patch"  # default
+
+          if echo "$COMMITS" | grep -qE "(^|\s)(feat)(\(.+\))?:"; then
+            BUMP="minor"
+          fi
+
+          if echo "$COMMITS" | grep -qE "BREAKING CHANGE|!:" ; then
+            BUMP="major"
+          fi
+
+          echo "Detected bump: $BUMP"
+          echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
+          echo "last_tag=$LAST_TAG" >> "$GITHUB_OUTPUT"
+
+      # ================================================================
+      # STEP 3: Calculate new version
+      # ================================================================
+      - name: Calculate new version
+        id: version
+        run: |
+          LAST_TAG="${{ steps.bump.outputs.last_tag }}"
+          BUMP="${{ steps.bump.outputs.bump }}"
+
+          # Strip the 'v' prefix
+          VERSION="${LAST_TAG#v}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+
+          case "$BUMP" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+          esac
+
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          NEW_TAG="v${NEW_VERSION}"
+
+          echo "New version: $NEW_TAG"
+          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+
+      # ================================================================
+      # STEP 4: Update package.json version
+      # ================================================================
+      - name: Bump package.json
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          npm version "$NEW_VERSION" --no-git-tag-version --allow-same-version
+          echo "package.json updated to $NEW_VERSION"
+
+      # ================================================================
+      # STEP 5: Generate CHANGELOG entry
+      # ================================================================
+      - name: Update CHANGELOG
+        run: |
+          NEW_TAG="${{ steps.version.outputs.new_tag }}"
+          LAST_TAG="${{ steps.bump.outputs.last_tag }}"
+          DATE=$(date +%Y-%m-%d)
+
+          if [ "$LAST_TAG" = "v0.0.0" ]; then
+            COMMITS=$(git log --pretty=format:"- %s")
+          else
+            COMMITS=$(git log "${LAST_TAG}..HEAD" --pretty=format:"- %s")
+          fi
+
+          # Build the new section
+          {
+            echo "## [${NEW_TAG#v}] - $DATE"
+            echo ""
+            echo "$COMMITS"
+            echo ""
+          } > /tmp/new_section.md
+
+          # Prepend to existing CHANGELOG (or create it)
+          if [ -f CHANGELOG.md ]; then
+            cat /tmp/new_section.md CHANGELOG.md > /tmp/changelog_combined.md
+            mv /tmp/changelog_combined.md CHANGELOG.md
+          else
+            {
+              echo "# Changelog"
+              echo ""
+              cat /tmp/new_section.md
+            } > CHANGELOG.md
+          fi
+          echo "CHANGELOG.md updated"
+
+      # ================================================================
+      # STEP 6: Commit version bump + changelog
+      # ================================================================
+      - name: Commit version bump
+        run: |
+          NEW_TAG="${{ steps.version.outputs.new_tag }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json CHANGELOG.md
+          git commit -m "chore(release): $NEW_TAG [skip ci]" || echo "Nothing to commit"
+          git push origin HEAD:${{ github.event.pull_request.base.ref }}
+
+      # ================================================================
+      # STEP 7: Create git tag + GitHub release
+      # ================================================================
+      - name: Create tag and release
+        run: |
+          NEW_TAG="${{ steps.version.outputs.new_tag }}"
+          git tag "$NEW_TAG"
+          git push origin "$NEW_TAG"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.new_tag }}
+          name: ${{ steps.version.outputs.new_tag }}
+          generate_release_notes: true
+
+      # ================================================================
+      # STEP 8: Update Jira — comment + close linked tickets
+      # ================================================================
+      - name: Update Jira tickets
+        env:
+          JIRA_HOST: ${{ secrets.JIRA_HOST }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+        run: |
+          NEW_TAG="${{ steps.version.outputs.new_tag }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+
+          # Extract Jira keys from PR title and branch (e.g., PROJ-123)
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          KEYS=$(echo "$PR_TITLE $BRANCH" | grep -oE "[A-Z]+-[0-9]+" | sort -u)
+
+          if [ -z "$KEYS" ]; then
+            echo "No Jira keys found in PR title or branch. Skipping Jira update."
+            exit 0
+          fi
+
+          AUTH=$(echo -n "$JIRA_EMAIL:$JIRA_API_TOKEN" | base64 -w 0)
+
+          for KEY in $KEYS; do
+            echo "Updating $KEY..."
+
+            # Add a comment
+            COMMENT="Merged in PR #${PR_NUMBER} and released in ${NEW_TAG}."
+            curl -s -X POST \
+              -H "Authorization: Basic $AUTH" \
+              -H "Content-Type: application/json" \
+              "https://${JIRA_HOST}/rest/api/3/issue/${KEY}/comment" \
+              -d "{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"${COMMENT}\"}]}]}}" \
+              > /dev/null && echo "  Comment added to $KEY"
+
+            # Transition to Done — find the transition id for "Done"
+            TRANSITIONS=$(curl -s \
+              -H "Authorization: Basic $AUTH" \
+              "https://${JIRA_HOST}/rest/api/3/issue/${KEY}/transitions")
+
+            DONE_ID=$(echo "$TRANSITIONS" | grep -oE '\{"id":"[0-9]+","name":"Done"' | grep -oE '"id":"[0-9]+"' | grep -oE '[0-9]+' | head -1)
+
+            if [ -n "$DONE_ID" ]; then
+              curl -s -X POST \
+                -H "Authorization: Basic $AUTH" \
+                -H "Content-Type: application/json" \
+                "https://${JIRA_HOST}/rest/api/3/issue/${KEY}/transitions" \
+                -d "{\"transition\":{\"id\":\"${DONE_ID}\"}}" \
+                > /dev/null && echo "  $KEY transitioned to Done"
+            else
+              echo "  No 'Done' transition available for $KEY (skipped)"
+            fi
+          done

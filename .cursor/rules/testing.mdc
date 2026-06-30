@@ -1,0 +1,9 @@
+---
+description: Convenciones de testing
+globs: ["src/**/*.test.*", "src/**/*.spec.*", "tests/**"]
+alwaysApply: false
+---
+- No .only() ni .skip() en tests commiteados.
+- Cobertura mínima 80%.
+- Tests de integración con instancia real de DB.
+- Nombres: describe("qué") → it("hace qué cuando condición").
