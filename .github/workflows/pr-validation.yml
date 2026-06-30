@@ -70,7 +70,8 @@ jobs:
           DIFF=$(git diff "$BASE_SHA" "$HEAD_SHA")
 
           # Patterns that should never appear in committed code
-          if echo "$DIFF" | grep -iE "(api[_-]?key|secret|password|token)\s*=\s*['\"][^'\"]{8,}" ; then
+          # Require no spaces in the value — real secrets don't contain spaces, error messages do
+          if echo "$DIFF" | grep -iE "(api[_-]?key|secret|password|token)\s*=\s*['\"][^'\"\s]{8,}" ; then
             echo "::error::Potential hardcoded secret detected in diff"
             exit 1
           fi

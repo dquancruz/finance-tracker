@@ -1,0 +1,19 @@
+{
+  "name": "@finance-tracker/ui",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "tsc --noEmit --strict",
+    "type-check": "tsc --noEmit",
+    "build": "echo 'ui package uses source directly'"
+  },
+  "peerDependencies": {
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
