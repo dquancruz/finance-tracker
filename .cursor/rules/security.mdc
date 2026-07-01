@@ -1,11 +1,11 @@
 ---
-description: Reglas de seguridad para zonas sensibles
+description: Security rules for sensitive areas
 globs: ["src/api/**", "src/auth/**", "infra/**", "cdk/**"]
 alwaysApply: false
 ---
-- No commitear secretos ni credenciales.
-- argon2id/bcrypt para passwords; nunca MD5/SHA1.
-- Parametrizar queries MongoDB.
-- IAM con menor privilegio.
-- S3 sin buckets públicos por defecto.
-- Secretos en Secrets Manager o SSM.
+- Do not commit secrets or credentials.
+- argon2id/bcrypt for passwords; never MD5/SHA1.
+- Parameterize MongoDB queries.
+- IAM with least privilege.
+- S3 without public buckets by default.
+- Secrets in Secrets Manager or SSM.

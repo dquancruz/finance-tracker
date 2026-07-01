@@ -1,10 +1,10 @@
 ---
-description: Convenciones de frontend para React/Next.js/Astro
+description: Frontend conventions for React/Next.js/Astro
 globs: ["src/components/**", "src/pages/**", "src/app/**", "src/ui/**"]
 alwaysApply: false
 ---
-- Server Components por defecto; 'use client' solo cuando necesario.
-- WCAG AA mínimo, HTML semántico, navegación por teclado.
-- No `any` en TypeScript.
-- No `console.log` en código commiteado.
+- Server Components by default; 'use client' only when necessary.
+- WCAG AA minimum, semantic HTML, keyboard navigation.
+- No `any` in TypeScript.
+- No `console.log` in committed code.
 - Mobile-first responsive.
