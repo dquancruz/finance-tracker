@@ -131,17 +131,21 @@ jobs:
             echo ""
           } > /tmp/new_section.md
 
-          # Prepend to existing CHANGELOG (or create it)
+          # Prepend to existing CHANGELOG (or create it), keeping a single "# Changelog"
+          # header at the top instead of re-burying it under each new release section.
           if [ -f CHANGELOG.md ]; then
-            cat /tmp/new_section.md CHANGELOG.md > /tmp/changelog_combined.md
-            mv /tmp/changelog_combined.md CHANGELOG.md
+            EXISTING_BODY=$(grep -v '^# Changelog$' CHANGELOG.md)
           else
-            {
-              echo "# Changelog"
-              echo ""
-              cat /tmp/new_section.md
-            } > CHANGELOG.md
+            EXISTING_BODY=""
           fi
+
+          {
+            echo "# Changelog"
+            echo ""
+            cat /tmp/new_section.md
+            echo "$EXISTING_BODY"
+          } > /tmp/changelog_combined.md
+          mv /tmp/changelog_combined.md CHANGELOG.md
           echo "CHANGELOG.md updated"
 
       # ================================================================
@@ -180,14 +184,27 @@ jobs:
           JIRA_HOST: ${{ secrets.JIRA_HOST }}
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
         run: |
+          if [ -z "$JIRA_HOST" ] || [ -z "$JIRA_EMAIL" ] || [ -z "$JIRA_API_TOKEN" ]; then
+            echo "Jira secrets (JIRA_HOST/JIRA_EMAIL/JIRA_API_TOKEN) are not configured for this repo. Skipping Jira update."
+            exit 0
+          fi
+
+          if [ -z "$JIRA_PROJECT_KEY" ]; then
+            echo "JIRA_PROJECT_KEY secret is not configured. Skipping Jira update."
+            exit 0
+          fi
+
           NEW_TAG="${{ steps.version.outputs.new_tag }}"
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_NUMBER="${{ github.event.pull_request.number }}"
 
-          # Extract Jira keys from PR title and branch (e.g., PROJ-123)
+          # Extract Jira keys from PR title and branch (e.g., PROJ-123).
+          # Scoped to JIRA_PROJECT_KEY so unrelated bracketed tags like "[PHASE-2]" in the
+          # PR title aren't mistaken for a Jira issue key.
           BRANCH="${{ github.event.pull_request.head.ref }}"
-          KEYS=$(echo "$PR_TITLE $BRANCH" | grep -oE "[A-Z]+-[0-9]+" | sort -u)
+          KEYS=$(echo "$PR_TITLE $BRANCH" | grep -oE "${JIRA_PROJECT_KEY}-[0-9]+" | sort -u)
 
           if [ -z "$KEYS" ]; then
             echo "No Jira keys found in PR title or branch. Skipping Jira update."
@@ -199,19 +216,20 @@ jobs:
           for KEY in $KEYS; do
             echo "Updating $KEY..."
 
-            # Add a comment
+            # Add a comment (failures here shouldn't fail the whole release job)
             COMMENT="Merged in PR #${PR_NUMBER} and released in ${NEW_TAG}."
             curl -s -X POST \
               -H "Authorization: Basic $AUTH" \
               -H "Content-Type: application/json" \
               "https://${JIRA_HOST}/rest/api/3/issue/${KEY}/comment" \
               -d "{\"body\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"${COMMENT}\"}]}]}}" \
-              > /dev/null && echo "  Comment added to $KEY"
+              -o /dev/null -w "  comment request status: %{http_code}\n" \
+              || echo "  Failed to reach Jira to comment on $KEY (continuing)"
 
             # Transition to Done — find the transition id for "Done"
             TRANSITIONS=$(curl -s \
               -H "Authorization: Basic $AUTH" \
-              "https://${JIRA_HOST}/rest/api/3/issue/${KEY}/transitions")
+              "https://${JIRA_HOST}/rest/api/3/issue/${KEY}/transitions" || echo "{}")
 
             DONE_ID=$(echo "$TRANSITIONS" | grep -oE '\{"id":"[0-9]+","name":"Done"' | grep -oE '"id":"[0-9]+"' | grep -oE '[0-9]+' | head -1)
 
@@ -221,7 +239,8 @@ jobs:
                 -H "Content-Type: application/json" \
                 "https://${JIRA_HOST}/rest/api/3/issue/${KEY}/transitions" \
                 -d "{\"transition\":{\"id\":\"${DONE_ID}\"}}" \
-                > /dev/null && echo "  $KEY transitioned to Done"
+                -o /dev/null -w "  transition request status: %{http_code}\n" \
+                || echo "  Failed to transition $KEY (continuing)"
             else
               echo "  No 'Done' transition available for $KEY (skipped)"
             fi
