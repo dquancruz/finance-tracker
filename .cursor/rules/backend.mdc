@@ -1,11 +1,11 @@
 ---
-description: Convenciones de backend para NestJS/FastAPI/MongoDB
+description: Backend conventions for NestJS/FastAPI/MongoDB
 globs: ["src/api/**", "src/services/**", "src/modules/**"]
 alwaysApply: false
 ---
-- Validar input con Zod (TS) o Pydantic (Python).
-- Errores tipados, no mensajes genéricos.
-- No filtrar stack traces al cliente.
-- Soft deletes por defecto.
-- Paginación en colecciones.
-- Rate limiting en rutas públicas.
+- Validate input with Zod (TS) or Pydantic (Python).
+- Typed errors, not generic messages.
+- Do not leak stack traces to the client.
+- Soft deletes by default.
+- Pagination on collections.
+- Rate limiting on public routes.
