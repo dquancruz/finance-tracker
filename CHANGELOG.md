@@ -1,3 +1,8 @@
+## [0.1.1] - 2026-07-01
+
+- Merge pull request #3 from dquancruz/docs/translate-instructions-to-english
+- docs: translate instruction files to English
+
 # Changelog
 
 ## [0.1.0] - 2026-06-30
