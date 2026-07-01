@@ -1,20 +1,20 @@
 # Finance Tracker
 
-> Aplicación de seguimiento de finanzas personales — web-first, escalable a mobile (iOS/Android).
+> Personal finance tracking application — web-first, scalable to mobile (iOS/Android).
 
 ## Tech Stack
 - Runtime: Node.js 20
 - Monorepo: Turborepo (`apps/web`, `apps/api`, `packages/shared`, `packages/finance-utils`, `packages/ui`)
 - Web: Next.js 15 App Router + TypeScript + Tailwind CSS + shadcn/ui
 - API: NestJS + TypeScript + Socket.io (WebSockets)
-- Base de datos: MongoDB Atlas + Mongoose (discriminator pattern para tipos de gasto)
-- Auth web: NextAuth.js v5 (credentials + Google OAuth)
-- Auth API: Passport JWT + argon2id
+- Database: MongoDB Atlas + Mongoose (discriminator pattern for expense types)
+- Web auth: NextAuth.js v5 (credentials + Google OAuth)
+- API auth: Passport JWT + argon2id
 - Charts: Recharts
 - Testing: Jest (API) + Vitest (web) + Playwright (E2E)
 - Deploy: Vercel (web) + Railway (API) + MongoDB Atlas
 
-## Comandos
+## Commands
 - Build:       `npm run build`        → `turbo run build`
 - Test:        `npm test`             → `turbo run test`
 - Lint:        `npm run lint`         → `turbo run lint`
@@ -23,7 +23,7 @@
 - Auto-commit: `npm run auto-commit -- --help`
 - Auto-PR:     `npm run auto-pr -- --help`
 
-## Arquitectura
+## Architecture
 
 ```
 finance-tracker/
@@ -31,32 +31,32 @@ finance-tracker/
 │   ├── web/              → Next.js 15 (src/app/, components/, hooks/, lib/)
 │   └── api/              → NestJS (src/auth/, users/, categories/, expenses/, analytics/, realtime/)
 ├── packages/
-│   ├── shared/           → Tipos TypeScript + Zod schemas (IUser, ICategory, IExpense, analytics)
-│   ├── finance-utils/    → Lógica financiera pura: interés, amortización, recurrencia
-│   └── ui/               → shadcn/ui re-exportados como workspace package
+│   ├── shared/           → TypeScript types + Zod schemas (IUser, ICategory, IExpense, analytics)
+│   ├── finance-utils/    → Pure financial logic: interest, amortization, recurrence
+│   └── ui/               → shadcn/ui re-exported as a workspace package
 └── scripts/              → auto-commit.js, auto-pr.js, auto-jira.js, dashboard.js
 ```
 
-## Tipos de Gasto (Modelo Core)
-- **Simple**: pago único (amount, date, category)
-- **Recurring**: suscripción (amount, frequency, nextDueDate, isActive)
-- **Installment**: cuota/préstamo (totalAmount, numInstallments, interestRate, interestType: none|simple|compound, paymentSchedule[])
+## Expense Types (Core Model)
+- **Simple**: one-time payment (amount, date, category)
+- **Recurring**: subscription (amount, frequency, nextDueDate, isActive)
+- **Installment**: installment/loan (totalAmount, numInstallments, interestRate, interestType: none|simple|compound, paymentSchedule[])
 
-## Convenciones
-- Server Components por defecto en Next.js; `'use client'` solo cuando sea necesario
-- Soft deletes — nunca borrar físicamente (`deletedAt` en lugar de DELETE)
-- Todos los modelos tienen `createdAt`, `updatedAt`, `deletedAt?`
-- Discriminador Mongoose `__t` para tipos de gasto en una sola colección
-- Cursor-based pagination (cursor = last `_id`) en `GET /api/expenses`
-- Conventional Commits (ver skill `semantic-versioning`)
-- Sin `any` explícitos — TypeScript strict mode
+## Conventions
+- Server Components by default in Next.js; `'use client'` only when necessary
+- Soft deletes — never physically delete records (`deletedAt` instead of DELETE)
+- All models have `createdAt`, `updatedAt`, `deletedAt?`
+- Mongoose discriminator `__t` for expense types in a single collection
+- Cursor-based pagination (cursor = last `_id`) on `GET /api/expenses`
+- Conventional Commits (see `semantic-versioning` skill)
+- No explicit `any` — TypeScript strict mode
 
 ## Real-time (Socket.io)
-- Auth en handshake: `socket.auth.token` (JWT Bearer)
-- Cada usuario se une a room `user:{userId}`
-- Eventos clave: `expense:created`, `expense:updated`, `expense:deleted`, `installment:paid`, `analytics:refresh` (debounced 500ms), `budget:alert`, `recurring:due_soon`
+- Auth on handshake: `socket.auth.token` (JWT Bearer)
+- Each user joins room `user:{userId}`
+- Key events: `expense:created`, `expense:updated`, `expense:deleted`, `installment:paid`, `analytics:refresh` (debounced 500ms), `budget:alert`, `recurring:due_soon`
 
-## Variables de Entorno (`.env.local`)
+## Environment Variables (`.env.local`)
 ```
 MONGODB_URI=
 JWT_SECRET=
@@ -74,29 +74,29 @@ GIT_AUTHOR_NAME=Daniel Quan
 GIT_AUTHOR_EMAIL=danielquan.c@gmail.com
 ```
 
-## Workflow de agentes (Claude Code)
-Los subagentes residen en `~/.claude/agents/`. En otras herramientas, replicar el flujo manualmente siguiendo el árbol de decisión abajo.
+## Agent Workflow (Claude Code)
+Subagents live in `~/.claude/agents/`. In other tools, replicate the flow manually using the decision tree below.
 
-### Árbol de decisión: cuándo usar cuál agente
+### Decision tree: which agent to use
 ```
-¿Qué necesitas?
-- Diseñar arquitectura / decidir el enfoque   → solutions-expert
-- Generar jerarquía de tickets Jira           → ticket-orchestrator
-- Backend API (NestJS/MongoDB)                → backend-expert
-- Frontend (Next.js + a11y + diseño)          → frontend-expert
-- Arquitectura AWS                            → aws-architect
-- Infra as Code (CDK)                         → cdk-expert
-- Crear PR (formato TELUS)                    → pr-manager
-- Review general + scanning ligero            → code-reviewer-pro
-- Seguridad profunda (auth/crypto/IAM)        → security-expert
-- Docs + versionado + releases                → documentation-generator
-- Orquestar varios de los anteriores          → agent-orchestrator
+What do you need?
+- Design architecture / decide approach        → solutions-expert
+- Generate Jira ticket hierarchy               → ticket-orchestrator
+- Backend API (NestJS/MongoDB)                 → backend-expert
+- Frontend (Next.js + a11y + design)           → frontend-expert
+- AWS architecture                             → aws-architect
+- Infrastructure as Code (CDK)                 → cdk-expert
+- Create PR (TELUS format)                     → pr-manager
+- General review + light scanning              → code-reviewer-pro
+- Deep security (auth/crypto/IAM)              → security-expert
+- Docs + versioning + releases                 → documentation-generator
+- Orchestrate several of the above             → agent-orchestrator
 ```
 
-Pipeline típico: solutions-expert → (backend|frontend) → code-reviewer-pro → pr-manager.
+Typical pipeline: solutions-expert → (backend|frontend) → code-reviewer-pro → pr-manager.
 
-## Reglas críticas
-- NUNCA hacer push directo a `main`.
-- NUNCA commitear `.env.local` ni secretos.
-- SIEMPRE correr lint + tests antes de un PR.
-- Scope acotado: investigaciones >50 archivos → spawn de subagente, no en el contexto principal.
+## Critical Rules
+- NEVER push directly to `main`.
+- NEVER commit `.env.local` or secrets.
+- ALWAYS run lint + tests before opening a PR.
+- Keep scope tight: investigations spanning >50 files → spawn a subagent, not the main context.

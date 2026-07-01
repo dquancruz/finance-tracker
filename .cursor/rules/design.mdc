@@ -1,7 +1,7 @@
 ---
-description: Dirección de diseño y presets activos del proyecto
+description: Design direction and active project presets
 globs: ["src/components/**", "src/app/**", "src/ui/**", "src/styles/**"]
 alwaysApply: false
 ---
 Design preset: quiet
-<!-- Cambiar a: velocity | vice | quiet, o poner tokens reales del cliente -->
+<!-- Change to: velocity | vice | quiet, or add the client's real tokens -->
