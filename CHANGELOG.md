@@ -1,3 +1,13 @@
+## [0.2.0] - 2026-07-01
+
+- Merge pull request #4 from dquancruz/feat/phase-2-expense-category-crud
+- feat(web): add expenses list, CRUD forms, and recurring wizard
+- feat(web): add categories management page with budget configuration
+- fix(web): wrap login page in a Suspense boundary
+- feat(api): add expenses module with discriminated schema and recurring/installment engines
+- feat(api): add categories CRUD module with budget limits
+- chore: sync package-lock.json with finance-utils workspace dependency
+
 ## [0.1.1] - 2026-07-01
 
 - Merge pull request #3 from dquancruz/docs/translate-instructions-to-english
