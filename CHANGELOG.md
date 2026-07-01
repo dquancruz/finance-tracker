@@ -1,3 +1,5 @@
+# Changelog
+
 ## [0.2.0] - 2026-07-01
 
 - Merge pull request #4 from dquancruz/feat/phase-2-expense-category-crud
@@ -13,8 +15,6 @@
 - Merge pull request #3 from dquancruz/docs/translate-instructions-to-english
 - docs: translate instruction files to English
 
-# Changelog
-
 ## [0.1.0] - 2026-06-30
 
 - Merge pull request #2 from dquancruz/feat/phase-1-complete
@@ -29,4 +29,3 @@
 - Merge pull request #1 from dquancruz/feat/initial-setup
 - chore: initial repo setup with claude automation tooling
 - chore: initialize repository
-
