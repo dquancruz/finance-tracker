@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1] - 2026-07-01
+
+- Merge pull request #6 from dquancruz/feat/initial-setup
+- Merge pull request #5 from dquancruz/fix/jira-workflow-and-changelog
+- fix(ci): scope Jira key extraction and fix CHANGELOG header duplication
+
+
 ## [0.2.0] - 2026-07-01
 
 - Merge pull request #4 from dquancruz/feat/phase-2-expense-category-crud
