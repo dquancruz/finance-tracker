@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.0] - 2026-07-02
+
+- feat: Phase 4 — Real-time & Notifications [PHASE-4] (#8)
+
+
 ## [0.3.0] - 2026-07-02
 
 - feat: Phase 3 — Analytics & Dashboard Data [PHASE-3] (#7)
