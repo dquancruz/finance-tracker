@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.0] - 2026-07-02
+
+- feat: Phase 3 — Analytics & Dashboard Data [PHASE-3] (#7)
+
+
 ## [0.2.1] - 2026-07-01
 
 - Merge pull request #6 from dquancruz/feat/initial-setup
