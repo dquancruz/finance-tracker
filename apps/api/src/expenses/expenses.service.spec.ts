@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { ExpensesService } from './expenses.service';
 import { Expense } from './schemas/expense.schema';
 
@@ -46,6 +47,15 @@ describe('ExpensesService', () => {
       providers: [
         ExpensesService,
         { provide: getModelToken(Expense.name), useValue: modelMock },
+        {
+          provide: RealtimeGateway,
+          useValue: {
+            emitExpenseCreated: jest.fn(),
+            emitExpenseUpdated: jest.fn(),
+            emitExpenseDeleted: jest.fn(),
+            emitInstallmentPaid: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

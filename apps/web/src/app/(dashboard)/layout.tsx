@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { NotificationCenter } from './_components/notification-center';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Dashboard', icon: 'grid' },
@@ -146,6 +147,9 @@ export default async function DashboardLayout({
 
       {/* Main content */}
       <main className="flex-1 overflow-auto">
+        <div className="flex items-center justify-end border-b border-zinc-200 bg-white px-6 py-2">
+          <NotificationCenter />
+        </div>
         {children}
       </main>
     </div>

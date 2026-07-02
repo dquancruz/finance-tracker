@@ -11,6 +11,7 @@ import {
   daysUntilDue,
 } from '@finance-tracker/finance-utils';
 import type { ExpenseType } from '@finance-tracker/shared';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 import {
   AnyExpenseDocument,
   Expense,
@@ -39,6 +40,7 @@ export class ExpensesService {
   constructor(
     @InjectModel(Expense.name)
     private readonly expenseModel: Model<ExpenseDocument>,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   private discriminatorModel(type: ExpenseType): Model<AnyExpenseDocument> {
@@ -61,6 +63,8 @@ export class ExpensesService {
       notes: dto.notes,
     };
 
+    let saved: AnyExpenseDocument;
+
     if (dto.type === 'simple') {
       const date = new Date(dto.date);
       const doc = new (this.discriminatorModel('simple'))({
@@ -68,10 +72,8 @@ export class ExpensesService {
         amount: dto.amount,
         date,
       });
-      return doc.save();
-    }
-
-    if (dto.type === 'recurring') {
+      saved = await doc.save();
+    } else if (dto.type === 'recurring') {
       const startDate = new Date(dto.startDate);
       const doc = new (this.discriminatorModel('recurring'))({
         ...common,
@@ -84,34 +86,38 @@ export class ExpensesService {
         endDate: dto.endDate ? new Date(dto.endDate) : undefined,
         isActive: true,
       });
-      return doc.save();
+      saved = await doc.save();
+    } else {
+      // installment
+      const startDate = new Date(dto.startDate);
+      const interestType = dto.interestType ?? 'none';
+      const schedule = buildAmortizationSchedule(
+        dto.totalAmount,
+        dto.numInstallments,
+        dto.interestRate ?? 0,
+        interestType,
+        startDate,
+      );
+      const doc = new (this.discriminatorModel('installment'))({
+        ...common,
+        description: dto.description,
+        amount: dto.totalAmount,
+        date: startDate,
+        totalAmount: dto.totalAmount,
+        numInstallments: dto.numInstallments,
+        installmentAmount:
+          schedule[0]?.totalDue ??
+          round2(dto.totalAmount / dto.numInstallments),
+        interestRate: dto.interestRate,
+        interestType,
+        startDate,
+        paymentSchedule: schedule,
+      });
+      saved = await doc.save();
     }
 
-    // installment
-    const startDate = new Date(dto.startDate);
-    const interestType = dto.interestType ?? 'none';
-    const schedule = buildAmortizationSchedule(
-      dto.totalAmount,
-      dto.numInstallments,
-      dto.interestRate ?? 0,
-      interestType,
-      startDate,
-    );
-    const doc = new (this.discriminatorModel('installment'))({
-      ...common,
-      description: dto.description,
-      amount: dto.totalAmount,
-      date: startDate,
-      totalAmount: dto.totalAmount,
-      numInstallments: dto.numInstallments,
-      installmentAmount:
-        schedule[0]?.totalDue ?? round2(dto.totalAmount / dto.numInstallments),
-      interestRate: dto.interestRate,
-      interestType,
-      startDate,
-      paymentSchedule: schedule,
-    });
-    return doc.save();
+    this.realtimeGateway.emitExpenseCreated(userId, saved);
+    return saved;
   }
 
   async findAllForUser(
@@ -226,7 +232,9 @@ export class ExpensesService {
       }
     }
 
-    return expense.save();
+    const saved = await expense.save();
+    this.realtimeGateway.emitExpenseUpdated(userId, saved);
+    return saved;
   }
 
   /** Rebuilds the schedule for not-yet-paid installments, preserving paid ones. */
@@ -256,7 +264,9 @@ export class ExpensesService {
   async softDelete(id: string, userId: string): Promise<AnyExpenseDocument> {
     const expense = await this.findOneForUser(id, userId);
     expense.deletedAt = new Date();
-    return expense.save();
+    const saved = await expense.save();
+    this.realtimeGateway.emitExpenseDeleted(userId, id);
+    return saved;
   }
 
   async payInstallment(
@@ -276,7 +286,9 @@ export class ExpensesService {
 
     row.paidAt = new Date();
     row.paidAmount = dto.paidAmount ?? row.totalDue;
-    return expense.save();
+    const saved = await expense.save();
+    this.realtimeGateway.emitInstallmentPaid(userId, saved);
+    return saved;
   }
 
   /**
@@ -317,7 +329,9 @@ export class ExpensesService {
       throw new BadRequestException('Expense is not a recurring expense');
     }
     this.advanceRecurringExpense(expense);
-    return expense.save();
+    const saved = await expense.save();
+    this.realtimeGateway.emitExpenseUpdated(userId, saved);
+    return saved;
   }
 
   /** Cron entry point — advances every due, active recurring expense. */
@@ -333,7 +347,8 @@ export class ExpensesService {
 
     for (const expense of due as AnyExpenseDocument[]) {
       this.advanceRecurringExpense(expense);
-      await expense.save();
+      const saved = await expense.save();
+      this.realtimeGateway.emitExpenseUpdated(saved.userId, saved);
     }
 
     return due.length;

@@ -8,6 +8,8 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ExpensesModule } from './expenses/expenses.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { RealtimeModule } from './realtime/realtime.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -25,6 +27,8 @@ import { UsersModule } from './users/users.module';
     CategoriesModule,
     ExpensesModule,
     AnalyticsModule,
+    RealtimeModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

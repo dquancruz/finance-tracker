@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { RealtimeModule } from '../realtime/realtime.module';
 import { ExpensesController } from './expenses.controller';
 import { ExpensesService } from './expenses.service';
 import { RecurringExpenseProcessor } from './recurring-expense.processor';
@@ -28,6 +29,7 @@ import {
         ],
       },
     ]),
+    RealtimeModule,
   ],
   controllers: [ExpensesController],
   providers: [ExpensesService, RecurringExpenseProcessor],

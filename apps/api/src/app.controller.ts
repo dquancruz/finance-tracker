@@ -9,4 +9,10 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  /** Liveness/readiness probe for deployment platforms (e.g. Railway). */
+  @Get('health')
+  getHealth(): { status: 'ok'; timestamp: string } {
+    return { status: 'ok', timestamp: new Date().toISOString() };
+  }
 }
