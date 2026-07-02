@@ -1,60 +1,15 @@
-import type { IDashboardSummary } from '@finance-tracker/shared';
+'use client';
 
-// Placeholder type mirroring IDashboardSummary keys used in cards
-type SummaryCardProps = {
-  title: string;
-  description: string;
-  placeholderLabel: string;
-};
-
-function SummaryCard({ title, description, placeholderLabel }: SummaryCardProps) {
-  return (
-    <article
-      aria-label={title}
-      className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
-    >
-      <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
-        {title}
-      </p>
-      <div
-        aria-label={`${title} — ${placeholderLabel}`}
-        className="mt-3 h-8 w-28 animate-pulse rounded-md bg-zinc-100"
-      />
-      <p className="mt-2 text-xs text-zinc-400">{description}</p>
-    </article>
-  );
-}
-
-// Satisfies the shared type to confirm our placeholder structure is correct
-// Real data will be fetched in Phase 3
-const CARD_CONFIG = [
-  {
-    key: 'totalThisMonth' satisfies keyof IDashboardSummary,
-    title: 'Total This Month',
-    description: 'All expenses in the current calendar month',
-    placeholderLabel: 'loading…',
-  },
-  {
-    key: 'totalLastMonth' satisfies keyof IDashboardSummary,
-    title: 'Last Month',
-    description: 'Total spending in the previous month',
-    placeholderLabel: 'loading…',
-  },
-  {
-    key: 'upcomingPayments' satisfies keyof IDashboardSummary,
-    title: 'Upcoming Payments',
-    description: 'Recurring and installment payments due soon',
-    placeholderLabel: 'loading…',
-  },
-  {
-    key: 'budgetStatus' satisfies keyof IDashboardSummary,
-    title: 'Budget Status',
-    description: 'How you are tracking against your budget limits',
-    placeholderLabel: 'loading…',
-  },
-] as const;
+import { useDashboardSummary } from '@/lib/hooks/use-analytics';
+import { BudgetStatusCards } from './_components/budget-status-cards';
+import { CategoryBreakdownChart } from './_components/category-breakdown-chart';
+import { MonthlyTrendChart } from './_components/monthly-trend-chart';
+import { SummaryCards } from './_components/summary-cards';
+import { UpcomingPaymentsList } from './_components/upcoming-payments-list';
 
 export default function DashboardPage() {
+  const { data: summary, isLoading, isError } = useDashboardSummary();
+
   return (
     <div className="px-6 py-8">
       <header className="mb-8">
@@ -64,43 +19,46 @@ export default function DashboardPage() {
         <p className="mt-1 text-sm text-zinc-500">Your financial overview</p>
       </header>
 
-      <section aria-label="Financial summary">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {CARD_CONFIG.map((card) => (
-            <SummaryCard
-              key={card.key}
-              title={card.title}
-              description={card.description}
-              placeholderLabel={card.placeholderLabel}
-            />
+      {isLoading && (
+        <div
+          aria-label="Loading dashboard"
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              aria-hidden="true"
+              className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
+            >
+              <div className="h-3 w-24 animate-pulse rounded bg-zinc-100" />
+              <div className="mt-3 h-8 w-28 animate-pulse rounded-md bg-zinc-100" />
+              <div className="mt-2 h-2.5 w-32 animate-pulse rounded bg-zinc-100" />
+            </div>
           ))}
         </div>
-      </section>
+      )}
 
-      <section aria-label="Activity" className="mt-8">
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-zinc-700">Recent activity</p>
-          <div className="mt-4 space-y-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                aria-hidden="true"
-                className="flex items-center gap-4"
-              >
-                <div className="h-8 w-8 animate-pulse rounded-full bg-zinc-100" />
-                <div className="flex-1 space-y-1.5">
-                  <div className="h-3 w-36 animate-pulse rounded bg-zinc-100" />
-                  <div className="h-2.5 w-24 animate-pulse rounded bg-zinc-100" />
-                </div>
-                <div className="h-3 w-16 animate-pulse rounded bg-zinc-100" />
-              </div>
-            ))}
-          </div>
-          <p className="mt-4 text-xs text-zinc-400">
-            Real data will appear here in Phase 3.
-          </p>
-        </div>
-      </section>
+      {isError && (
+        <p role="alert" className="text-sm text-red-600">
+          Could not load your dashboard data. Please try again.
+        </p>
+      )}
+
+      {summary && (
+        <>
+          <SummaryCards summary={summary} />
+
+          <section aria-label="Charts" className="mt-6 grid gap-6 lg:grid-cols-2">
+            <MonthlyTrendChart trends={summary.monthlyTrends} />
+            <CategoryBreakdownChart breakdown={summary.categoryBreakdown} />
+          </section>
+
+          <section aria-label="Details" className="mt-6 grid gap-6 lg:grid-cols-2">
+            <BudgetStatusCards budgetStatus={summary.budgetStatus} />
+            <UpcomingPaymentsList payments={summary.upcomingPayments} />
+          </section>
+        </>
+      )}
     </div>
   );
 }

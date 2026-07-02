@@ -1,0 +1,76 @@
+'use client';
+
+import type { ICategorySpend } from '@finance-tracker/shared';
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
+import { formatCurrency } from '@/lib/format';
+
+interface CategoryBreakdownChartProps {
+  breakdown: ICategorySpend[];
+}
+
+export function CategoryBreakdownChart({
+  breakdown,
+}: CategoryBreakdownChartProps) {
+  return (
+    <article
+      aria-label="Spending by category"
+      className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
+    >
+      <p className="text-sm font-medium text-zinc-700">Category breakdown</p>
+      <p className="mt-1 text-xs text-zinc-400">This month&apos;s spending by category</p>
+
+      {breakdown.length === 0 ? (
+        <p className="mt-8 text-sm text-zinc-400">
+          No expenses recorded this month yet.
+        </p>
+      ) : (
+        <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="h-56 w-full sm:w-56 sm:shrink-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={breakdown}
+                  dataKey="amount"
+                  nameKey="categoryName"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={80}
+                  paddingAngle={2}
+                >
+                  {breakdown.map((entry) => (
+                    <Cell key={entry.categoryId} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value: number) => formatCurrency(value)} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          <ul role="list" className="min-w-0 flex-1 space-y-2">
+            {breakdown.map((category) => (
+              <li
+                key={category.categoryId}
+                className="flex items-center justify-between gap-2 text-sm"
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <span
+                    aria-hidden="true"
+                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: category.color }}
+                  />
+                  <span className="truncate text-zinc-700">
+                    {category.categoryName}
+                  </span>
+                </span>
+                <span className="shrink-0 text-zinc-500">
+                  {formatCurrency(category.amount)} ({category.percentage.toFixed(0)}%)
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </article>
+  );
+}
