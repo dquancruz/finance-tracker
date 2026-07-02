@@ -35,6 +35,11 @@ export class UsersService {
       .exec();
   }
 
+  /** All non-deleted users — used by scheduled jobs that fan out per user. */
+  async findAllActive(): Promise<UserDocument[]> {
+    return this.userModel.find({ deletedAt: { $exists: false } }).exec();
+  }
+
   async create(dto: CreateUserInput): Promise<UserDocument> {
     const user = new this.userModel(dto);
     return user.save();
