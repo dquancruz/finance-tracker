@@ -93,12 +93,13 @@ Not currently read by any `apps/api` code but reserved per `AGENTS.md`'s
 documented env var list (`JWT_REFRESH_SECRET`) — skip unless/until a refresh-token
 flow is implemented; don't set unused secrets in Railway.
 
-Recommended **additional** var to introduce alongside this deployment (not
-yet in the code): `CORS_ORIGIN` — `apps/api/src/main.ts` currently calls
-`app.enableCors()` with no options (allow-all), which is fine for local dev
-but should be scoped to the Vercel domain(s) before this is a public
-deployment. Small follow-up: read `CORS_ORIGIN` (comma-separated list) in
-`main.ts` and pass it to `enableCors({ origin: [...] })`.
+**Implemented (Phase 5):** `CORS_ORIGIN` (comma-separated list) is now read
+in `main.ts` and passed to `enableCors({ origin: [...] })`. `env.validation.ts`
+enforces it's set whenever `NODE_ENV=production` (boot fails otherwise — no
+silent allow-all in prod). Also new: `THROTTLE_TTL_MS` / `THROTTLE_LIMIT`
+(global rate limiting defaults, see §8) and `NODE_ENV` itself (must be set to
+`production` on Railway — used for both the CORS gate above and the Mongo
+connection pool sizing in §4).
 
 ## 3. Health check endpoint
 
@@ -119,11 +120,13 @@ containers can get a different egress IP per deploy/restart. Two options:
   `finance-tracker` database only, not an Atlas admin user) for security.
   This is the standard guidance for PaaS platforms without static egress
   (Railway, most of Vercel/Render's free tiers, etc.).
-- **Hardened (Phase 5 candidate):** Railway's "TCP Proxy" / static outbound
-  IP add-on (Pro plan) gives a fixed egress IP that can be allowlisted
-  explicitly in Atlas Network Access instead of `0.0.0.0/0`. Track this as a
-  Phase 5 (Polish & Production) hardening item alongside "Production MongoDB
-  Atlas configuration" already listed in `PHASES.md`.
+- **Hardened (Phase 5 candidate, still open):** Railway's "TCP Proxy" /
+  static outbound IP add-on (Pro plan) gives a fixed egress IP that can be
+  allowlisted explicitly in Atlas Network Access instead of `0.0.0.0/0`.
+  Requires a paid Railway plan change + Atlas dashboard config — infra work,
+  not code, so it's still open after this PR. Everything else under
+  "Production MongoDB Atlas configuration" (connection resiliency, pool
+  sizing, index management) is covered in `docs/deployment/mongodb-atlas.md`.
 
 ## 5. Socket.io / WebSocket proxy considerations
 
@@ -159,18 +162,32 @@ Once Railway assigns a domain (either the generated
 - `NEXTAUTH_URL` → the Vercel deployment's own URL (unchanged by this work,
   listed here for completeness since it's in the same env var group)
 
-And on the **Railway** side once `CORS_ORIGIN` is introduced (§2): set it to
-the Vercel production domain (and preview-deployment wildcard if previews
-need to hit the live API). Also update the Google OAuth "Authorized redirect
-URIs" if the Vercel domain changes from what's currently configured.
+And on the **Railway** side, set `CORS_ORIGIN` (§2) to the Vercel production
+domain (and preview-deployment wildcard if previews need to hit the live
+API). Also update the Google OAuth "Authorized redirect URIs" if the Vercel
+domain changes from what's currently configured.
 
-## 7. Open items / explicitly out of scope here
+## 8. Rate limiting
+
+`AppModule` now registers `ThrottlerModule` globally (`@nestjs/throttler` +
+`ThrottlerGuard` as an `APP_GUARD`) — every route is limited to
+`THROTTLE_LIMIT` requests per `THROTTLE_TTL_MS` window by default (100 req /
+60s), tracked per client IP. `AuthController`'s `login`/`register` endpoints
+override this with a much tighter limit (5 req/min) since they're the
+highest-value brute-force/signup-spam target. No Railway-specific config
+needed — this runs entirely in the Node process. If the API ever scales to
+multiple Railway replicas, the in-memory throttler storage becomes
+per-instance (each replica gets its own 5-req budget); switch to
+`@nestjs/throttler`'s Redis storage adapter at that point.
+
+## 9. Open items / explicitly out of scope here
 
 - No Railway project/service has been created — this is a plan only.
 - `apps/api/Dockerfile` (Option B) does not exist yet; Option A requires no
   new files, just Railway dashboard settings.
-- `CORS_ORIGIN` support in `main.ts` is not implemented — noted as a
-  pre-production follow-up, not part of this change.
 - Redis-backed Socket.io adapter is not implemented — only relevant once
   scaling beyond one Railway replica.
-- Atlas static-IP allowlisting is deferred to Phase 5 hardening.
+- Atlas static-IP allowlisting is deferred — infra/billing change, not code
+  (see §4).
+- Redis-backed throttler storage is deferred — only relevant once scaling
+  beyond one Railway replica (see §8).
