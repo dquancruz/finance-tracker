@@ -25,6 +25,17 @@ export class Notification {
   @Prop({ type: Object })
   metadata?: Record<string, unknown>;
 
+  /**
+   * Idempotency key for cron-generated notifications (e.g.
+   * `budget:<categoryId>:<monthKey>` or `payment:<expenseId>:<dueDate>`).
+   * Combined with the unique index below, this guarantees at most one
+   * notification per (userId, dedupeKey) is ever persisted, even if two
+   * processor runs race each other. Manually-created notifications (e.g.
+   * `type: 'system'`) can omit it.
+   */
+  @Prop()
+  dedupeKey?: string;
+
   @Prop({ default: false })
   read: boolean;
 
@@ -39,3 +50,11 @@ export const NotificationSchema = SchemaFactory.createForClass(Notification);
 
 NotificationSchema.index({ userId: 1, deletedAt: 1, createdAt: -1 });
 NotificationSchema.index({ userId: 1, read: 1, deletedAt: 1 });
+
+// Atomic dedupe guard: only one notification per (userId, dedupeKey) can
+// ever exist. Partial so notifications without a dedupeKey (manual/system)
+// aren't constrained by it.
+NotificationSchema.index(
+  { userId: 1, dedupeKey: 1 },
+  { unique: true, partialFilterExpression: { dedupeKey: { $type: 'string' } } },
+);
