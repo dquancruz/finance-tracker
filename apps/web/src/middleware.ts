@@ -32,5 +32,12 @@ export const middleware = auth((req: NextRequest & { auth: unknown }) => {
 });
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.svg$).*)'],
+  // Exclude static/build assets AND the PWA-installability assets
+  // (manifest, generated icons, offline fallback page, service worker
+  // script) — these must be publicly fetchable without a session, both for
+  // browsers evaluating installability before a user is logged in and for
+  // the service worker's own precaching of the offline shell.
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|offline.html|icons/|icon$|apple-icon$|.*\\.svg$).*)',
+  ],
 };
