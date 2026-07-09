@@ -14,6 +14,29 @@ export interface CreateNotificationInput {
   metadata?: Record<string, unknown>;
 }
 
+export interface CreateDedupedNotificationInput extends CreateNotificationInput {
+  /** Idempotency key — see `Notification.dedupeKey` for format conventions. */
+  dedupeKey: string;
+}
+
+export interface DedupedNotificationResult {
+  notification: NotificationDocument;
+  /** False when a notification for this (userId, dedupeKey) already existed. */
+  created: boolean;
+}
+
+/** MongoDB duplicate-key error code. */
+const MONGO_DUPLICATE_KEY_ERROR_CODE = 11000;
+
+function isDuplicateKeyError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: number }).code === MONGO_DUPLICATE_KEY_ERROR_CODE
+  );
+}
+
 @Injectable()
 export class NotificationsService {
   constructor(
@@ -68,24 +91,56 @@ export class NotificationsService {
   }
 
   /**
-   * Dedupe guard for the notification processor — avoids re-alerting on
-   * every cron tick for the same budget/payment by keying on
-   * `metadata.dedupeKey` and only looking within a recent time window.
+   * Atomic dedupe guard for the notification processor. Replaces the old
+   * check-then-insert `existsRecent()` pattern (race-prone when cron runs
+   * overlap) with a single `findOneAndUpdate({ upsert: true })` guarded by
+   * the unique `(userId, dedupeKey)` index on the schema — MongoDB itself
+   * guarantees only one caller ever wins the insert for a given key.
+   *
+   * If two callers race anyway (both attempt the upsert before either's
+   * insert is visible to the other), the loser gets a duplicate-key error
+   * from Mongo; we catch it and re-fetch the winning document so callers
+   * always get a notification back, with `created: false` telling them not
+   * to re-emit a real-time push.
    */
-  async existsRecent(
+  async createDeduped(
     userId: string,
-    dedupeKey: string,
-    withinHours: number,
-  ): Promise<boolean> {
-    const since = new Date(Date.now() - withinHours * 60 * 60 * 1000);
-    const existing = await this.notificationModel
-      .findOne({
-        userId,
-        'metadata.dedupeKey': dedupeKey,
-        createdAt: { $gte: since },
-        deletedAt: { $exists: false },
-      })
-      .exec();
-    return Boolean(existing);
+    input: CreateDedupedNotificationInput,
+  ): Promise<DedupedNotificationResult> {
+    const { dedupeKey, ...rest } = input;
+
+    try {
+      const result = await this.notificationModel
+        .findOneAndUpdate(
+          { userId, dedupeKey },
+          { $setOnInsert: { ...rest, userId, dedupeKey } },
+          {
+            upsert: true,
+            new: true,
+            setDefaultsOnInsert: true,
+            includeResultMetadata: true,
+          },
+        )
+        .exec();
+
+      if (!result.value) {
+        throw new Error('findOneAndUpdate upsert returned no document');
+      }
+
+      return {
+        notification: result.value,
+        created: !result.lastErrorObject?.updatedExisting,
+      };
+    } catch (error) {
+      if (isDuplicateKeyError(error)) {
+        const existing = await this.notificationModel
+          .findOne({ userId, dedupeKey })
+          .exec();
+        if (existing) {
+          return { notification: existing, created: false };
+        }
+      }
+      throw error;
+    }
   }
 }

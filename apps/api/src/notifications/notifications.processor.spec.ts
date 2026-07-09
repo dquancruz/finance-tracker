@@ -13,8 +13,7 @@ describe('NotificationsProcessor', () => {
     getUpcomingPayments: jest.Mock;
   };
   let notificationsService: {
-    create: jest.Mock;
-    existsRecent: jest.Mock;
+    createDeduped: jest.Mock;
   };
   let realtimeGateway: {
     emitBudgetAlert: jest.Mock;
@@ -32,8 +31,9 @@ describe('NotificationsProcessor', () => {
       getUpcomingPayments: jest.fn().mockResolvedValue([]),
     };
     notificationsService = {
-      create: jest.fn().mockResolvedValue({ _id: 'notif-1' }),
-      existsRecent: jest.fn().mockResolvedValue(false),
+      createDeduped: jest
+        .fn()
+        .mockResolvedValue({ notification: { _id: 'notif-1' }, created: true }),
     };
     realtimeGateway = {
       emitBudgetAlert: jest.fn(),
@@ -67,10 +67,11 @@ describe('NotificationsProcessor', () => {
 
     await processor.handleChecks();
 
-    expect(notificationsService.create).toHaveBeenCalledWith(
-      'user-1',
-      expect.objectContaining({ type: 'budget_overrun' }),
-    );
+    const [userIdArg, inputArg] = notificationsService.createDeduped.mock
+      .calls[0] as [string, { type: string; dedupeKey: string }];
+    expect(userIdArg).toBe('user-1');
+    expect(inputArg.type).toBe('budget_overrun');
+    expect(inputArg.dedupeKey).toContain('budget:cat-1:');
     expect(realtimeGateway.emitBudgetAlert).toHaveBeenCalledWith('user-1', {
       _id: 'notif-1',
     });
@@ -90,10 +91,10 @@ describe('NotificationsProcessor', () => {
 
     await processor.handleChecks();
 
-    expect(notificationsService.create).not.toHaveBeenCalled();
+    expect(notificationsService.createDeduped).not.toHaveBeenCalled();
   });
 
-  it('does not re-notify a budget overrun already alerted within the dedupe window', async () => {
+  it('does not push a real-time alert when the dedupe key already exists', async () => {
     analyticsService.getBudgetStatus.mockResolvedValue([
       {
         categoryId: 'cat-1',
@@ -104,11 +105,15 @@ describe('NotificationsProcessor', () => {
         percentage: 120,
       },
     ]);
-    notificationsService.existsRecent.mockResolvedValue(true);
+    notificationsService.createDeduped.mockResolvedValue({
+      notification: { _id: 'notif-1' },
+      created: false,
+    });
 
     await processor.handleChecks();
 
-    expect(notificationsService.create).not.toHaveBeenCalled();
+    expect(notificationsService.createDeduped).toHaveBeenCalled();
+    expect(realtimeGateway.emitBudgetAlert).not.toHaveBeenCalled();
   });
 
   it('creates a payment_due notification for payments due within the window', async () => {
@@ -125,10 +130,11 @@ describe('NotificationsProcessor', () => {
 
     await processor.handleChecks();
 
-    expect(notificationsService.create).toHaveBeenCalledWith(
-      'user-1',
-      expect.objectContaining({ type: 'payment_due' }),
-    );
+    const [userIdArg, inputArg] = notificationsService.createDeduped.mock
+      .calls[0] as [string, { type: string; dedupeKey: string }];
+    expect(userIdArg).toBe('user-1');
+    expect(inputArg.type).toBe('payment_due');
+    expect(inputArg.dedupeKey).toContain('payment:exp-1:');
     expect(realtimeGateway.emitRecurringDueSoon).toHaveBeenCalledWith(
       'user-1',
       { _id: 'notif-1' },
@@ -149,6 +155,27 @@ describe('NotificationsProcessor', () => {
 
     await processor.handleChecks();
 
-    expect(notificationsService.create).not.toHaveBeenCalled();
+    expect(notificationsService.createDeduped).not.toHaveBeenCalled();
+  });
+
+  it('skips a run entirely if the previous one is still in progress (overlap guard)', async () => {
+    let resolveFirstRun: () => void = () => {};
+    const firstRunGate = new Promise<void>((resolve) => {
+      resolveFirstRun = resolve;
+    });
+    usersService.findAllActive.mockImplementationOnce(async () => {
+      await firstRunGate;
+      return [];
+    });
+
+    const firstRun = processor.handleChecks();
+    const secondRun = processor.handleChecks(); // should be skipped, no-op
+
+    resolveFirstRun();
+    await Promise.all([firstRun, secondRun]);
+
+    // findAllActive should only have been invoked once (the first run) —
+    // the second call returned early without querying anything.
+    expect(usersService.findAllActive).toHaveBeenCalledTimes(1);
   });
 });

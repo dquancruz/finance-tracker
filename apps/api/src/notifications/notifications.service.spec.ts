@@ -32,6 +32,7 @@ describe('NotificationsService', () => {
   let modelMock: {
     find: jest.Mock;
     findOne: jest.Mock;
+    findOneAndUpdate: jest.Mock;
     countDocuments: jest.Mock;
     updateMany: jest.Mock;
   };
@@ -40,6 +41,7 @@ describe('NotificationsService', () => {
     modelMock = {
       find: jest.fn(),
       findOne: jest.fn(),
+      findOneAndUpdate: jest.fn(),
       countDocuments: jest.fn(),
       updateMany: jest.fn(),
     };
@@ -158,25 +160,102 @@ describe('NotificationsService', () => {
     });
   });
 
-  describe('existsRecent', () => {
-    it('returns true when a matching recent notification exists', async () => {
-      modelMock.findOne.mockReturnValue({
-        exec: jest.fn().mockResolvedValue(buildDoc()),
+  describe('createDeduped', () => {
+    it('inserts and returns created: true on first occurrence of a dedupeKey', async () => {
+      const inserted = buildDoc({ dedupeKey: 'budget:cat-1:2026-07' });
+      modelMock.findOneAndUpdate.mockReturnValue({
+        exec: jest.fn().mockResolvedValue({
+          value: inserted,
+          lastErrorObject: { updatedExisting: false },
+        }),
       });
 
-      const exists = await service.existsRecent('user-1', 'budget:cat-1', 24);
+      const result = await service.createDeduped('user-1', {
+        type: 'budget_overrun',
+        title: 'Over budget',
+        message: 'You went over budget',
+        dedupeKey: 'budget:cat-1:2026-07',
+      });
 
-      expect(exists).toBe(true);
+      const [filterArg, updateArg, optionsArg] = modelMock.findOneAndUpdate.mock
+        .calls[0] as [
+        Record<string, unknown>,
+        { $setOnInsert: Record<string, unknown> },
+        Record<string, unknown>,
+      ];
+      expect(filterArg).toEqual({
+        userId: 'user-1',
+        dedupeKey: 'budget:cat-1:2026-07',
+      });
+      expect(updateArg.$setOnInsert).toMatchObject({
+        userId: 'user-1',
+        dedupeKey: 'budget:cat-1:2026-07',
+      });
+      expect(optionsArg).toMatchObject({
+        upsert: true,
+        includeResultMetadata: true,
+      });
+      expect(result.created).toBe(true);
+      expect(result.notification).toBe(inserted);
     });
 
-    it('returns false when nothing matches', async () => {
-      modelMock.findOne.mockReturnValue({
-        exec: jest.fn().mockResolvedValue(null),
+    it('returns created: false when a notification for the key already exists', async () => {
+      const existing = buildDoc({ dedupeKey: 'budget:cat-1:2026-07' });
+      modelMock.findOneAndUpdate.mockReturnValue({
+        exec: jest.fn().mockResolvedValue({
+          value: existing,
+          lastErrorObject: { updatedExisting: true },
+        }),
       });
 
-      const exists = await service.existsRecent('user-1', 'budget:cat-1', 24);
+      const result = await service.createDeduped('user-1', {
+        type: 'budget_overrun',
+        title: 'Over budget',
+        message: 'You went over budget',
+        dedupeKey: 'budget:cat-1:2026-07',
+      });
 
-      expect(exists).toBe(false);
+      expect(result.created).toBe(false);
+      expect(result.notification).toBe(existing);
+    });
+
+    it('falls back to the existing document when it loses a race (duplicate key error)', async () => {
+      const raceWinner = buildDoc({ dedupeKey: 'budget:cat-1:2026-07' });
+      modelMock.findOneAndUpdate.mockReturnValue({
+        exec: jest.fn().mockRejectedValue(
+          Object.assign(new Error('E11000 duplicate key error'), {
+            code: 11000,
+          }),
+        ),
+      });
+      modelMock.findOne.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(raceWinner),
+      });
+
+      const result = await service.createDeduped('user-1', {
+        type: 'budget_overrun',
+        title: 'Over budget',
+        message: 'You went over budget',
+        dedupeKey: 'budget:cat-1:2026-07',
+      });
+
+      expect(result.created).toBe(false);
+      expect(result.notification).toBe(raceWinner);
+    });
+
+    it('rethrows non-duplicate-key errors', async () => {
+      modelMock.findOneAndUpdate.mockReturnValue({
+        exec: jest.fn().mockRejectedValue(new Error('connection lost')),
+      });
+
+      await expect(
+        service.createDeduped('user-1', {
+          type: 'budget_overrun',
+          title: 'Over budget',
+          message: 'You went over budget',
+          dedupeKey: 'budget:cat-1:2026-07',
+        }),
+      ).rejects.toThrow('connection lost');
     });
   });
 });
