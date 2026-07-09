@@ -34,7 +34,7 @@ export function CategoryList({ categories }: CategoryListProps) {
         <h2 className="text-sm font-semibold text-zinc-900">
           System categories
         </h2>
-        <p className="mt-1 text-xs text-zinc-400">
+        <p className="mt-1 text-xs text-zinc-500">
           Built-in categories available to everyone — budgets and edits are
           not supported on these.
         </p>

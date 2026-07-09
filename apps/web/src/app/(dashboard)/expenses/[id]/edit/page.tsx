@@ -17,7 +17,7 @@ export default function EditExpensePage() {
   const updateExpense = useUpdateExpense();
 
   if (isLoading) {
-    return <p className="p-6 text-sm text-zinc-400">Loading expense…</p>;
+    return <p className="p-6 text-sm text-zinc-500">Loading expense…</p>;
   }
   if (isError || !expense) {
     return (

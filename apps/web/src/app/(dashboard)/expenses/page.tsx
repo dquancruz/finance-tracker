@@ -46,7 +46,7 @@ export default function ExpensesPage() {
       </div>
 
       {isLoading && (
-        <p className="mt-8 text-sm text-zinc-400">Loading expenses…</p>
+        <p className="mt-8 text-sm text-zinc-500">Loading expenses…</p>
       )}
       {isError && (
         <p role="alert" className="mt-8 text-sm text-red-600">

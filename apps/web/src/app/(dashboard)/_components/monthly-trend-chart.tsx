@@ -31,7 +31,7 @@ export function MonthlyTrendChart({ trends }: MonthlyTrendChartProps) {
       className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
     >
       <p className="text-sm font-medium text-zinc-700">Monthly trend</p>
-      <p className="mt-1 text-xs text-zinc-400">
+      <p className="mt-1 text-xs text-zinc-500">
         Total spend over the last {trends.length} months
       </p>
 
@@ -71,7 +71,7 @@ export function MonthlyTrendChart({ trends }: MonthlyTrendChartProps) {
           </ResponsiveContainer>
         </div>
       ) : (
-        <p className="mt-8 text-sm text-zinc-400">
+        <p className="mt-8 text-sm text-zinc-500">
           Not enough data yet to chart a trend.
         </p>
       )}

@@ -232,7 +232,7 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
       )}
 
       {props.mode === 'edit' && (
-        <p className="text-xs text-zinc-400">
+        <p className="text-xs text-zinc-500">
           Changing the interest type/rate rebuilds the schedule for
           installments that haven&apos;t been paid yet.
         </p>
