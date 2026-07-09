@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.1] - 2026-07-09
+
+- fix(notifications): atomic dedupe guard for cron notifications (#9)
+
+
 ## [0.4.0] - 2026-07-02
 
 - feat: Phase 4 — Real-time & Notifications [PHASE-4] (#8)
