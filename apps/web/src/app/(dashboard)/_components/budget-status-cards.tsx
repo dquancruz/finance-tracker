@@ -17,12 +17,12 @@ export function BudgetStatusCards({ budgetStatus }: BudgetStatusCardsProps) {
       className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
     >
       <p className="text-sm font-medium text-zinc-700">Budget status</p>
-      <p className="mt-1 text-xs text-zinc-400">
+      <p className="mt-1 text-xs text-zinc-500">
         How you are tracking against your budget limits
       </p>
 
       {budgetStatus.length === 0 ? (
-        <p className="mt-8 text-sm text-zinc-400">
+        <p className="mt-8 text-sm text-zinc-500">
           No categories have a budget limit set yet. Configure one from the
           Categories page.
         </p>
@@ -55,7 +55,7 @@ export function BudgetStatusCards({ budgetStatus }: BudgetStatusCardsProps) {
                     style={{ width: `${barWidth}%` }}
                   />
                 </div>
-                <p className="mt-1 text-xs text-zinc-400">
+                <p className="mt-1 text-xs text-zinc-500">
                   {budget.percentage.toFixed(0)}% used
                   {budget.remaining >= 0
                     ? ` — ${formatCurrency(budget.remaining)} remaining`

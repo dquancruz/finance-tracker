@@ -186,7 +186,7 @@ export default function RegisterPage() {
                 {fieldErrors.password}
               </p>
             ) : (
-              <p id="password-hint" className="mt-1 text-xs text-zinc-400">
+              <p id="password-hint" className="mt-1 text-xs text-zinc-500">
                 Must be at least 8 characters.
               </p>
             )}

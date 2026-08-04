@@ -31,12 +31,12 @@ export function UpcomingPaymentsList({ payments }: UpcomingPaymentsListProps) {
       className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
     >
       <p className="text-sm font-medium text-zinc-700">Upcoming payments</p>
-      <p className="mt-1 text-xs text-zinc-400">
+      <p className="mt-1 text-xs text-zinc-500">
         Recurring and installment payments due in the next 30 days
       </p>
 
       {payments.length === 0 ? (
-        <p className="mt-8 text-sm text-zinc-400">
+        <p className="mt-8 text-sm text-zinc-500">
           Nothing due in the next 30 days.
         </p>
       ) : (
@@ -55,7 +55,7 @@ export function UpcomingPaymentsList({ payments }: UpcomingPaymentsListProps) {
                 <p className="truncate text-sm font-medium text-zinc-900">
                   {payment.description}
                 </p>
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-zinc-500">
                   {formatDate(payment.dueDate)}
                 </p>
               </div>

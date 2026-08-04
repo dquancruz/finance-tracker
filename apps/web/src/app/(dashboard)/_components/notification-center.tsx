@@ -41,7 +41,7 @@ function NotificationRow({
           >
             {notification.type.replace('_', ' ')}
           </span>
-          <span className="shrink-0 text-[11px] text-zinc-400">
+          <span className="shrink-0 text-[11px] text-zinc-500">
             {formatRelativeTime(notification.createdAt)}
           </span>
         </div>
@@ -157,12 +157,12 @@ export function NotificationCenter() {
 
           <div className="max-h-80 overflow-y-auto p-2">
             {isLoading && (
-              <p className="px-3 py-6 text-center text-sm text-zinc-400">
+              <p className="px-3 py-6 text-center text-sm text-zinc-500">
                 Loading…
               </p>
             )}
             {!isLoading && (notifications ?? []).length === 0 && (
-              <p className="px-3 py-6 text-center text-sm text-zinc-400">
+              <p className="px-3 py-6 text-center text-sm text-zinc-500">
                 You&apos;re all caught up.
               </p>
             )}

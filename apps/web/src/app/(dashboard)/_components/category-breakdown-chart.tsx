@@ -17,10 +17,10 @@ export function CategoryBreakdownChart({
       className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
     >
       <p className="text-sm font-medium text-zinc-700">Category breakdown</p>
-      <p className="mt-1 text-xs text-zinc-400">This month&apos;s spending by category</p>
+      <p className="mt-1 text-xs text-zinc-500">This month&apos;s spending by category</p>
 
       {breakdown.length === 0 ? (
-        <p className="mt-8 text-sm text-zinc-400">
+        <p className="mt-8 text-sm text-zinc-500">
           No expenses recorded this month yet.
         </p>
       ) : (

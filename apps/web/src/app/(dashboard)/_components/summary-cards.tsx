@@ -22,13 +22,13 @@ function SummaryCard({
       aria-label={title}
       className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
     >
-      <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
+      <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
         {title}
       </p>
       <p className={`mt-3 text-2xl font-semibold ${valueClassName}`}>
         {value}
       </p>
-      <p className="mt-2 text-xs text-zinc-400">{description}</p>
+      <p className="mt-2 text-xs text-zinc-500">{description}</p>
     </article>
   );
 }

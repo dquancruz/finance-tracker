@@ -1,11 +1,45 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useDashboardSummary } from '@/lib/hooks/use-analytics';
 import { BudgetStatusCards } from './_components/budget-status-cards';
-import { CategoryBreakdownChart } from './_components/category-breakdown-chart';
-import { MonthlyTrendChart } from './_components/monthly-trend-chart';
 import { SummaryCards } from './_components/summary-cards';
 import { UpcomingPaymentsList } from './_components/upcoming-payments-list';
+
+// recharts is one of the heaviest dependencies in the app (~100kb+ gzipped)
+// and is only ever needed once the dashboard summary has actually loaded —
+// code-split both charts out of the initial dashboard bundle so the
+// skeleton/first paint doesn't have to wait on them.
+function ChartSkeleton({ label }: { label: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="h-72 animate-pulse rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
+    >
+      <div className="h-3 w-32 rounded bg-zinc-100" />
+      <p className="sr-only">{label}</p>
+    </div>
+  );
+}
+
+const MonthlyTrendChart = dynamic(
+  () =>
+    import('./_components/monthly-trend-chart').then(
+      (mod) => mod.MonthlyTrendChart,
+    ),
+  { ssr: false, loading: () => <ChartSkeleton label="Loading monthly trend chart" /> },
+);
+
+const CategoryBreakdownChart = dynamic(
+  () =>
+    import('./_components/category-breakdown-chart').then(
+      (mod) => mod.CategoryBreakdownChart,
+    ),
+  {
+    ssr: false,
+    loading: () => <ChartSkeleton label="Loading category breakdown chart" />,
+  },
+);
 
 export default function DashboardPage() {
   const { data: summary, isLoading, isError } = useDashboardSummary();

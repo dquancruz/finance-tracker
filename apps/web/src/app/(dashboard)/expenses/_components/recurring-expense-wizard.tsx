@@ -119,13 +119,13 @@ export function RecurringExpenseWizard({ onSubmit }: RecurringExpenseWizardProps
               className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ${
                 index <= step
                   ? 'bg-indigo-600 text-white'
-                  : 'bg-zinc-100 text-zinc-400'
+                  : 'bg-zinc-100 text-zinc-500'
               }`}
             >
               {index + 1}
             </span>
             <span
-              className={`text-sm ${index === step ? 'font-medium text-zinc-900' : 'text-zinc-400'}`}
+              className={`text-sm ${index === step ? 'font-medium text-zinc-900' : 'text-zinc-500'}`}
             >
               {label}
             </span>

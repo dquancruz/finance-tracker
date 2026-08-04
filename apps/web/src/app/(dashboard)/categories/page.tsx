@@ -19,7 +19,7 @@ export default function CategoriesPage() {
       </div>
 
       {isLoading && (
-        <p className="mt-8 text-sm text-zinc-400">Loading categories…</p>
+        <p className="mt-8 text-sm text-zinc-500">Loading categories…</p>
       )}
       {isError && (
         <p role="alert" className="mt-8 text-sm text-red-600">
