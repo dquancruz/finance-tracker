@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.6.1] - 2026-08-05
+
+- fix(deploy): give the web Railway service its own config file (#13)
+
+
 ## [0.6.0] - 2026-08-05
 
 - feat(deploy): add Dockerfile for apps/web Railway deployment (#12)
