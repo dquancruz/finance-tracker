@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.5.1] - 2026-08-05
+
+- fix(api): coerce string-typed numeric env vars + Railway deploy config (#11)
+
+
 ## [0.5.0] - 2026-08-05
 
 - feat: Phase 5 — Polish & Production [PHASE-5] (#10)
