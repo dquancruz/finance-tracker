@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.5.0] - 2026-08-05
+
+- feat: Phase 5 — Polish & Production [PHASE-5] (#10)
+
+
 ## [0.4.1] - 2026-07-09
 
 - fix(notifications): atomic dedupe guard for cron notifications (#9)
