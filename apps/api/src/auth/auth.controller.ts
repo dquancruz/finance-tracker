@@ -8,6 +8,8 @@ interface AuthenticatedRequest {
   user: {
     _id: { toString(): string };
     email: string;
+    name: string;
+    avatar?: string;
   };
 }
 
@@ -31,6 +33,6 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Request() req: AuthenticatedRequest) {
-    return this.authService.login(req.user._id.toString(), req.user.email);
+    return this.authService.login(req.user);
   }
 }

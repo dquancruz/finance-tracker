@@ -4,6 +4,13 @@ import * as argon2 from 'argon2';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 
+interface AuthenticatableUser {
+  _id: { toString(): string };
+  email: string;
+  name: string;
+  avatar?: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -27,15 +34,29 @@ export class AuthService {
       email: dto.email,
       passwordHash,
     });
-    return this.signToken(user._id.toString(), user.email);
+    return this.buildAuthResponse(user);
   }
 
-  login(userId: string, email: string) {
-    return this.signToken(userId, email);
+  login(user: AuthenticatableUser) {
+    return this.buildAuthResponse(user);
   }
 
-  private signToken(sub: string, email: string) {
-    const token = this.jwtService.sign({ sub, email });
-    return { accessToken: token };
+  // Shaped as `{ user: { ...accessToken } }` to match what the web app's
+  // NextAuth Credentials authorize() callback expects — it reads
+  // `data.user` off the response body (see apps/web/src/lib/auth.ts).
+  private buildAuthResponse(user: AuthenticatableUser) {
+    const accessToken = this.jwtService.sign({
+      sub: user._id.toString(),
+      email: user.email,
+    });
+    return {
+      user: {
+        id: user._id.toString(),
+        email: user.email,
+        name: user.name,
+        avatar: user.avatar,
+        accessToken,
+      },
+    };
   }
 }
