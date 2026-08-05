@@ -49,4 +49,30 @@ describe('env.validation', () => {
       validate({ ...validBaseEnv, NODE_ENV: 'staging-typo' }),
     ).toThrow();
   });
+
+  // Regression test: process.env values are always strings — plain object
+  // literals with real numbers (as in the other tests) don't exercise the
+  // string->number coercion path that class-transformer's
+  // enableImplicitConversion depends on. This is what broke PORT on every
+  // real deploy despite passing tests.
+  it('coerces string-typed numeric env vars (as process.env actually provides them)', () => {
+    const result = validate({
+      ...validBaseEnv,
+      NODE_ENV: 'production',
+      CORS_ORIGIN: 'https://app.example.com',
+      PORT: '3000',
+      THROTTLE_TTL_MS: '30000',
+      THROTTLE_LIMIT: '50',
+    });
+
+    expect(result.PORT).toBe(3000);
+    expect(result.THROTTLE_TTL_MS).toBe(30000);
+    expect(result.THROTTLE_LIMIT).toBe(50);
+  });
+
+  it('rejects a non-numeric string PORT', () => {
+    expect(() => validate({ ...validBaseEnv, PORT: 'not-a-port' })).toThrow(
+      /PORT/,
+    );
+  });
 });
