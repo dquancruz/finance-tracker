@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.6.0] - 2026-08-05
+
+- feat(deploy): add Dockerfile for apps/web Railway deployment (#12)
+
+
 ## [0.5.1] - 2026-08-05
 
 - fix(api): coerce string-typed numeric env vars + Railway deploy config (#11)
