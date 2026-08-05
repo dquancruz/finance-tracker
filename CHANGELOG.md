@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.6.2] - 2026-08-05
+
+- fix(deploy): point web healthcheck at /login instead of / (#14)
+
+
 ## [0.6.1] - 2026-08-05
 
 - fix(deploy): give the web Railway service its own config file (#13)
