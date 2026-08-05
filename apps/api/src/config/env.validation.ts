@@ -23,6 +23,13 @@ enum Environment {
  * missing secret, an unset production CORS origin, or a malformed Mongo URI.
  */
 class EnvironmentVariables {
+  // Numeric fields below MUST have an explicit `: number` annotation. With
+  // `isolatedModules` on, tsc can't infer a per-file type for a bare
+  // `= 3001` initializer, so `emitDecoratorMetadata` emits `design:type:
+  // Object` instead of `Number` — and class-transformer's
+  // `enableImplicitConversion` relies on that metadata to coerce the raw
+  // (always-a-string) process.env value. Without the annotation, PORT etc.
+  // stay strings and fail @IsInt()/@Min() on every real deploy.
   @IsOptional()
   @IsIn(Object.values(Environment))
   NODE_ENV: Environment = Environment.Development;
@@ -43,7 +50,7 @@ class EnvironmentVariables {
   @IsOptional()
   @IsInt()
   @Min(1)
-  PORT = 3001;
+  PORT: number = 3001;
 
   /** Comma-separated allowed CORS origins. Required when NODE_ENV=production. */
   @IsOptional()
@@ -53,12 +60,12 @@ class EnvironmentVariables {
   @IsOptional()
   @IsInt()
   @Min(1000)
-  THROTTLE_TTL_MS = 60000;
+  THROTTLE_TTL_MS: number = 60000;
 
   @IsOptional()
   @IsInt()
   @Min(1)
-  THROTTLE_LIMIT = 100;
+  THROTTLE_LIMIT: number = 100;
 }
 
 export function validate(
