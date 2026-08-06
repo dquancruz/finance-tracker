@@ -18,11 +18,11 @@ function categoryLabel(categories: ICategory[], categoryId: string): string {
 function typeBadgeClasses(type: IExpense['type']): string {
   switch (type) {
     case 'simple':
-      return 'bg-zinc-100 text-zinc-700';
+      return 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300';
     case 'recurring':
-      return 'bg-indigo-100 text-indigo-700';
+      return 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300';
     case 'installment':
-      return 'bg-amber-100 text-amber-700';
+      return 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400';
   }
 }
 
@@ -32,17 +32,17 @@ export function ExpenseTable({ expenses, categories }: ExpenseTableProps) {
 
   if (expenses.length === 0) {
     return (
-      <p className="mt-6 text-sm text-zinc-500">
+      <p className="mt-6 text-sm text-zinc-500 dark:text-zinc-400">
         No expenses match the current filters.
       </p>
     );
   }
 
   return (
-    <div className="mt-6 overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
-      <table className="min-w-full divide-y divide-zinc-200 text-sm">
+    <div className="mt-6 overflow-x-auto rounded-xl border border-zinc-200 bg-surface shadow-sm dark:border-zinc-800">
+      <table className="min-w-full divide-y divide-zinc-200 text-sm dark:divide-zinc-800">
         <thead>
-          <tr className="text-left text-xs font-medium uppercase tracking-wider text-zinc-500">
+          <tr className="text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
             <th scope="col" className="px-4 py-3">Description</th>
             <th scope="col" className="px-4 py-3">Category</th>
             <th scope="col" className="px-4 py-3">Type</th>
@@ -51,7 +51,7 @@ export function ExpenseTable({ expenses, categories }: ExpenseTableProps) {
             <th scope="col" className="px-4 py-3 text-right">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-zinc-100">
+        <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
           {expenses.map((expense) => {
             const description =
               expense.type === 'simple'
@@ -70,8 +70,8 @@ export function ExpenseTable({ expenses, categories }: ExpenseTableProps) {
 
             return (
               <tr key={expense._id}>
-                <td className="px-4 py-3 text-zinc-900">{description}</td>
-                <td className="px-4 py-3 text-zinc-500">
+                <td className="px-4 py-3 text-zinc-900 dark:text-zinc-50">{description}</td>
+                <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400">
                   {categoryLabel(categories, expense.categoryId)}
                 </td>
                 <td className="px-4 py-3">
@@ -81,8 +81,8 @@ export function ExpenseTable({ expenses, categories }: ExpenseTableProps) {
                     {expense.type}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-zinc-500">{formatDate(date)}</td>
-                <td className="px-4 py-3 text-right font-medium text-zinc-900">
+                <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400">{formatDate(date)}</td>
+                <td className="px-4 py-3 text-right font-medium tabular-nums text-zinc-900 dark:text-zinc-50">
                   {formatCurrency(amount, expense.currency)}
                 </td>
                 <td className="px-4 py-3">
@@ -92,14 +92,14 @@ export function ExpenseTable({ expenses, categories }: ExpenseTableProps) {
                         type="button"
                         onClick={() => void payRecurring.mutateAsync(expense._id)}
                         disabled={payRecurring.isPending}
-                        className="rounded-md px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
+                        className="rounded-md px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
                       >
                         Mark paid
                       </button>
                     )}
                     <Link
                       href={`/expenses/${expense._id}/edit`}
-                      className="rounded-md px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50"
+                      className="rounded-md px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-indigo-400 dark:hover:bg-indigo-500/10"
                     >
                       Edit
                     </Link>
@@ -107,7 +107,7 @@ export function ExpenseTable({ expenses, categories }: ExpenseTableProps) {
                       type="button"
                       onClick={() => void deleteExpense.mutateAsync(expense._id)}
                       disabled={deleteExpense.isPending}
-                      className="rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                      className="rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-500/10"
                     >
                       Delete
                     </button>

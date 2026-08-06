@@ -38,9 +38,9 @@ export function notificationTone(type: NotificationType): NotificationTone {
 }
 
 const TONE_BADGE_CLASSES: Record<NotificationTone, string> = {
-  alert: 'bg-red-100 text-red-700',
-  warning: 'bg-amber-100 text-amber-700',
-  info: 'bg-indigo-100 text-indigo-700',
+  alert: 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400',
+  warning: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400',
+  info: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300',
 };
 
 /** Tailwind badge classes matching a notification tone. */

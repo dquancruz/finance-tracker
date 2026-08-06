@@ -62,21 +62,21 @@ export function SimpleExpenseForm({
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
       {error && (
-        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">
           {error}
         </div>
       )}
 
       <div>
-        <label htmlFor="simple-category" className="block text-sm font-medium text-zinc-700">
+        <label htmlFor="simple-category" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Category
         </label>
         <CategorySelect id="simple-category" value={categoryId} onChange={setCategoryId} required />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="simple-amount" className="block text-sm font-medium text-zinc-700">
+          <label htmlFor="simple-amount" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
             Amount
           </label>
           <input
@@ -87,11 +87,11 @@ export function SimpleExpenseForm({
             required
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm tabular-nums focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
           />
         </div>
         <div>
-          <label htmlFor="simple-date" className="block text-sm font-medium text-zinc-700">
+          <label htmlFor="simple-date" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
             Date
           </label>
           <input
@@ -100,27 +100,27 @@ export function SimpleExpenseForm({
             required
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="simple-notes" className="block text-sm font-medium text-zinc-700">
+        <label htmlFor="simple-notes" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Notes (optional)
         </label>
         <input
           id="simple-notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
         />
       </div>
 
       <button
         type="submit"
         disabled={pending}
-        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus-visible:ring-offset-zinc-900"
       >
         {pending ? 'Saving…' : submitLabel}
       </button>

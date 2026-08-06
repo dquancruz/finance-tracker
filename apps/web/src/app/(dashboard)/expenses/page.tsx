@@ -21,17 +21,19 @@ export default function ExpensesPage() {
   const { data, isLoading, isError } = useExpenses(filters);
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-zinc-900">Expenses</h1>
-          <p className="mt-2 text-zinc-500">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+            Expenses
+          </h1>
+          <p className="mt-2 text-zinc-500 dark:text-zinc-400">
             Track simple, recurring, and installment expenses.
           </p>
         </div>
         <Link
           href="/expenses/new"
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
         >
           Add expense
         </Link>
@@ -46,10 +48,10 @@ export default function ExpensesPage() {
       </div>
 
       {isLoading && (
-        <p className="mt-8 text-sm text-zinc-500">Loading expenses…</p>
+        <p className="mt-8 text-sm text-zinc-500 dark:text-zinc-400">Loading expenses…</p>
       )}
       {isError && (
-        <p role="alert" className="mt-8 text-sm text-red-600">
+        <p role="alert" className="mt-8 text-sm text-red-600 dark:text-red-400">
           Could not load expenses. Please try again.
         </p>
       )}
@@ -58,8 +60,8 @@ export default function ExpensesPage() {
         <>
           <ExpenseTable expenses={data.data} categories={categories ?? []} />
 
-          <div className="mt-4 flex items-center justify-between text-sm text-zinc-500">
-            <p>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="tabular-nums">
               Page {data.page} of {data.totalPages} — {data.total} total
             </p>
             <div className="flex gap-2">
@@ -69,7 +71,7 @@ export default function ExpensesPage() {
                   setFilters((f) => ({ ...f, page: Math.max(1, (f.page ?? 1) - 1) }))
                 }
                 disabled={data.page <= 1}
-                className="rounded-lg border border-zinc-300 px-3 py-1.5 font-medium disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-lg border border-zinc-300 px-3 py-1.5 font-medium transition-colors hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-700 dark:hover:bg-zinc-800"
               >
                 Previous
               </button>
@@ -82,7 +84,7 @@ export default function ExpensesPage() {
                   }))
                 }
                 disabled={data.page >= data.totalPages}
-                className="rounded-lg border border-zinc-300 px-3 py-1.5 font-medium disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-lg border border-zinc-300 px-3 py-1.5 font-medium transition-colors hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-700 dark:hover:bg-zinc-800"
               >
                 Next
               </button>

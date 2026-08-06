@@ -117,14 +117,14 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
       {error && (
-        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">
           {error}
         </div>
       )}
 
       {props.mode === 'create' && (
         <div>
-          <label htmlFor="inst-category" className="block text-sm font-medium text-zinc-700">
+          <label htmlFor="inst-category" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
             Category
           </label>
           <CategorySelect id="inst-category" value={categoryId} onChange={setCategoryId} required />
@@ -132,7 +132,7 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
       )}
 
       <div>
-        <label htmlFor="inst-description" className="block text-sm font-medium text-zinc-700">
+        <label htmlFor="inst-description" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Description
         </label>
         <input
@@ -141,14 +141,14 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="New laptop"
-          className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
         />
       </div>
 
       {props.mode === 'create' && (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="inst-total" className="block text-sm font-medium text-zinc-700">
+            <label htmlFor="inst-total" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Total amount
             </label>
             <input
@@ -159,11 +159,11 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
               required
               value={totalAmount}
               onChange={(e) => setTotalAmount(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
             />
           </div>
           <div>
-            <label htmlFor="inst-count" className="block text-sm font-medium text-zinc-700">
+            <label htmlFor="inst-count" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Number of installments
             </label>
             <input
@@ -173,22 +173,22 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
               required
               value={numInstallments}
               onChange={(e) => setNumInstallments(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
             />
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="inst-interest-type" className="block text-sm font-medium text-zinc-700">
+          <label htmlFor="inst-interest-type" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
             Interest type
           </label>
           <select
             id="inst-interest-type"
             value={interestType}
             onChange={(e) => setInterestType(e.target.value as InterestType)}
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
           >
             {INTEREST_TYPES.map((type) => (
               <option key={type} value={type}>
@@ -198,7 +198,7 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
           </select>
         </div>
         <div>
-          <label htmlFor="inst-interest-rate" className="block text-sm font-medium text-zinc-700">
+          <label htmlFor="inst-interest-rate" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
             Annual interest rate
           </label>
           <input
@@ -210,14 +210,14 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
             value={interestRate}
             onChange={(e) => setInterestRate(e.target.value)}
             placeholder="e.g. 0.15 for 15%"
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm disabled:opacity-50 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm disabled:opacity-50 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
           />
         </div>
       </div>
 
       {props.mode === 'create' && (
         <div>
-          <label htmlFor="inst-start-date" className="block text-sm font-medium text-zinc-700">
+          <label htmlFor="inst-start-date" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
             Start date
           </label>
           <input
@@ -226,13 +226,13 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
             required
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
           />
         </div>
       )}
 
       {props.mode === 'edit' && (
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
           Changing the interest type/rate rebuilds the schedule for
           installments that haven&apos;t been paid yet.
         </p>
@@ -241,7 +241,7 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus-visible:ring-offset-zinc-900"
       >
         {pending ? 'Saving…' : props.mode === 'create' ? 'Create expense' : 'Save changes'}
       </button>

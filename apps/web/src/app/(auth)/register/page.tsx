@@ -85,12 +85,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
+    <div className="rounded-xl border border-zinc-200 bg-surface p-8 shadow-sm dark:border-zinc-800">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
           Create an account
         </h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
           Start tracking your finances today
         </p>
       </div>
@@ -99,7 +99,7 @@ export default function RegisterPage() {
         <div
           role="alert"
           aria-live="assertive"
-          className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400"
         >
           {serverError}
         </div>
@@ -110,7 +110,7 @@ export default function RegisterPage() {
           <div>
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-zinc-700"
+              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
             >
               Full name
             </label>
@@ -124,11 +124,11 @@ export default function RegisterPage() {
               onChange={(e) => setName(e.target.value)}
               aria-describedby={fieldErrors.name ? 'name-error' : undefined}
               aria-invalid={!!fieldErrors.name}
-              className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 aria-[invalid=true]:border-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-1 block w-full rounded-lg border border-zinc-300 bg-surface px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 aria-[invalid=true]:border-red-400 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-50"
               placeholder="Jane Smith"
             />
             {fieldErrors.name && (
-              <p id="name-error" role="alert" className="mt-1 text-xs text-red-600">
+              <p id="name-error" role="alert" className="mt-1 text-xs text-red-600 dark:text-red-400">
                 {fieldErrors.name}
               </p>
             )}
@@ -137,7 +137,7 @@ export default function RegisterPage() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-zinc-700"
+              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
             >
               Email
             </label>
@@ -151,11 +151,11 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               aria-describedby={fieldErrors.email ? 'email-error' : undefined}
               aria-invalid={!!fieldErrors.email}
-              className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 aria-[invalid=true]:border-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-1 block w-full rounded-lg border border-zinc-300 bg-surface px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 aria-[invalid=true]:border-red-400 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-50"
               placeholder="you@example.com"
             />
             {fieldErrors.email && (
-              <p id="email-error" role="alert" className="mt-1 text-xs text-red-600">
+              <p id="email-error" role="alert" className="mt-1 text-xs text-red-600 dark:text-red-400">
                 {fieldErrors.email}
               </p>
             )}
@@ -164,7 +164,7 @@ export default function RegisterPage() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-zinc-700"
+              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
             >
               Password
             </label>
@@ -178,15 +178,15 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               aria-describedby={fieldErrors.password ? 'password-error' : 'password-hint'}
               aria-invalid={!!fieldErrors.password}
-              className="mt-1 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 aria-[invalid=true]:border-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-1 block w-full rounded-lg border border-zinc-300 bg-surface px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 aria-[invalid=true]:border-red-400 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-50"
               placeholder="••••••••"
             />
             {fieldErrors.password ? (
-              <p id="password-error" role="alert" className="mt-1 text-xs text-red-600">
+              <p id="password-error" role="alert" className="mt-1 text-xs text-red-600 dark:text-red-400">
                 {fieldErrors.password}
               </p>
             ) : (
-              <p id="password-hint" className="mt-1 text-xs text-zinc-500">
+              <p id="password-hint" className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
                 Must be at least 8 characters.
               </p>
             )}
@@ -196,17 +196,17 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={pending}
-          className="mt-6 flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-6 flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus:ring-offset-zinc-900"
         >
           {pending ? 'Creating account…' : 'Create account'}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-zinc-500">
+      <p className="mt-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
         Already have an account?{' '}
         <Link
           href="/login"
-          className="font-medium text-indigo-600 hover:text-indigo-700 focus:outline-none focus:underline"
+          className="font-medium text-indigo-600 hover:text-indigo-700 focus:outline-none focus:underline dark:text-indigo-400 dark:hover:text-indigo-300"
         >
           Sign in
         </Link>

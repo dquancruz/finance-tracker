@@ -65,13 +65,13 @@ export function RecurringExpenseEditForm({
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
       {error && (
-        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">
           {error}
         </div>
       )}
 
       <div>
-        <label htmlFor="rec-edit-description" className="block text-sm font-medium text-zinc-700">
+        <label htmlFor="rec-edit-description" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Description
         </label>
         <input
@@ -79,13 +79,13 @@ export function RecurringExpenseEditForm({
           required
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="rec-edit-amount" className="block text-sm font-medium text-zinc-700">
+          <label htmlFor="rec-edit-amount" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
             Amount
           </label>
           <input
@@ -96,18 +96,18 @@ export function RecurringExpenseEditForm({
             required
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm tabular-nums focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
           />
         </div>
         <div>
-          <label htmlFor="rec-edit-frequency" className="block text-sm font-medium text-zinc-700">
+          <label htmlFor="rec-edit-frequency" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
             Frequency
           </label>
           <select
             id="rec-edit-frequency"
             value={frequency}
             onChange={(e) => setFrequency(e.target.value as RecurringFrequency)}
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
           >
             {FREQUENCIES.map((freq) => (
               <option key={freq} value={freq}>
@@ -119,7 +119,7 @@ export function RecurringExpenseEditForm({
       </div>
 
       <div>
-        <label htmlFor="rec-edit-end" className="block text-sm font-medium text-zinc-700">
+        <label htmlFor="rec-edit-end" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
           End date (optional)
         </label>
         <input
@@ -127,16 +127,16 @@ export function RecurringExpenseEditForm({
           type="date"
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
         />
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-zinc-700">
+      <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
         <input
           type="checkbox"
           checked={isActive}
           onChange={(e) => setIsActive(e.target.checked)}
-          className="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500"
+          className="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700"
         />
         Active
       </label>
@@ -144,7 +144,7 @@ export function RecurringExpenseEditForm({
       <button
         type="submit"
         disabled={pending}
-        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus-visible:ring-offset-zinc-900"
       >
         {pending ? 'Saving…' : 'Save changes'}
       </button>

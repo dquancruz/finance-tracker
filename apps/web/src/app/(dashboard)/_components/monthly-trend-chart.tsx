@@ -28,10 +28,10 @@ export function MonthlyTrendChart({ trends }: MonthlyTrendChartProps) {
   return (
     <article
       aria-label="Monthly spending trend"
-      className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
+      className="rounded-xl border border-zinc-200 bg-surface p-6 shadow-sm dark:border-zinc-800"
     >
-      <p className="text-sm font-medium text-zinc-700">Monthly trend</p>
-      <p className="mt-1 text-xs text-zinc-500">
+      <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Monthly trend</p>
+      <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
         Total spend over the last {trends.length} months
       </p>
 
@@ -39,17 +39,17 @@ export function MonthlyTrendChart({ trends }: MonthlyTrendChartProps) {
         <div className="mt-4 h-64">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={trends} margin={{ left: 4, right: 12, top: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F4F4F5" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
               <XAxis
                 dataKey="month"
                 tickFormatter={monthTickLabel}
-                tick={{ fontSize: 12, fill: '#71717A' }}
-                axisLine={{ stroke: '#E4E4E7' }}
+                tick={{ fontSize: 12, fill: 'var(--chart-tick)' }}
+                axisLine={{ stroke: 'var(--chart-grid)' }}
                 tickLine={false}
               />
               <YAxis
                 tickFormatter={(value: number) => formatCurrency(value)}
-                tick={{ fontSize: 11, fill: '#71717A' }}
+                tick={{ fontSize: 11, fill: 'var(--chart-tick)' }}
                 axisLine={false}
                 tickLine={false}
                 width={72}
@@ -57,6 +57,14 @@ export function MonthlyTrendChart({ trends }: MonthlyTrendChartProps) {
               <Tooltip
                 formatter={(value: number) => formatCurrency(value)}
                 labelFormatter={monthTickLabel}
+                contentStyle={{
+                  background: 'var(--surface)',
+                  borderColor: 'var(--border)',
+                  borderRadius: 8,
+                  fontSize: 13,
+                }}
+                labelStyle={{ color: 'var(--foreground)' }}
+                itemStyle={{ color: 'var(--foreground)' }}
               />
               <Line
                 type="monotone"
@@ -71,7 +79,7 @@ export function MonthlyTrendChart({ trends }: MonthlyTrendChartProps) {
           </ResponsiveContainer>
         </div>
       ) : (
-        <p className="mt-8 text-sm text-zinc-500">
+        <p className="mt-8 text-sm text-zinc-500 dark:text-zinc-400">
           Not enough data yet to chart a trend.
         </p>
       )}
