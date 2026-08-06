@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.7.0] - 2026-08-06
+
+- feat(web): apply quiet-preset design pass across the app (#16)
+
+
 ## [0.6.3] - 2026-08-06
 
 - fix(auth): return user object from login/register to match web's NextAuth authorize() (#15)
