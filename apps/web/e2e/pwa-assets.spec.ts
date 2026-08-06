@@ -38,7 +38,7 @@ test.describe('PWA installability assets', () => {
     expect(sw.ok()).toBeTruthy();
   });
 
-  test('the login page links the manifest and includes a theme-color meta tag', async ({
+  test('the login page links the manifest and includes theme-color meta tags for light and dark', async ({
     page,
   }) => {
     await page.goto('/login');
@@ -47,9 +47,15 @@ test.describe('PWA installability assets', () => {
       'href',
       '/manifest.webmanifest',
     );
-    await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
-      'content',
-      '#18181b',
-    );
+
+    // theme-color varies by color scheme (see apps/web/src/app/layout.tsx's
+    // `viewport.themeColor`), so it renders as two media-conditioned meta
+    // tags rather than a single static one.
+    await expect(
+      page.locator('meta[name="theme-color"][media="(prefers-color-scheme: light)"]'),
+    ).toHaveAttribute('content', '#fafafa');
+    await expect(
+      page.locator('meta[name="theme-color"][media="(prefers-color-scheme: dark)"]'),
+    ).toHaveAttribute('content', '#09090b');
   });
 });
