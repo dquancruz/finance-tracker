@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.0] - 2026-08-06
+
+- feat(installments): replace placeholder with a real payoff dashboard (#18)
+- feat(categories): allow per-user budgets on system categories (#17)
+
+
 ## [0.7.0] - 2026-08-06
 
 - feat(web): apply quiet-preset design pass across the app (#16)
