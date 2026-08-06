@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.6.3] - 2026-08-06
+
+- fix(auth): return user object from login/register to match web's NextAuth authorize() (#15)
+
+
 ## [0.6.2] - 2026-08-05
 
 - fix(deploy): point web healthcheck at /login instead of / (#14)
