@@ -35,8 +35,9 @@ export function CategoryList({ categories }: CategoryListProps) {
           System categories
         </h2>
         <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-          Built-in categories available to everyone — budgets and edits are
-          not supported on these.
+          Built-in categories available to everyone — the name, icon, and
+          color can&apos;t be changed, but you can set your own budget on
+          them.
         </p>
         <ul role="list" className="mt-3 space-y-2">
           {systemCategories.map((category) => (
@@ -53,6 +54,7 @@ function CategoryRow({
   editable,
 }: {
   category: ICategory;
+  /** Whether name/icon/color/delete are allowed — false for system categories. */
   editable: boolean;
 }) {
   const updateCategory = useUpdateCategory();
@@ -139,7 +141,7 @@ function CategoryRow({
         )}
       </div>
 
-      {editable && !editing && (
+      {!editing && (
         <div className="flex shrink-0 gap-2">
           <button
             type="button"
@@ -148,14 +150,16 @@ function CategoryRow({
           >
             Edit budget
           </button>
-          <button
-            type="button"
-            onClick={() => void deleteCategory.mutateAsync(category._id)}
-            disabled={deleteCategory.isPending}
-            className="rounded-md px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-60 dark:text-red-400 dark:hover:bg-red-500/10"
-          >
-            Delete
-          </button>
+          {editable && (
+            <button
+              type="button"
+              onClick={() => void deleteCategory.mutateAsync(category._id)}
+              disabled={deleteCategory.isPending}
+              className="rounded-md px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-60 dark:text-red-400 dark:hover:bg-red-500/10"
+            >
+              Delete
+            </button>
+          )}
         </div>
       )}
     </li>

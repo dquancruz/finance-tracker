@@ -3,11 +3,19 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CategoriesController } from './categories.controller';
 import { CategoriesService } from './categories.service';
 import { Category, CategorySchema } from './schemas/category.schema';
+import {
+  CategoryBudgetOverride,
+  CategoryBudgetOverrideSchema,
+} from './schemas/category-budget-override.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Category.name, schema: CategorySchema },
+      {
+        name: CategoryBudgetOverride.name,
+        schema: CategoryBudgetOverrideSchema,
+      },
     ]),
   ],
   controllers: [CategoriesController],

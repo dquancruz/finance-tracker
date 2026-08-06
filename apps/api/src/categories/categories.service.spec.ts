@@ -3,6 +3,7 @@ import { getModelToken } from '@nestjs/mongoose';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { Category } from './schemas/category.schema';
+import { CategoryBudgetOverride } from './schemas/category-budget-override.schema';
 
 type MockDoc = {
   _id: string;
@@ -34,12 +35,26 @@ describe('CategoriesService', () => {
     findOne: jest.Mock;
     updateOne: jest.Mock;
   };
+  let overrideModelMock: {
+    find: jest.Mock;
+    findOne: jest.Mock;
+    findOneAndUpdate: jest.Mock;
+  };
 
   beforeEach(async () => {
     modelMock = {
       find: jest.fn(),
       findOne: jest.fn(),
       updateOne: jest.fn().mockResolvedValue({}),
+    };
+    overrideModelMock = {
+      find: jest
+        .fn()
+        .mockReturnValue({ exec: jest.fn().mockResolvedValue([]) }),
+      findOne: jest
+        .fn()
+        .mockReturnValue({ exec: jest.fn().mockResolvedValue(null) }),
+      findOneAndUpdate: jest.fn(),
     };
 
     const constructorMock = jest.fn().mockImplementation((data: object) => {
@@ -51,6 +66,10 @@ describe('CategoriesService', () => {
       providers: [
         CategoriesService,
         { provide: getModelToken(Category.name), useValue: constructorMock },
+        {
+          provide: getModelToken(CategoryBudgetOverride.name),
+          useValue: overrideModelMock,
+        },
       ],
     }).compile();
 
@@ -70,6 +89,31 @@ describe('CategoriesService', () => {
         $or: [{ userId: null }, { userId: 'user-1' }],
       });
       expect(result).toHaveLength(1);
+    });
+
+    it('merges a user budget override onto a system category', async () => {
+      const systemCat = buildDoc({
+        _id: 'cat-sys',
+        isSystem: true,
+        userId: null,
+      });
+      const exec = jest.fn().mockResolvedValue([systemCat]);
+      const sort = jest.fn().mockReturnValue({ exec });
+      modelMock.find.mockReturnValue({ sort });
+      overrideModelMock.find.mockReturnValue({
+        exec: jest.fn().mockResolvedValue([
+          {
+            categoryId: 'cat-sys',
+            budgetLimit: 300,
+            budgetPeriod: 'monthly',
+          },
+        ]),
+      });
+
+      const [result] = await service.findAllForUser('user-1');
+
+      expect(result.budgetLimit).toBe(300);
+      expect(result.budgetPeriod).toBe('monthly');
     });
   });
 
@@ -106,6 +150,31 @@ describe('CategoriesService', () => {
 
       expect(owned.save).toHaveBeenCalled();
       expect(result.budgetLimit).toBe(500);
+    });
+
+    it('upserts a per-user override for a budget-only update on a system category', async () => {
+      const systemDoc = buildDoc({ isSystem: true, userId: null });
+      const exec = jest.fn().mockResolvedValue(systemDoc);
+      modelMock.findOne.mockReturnValue({ exec });
+      overrideModelMock.findOneAndUpdate.mockReturnValue({
+        exec: jest
+          .fn()
+          .mockResolvedValue({ budgetLimit: 200, budgetPeriod: 'yearly' }),
+      });
+
+      const result = await service.update('cat-1', 'user-1', {
+        budgetLimit: 200,
+        budgetPeriod: 'yearly',
+      });
+
+      expect(overrideModelMock.findOneAndUpdate).toHaveBeenCalledWith(
+        { userId: 'user-1', categoryId: 'cat-1' },
+        { $set: { budgetLimit: 200, budgetPeriod: 'yearly' } },
+        { upsert: true, new: true },
+      );
+      expect(systemDoc.save).not.toHaveBeenCalled();
+      expect(result.budgetLimit).toBe(200);
+      expect(result.budgetPeriod).toBe('yearly');
     });
   });
 
