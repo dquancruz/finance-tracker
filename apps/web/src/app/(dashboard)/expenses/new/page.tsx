@@ -18,16 +18,18 @@ export default function NewExpensePage() {
   const createExpense = useCreateExpense();
 
   return (
-    <div className="mx-auto max-w-2xl p-6">
-      <h1 className="text-2xl font-semibold text-zinc-900">Add expense</h1>
-      <p className="mt-2 text-zinc-500">
+    <div className="mx-auto max-w-2xl p-4 sm:p-6">
+      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+        Add expense
+      </h1>
+      <p className="mt-2 text-zinc-500 dark:text-zinc-400">
         Choose an expense type to get started.
       </p>
 
       <div
         role="tablist"
         aria-label="Expense type"
-        className="mt-6 inline-flex rounded-lg border border-zinc-200 bg-white p-1"
+        className="mt-6 inline-flex rounded-lg border border-zinc-200 bg-surface p-1 dark:border-zinc-800"
       >
         {TYPE_TABS.map((tab) => (
           <button
@@ -36,10 +38,10 @@ export default function NewExpensePage() {
             role="tab"
             aria-selected={type === tab.value}
             onClick={() => setType(tab.value)}
-            className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+            className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
               type === tab.value
                 ? 'bg-indigo-600 text-white'
-                : 'text-zinc-600 hover:bg-zinc-100'
+                : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800'
             }`}
           >
             {tab.label}
@@ -47,7 +49,7 @@ export default function NewExpensePage() {
         ))}
       </div>
 
-      <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <div className="mt-6 rounded-xl border border-zinc-200 bg-surface p-6 shadow-sm dark:border-zinc-800">
         {type === 'simple' && (
           <SimpleExpenseForm
             submitLabel="Create expense"

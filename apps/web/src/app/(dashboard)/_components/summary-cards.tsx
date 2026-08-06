@@ -10,7 +10,7 @@ function SummaryCard({
   title,
   description,
   value,
-  valueClassName = 'text-zinc-900',
+  valueClassName = 'text-zinc-900 dark:text-zinc-50',
 }: {
   title: string;
   description: string;
@@ -20,15 +20,15 @@ function SummaryCard({
   return (
     <article
       aria-label={title}
-      className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
+      className="rounded-xl border border-zinc-200 bg-surface p-6 shadow-sm dark:border-zinc-800"
     >
-      <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+      <p className="text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
         {title}
       </p>
-      <p className={`mt-3 text-2xl font-semibold ${valueClassName}`}>
+      <p className={`mt-3 text-2xl font-semibold tabular-nums ${valueClassName}`}>
         {value}
       </p>
-      <p className="mt-2 text-xs text-zinc-500">{description}</p>
+      <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">{description}</p>
     </article>
   );
 }
@@ -52,7 +52,9 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
           description={`${formatPercentageChange(summary.monthOverMonthChange)} vs. last month`}
           value={formatCurrency(summary.totalLastMonth)}
           valueClassName={
-            changeIsIncrease ? 'text-red-600' : 'text-emerald-600'
+            changeIsIncrease
+              ? 'text-red-600 dark:text-red-400'
+              : 'text-emerald-600 dark:text-emerald-400'
           }
         />
         <SummaryCard
@@ -75,7 +77,9 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
               : `${summary.budgetStatus.length - overBudgetCount}/${summary.budgetStatus.length}`
           }
           valueClassName={
-            overBudgetCount > 0 ? 'text-amber-600' : 'text-zinc-900'
+            overBudgetCount > 0
+              ? 'text-amber-600 dark:text-amber-400'
+              : 'text-zinc-900 dark:text-zinc-50'
           }
         />
       </div>

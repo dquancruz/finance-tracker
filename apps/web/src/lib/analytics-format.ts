@@ -25,9 +25,9 @@ export function budgetToneBarClass(tone: BudgetTone): string {
 }
 
 const BUDGET_TONE_TEXT_CLASSES: Record<BudgetTone, string> = {
-  ok: 'text-emerald-600',
-  warning: 'text-amber-600',
-  over: 'text-red-600',
+  ok: 'text-emerald-600 dark:text-emerald-400',
+  warning: 'text-amber-600 dark:text-amber-400',
+  over: 'text-red-600 dark:text-red-400',
 };
 
 /** Tailwind text-color class matching a budget tone. */

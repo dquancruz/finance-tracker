@@ -31,7 +31,7 @@ function NotificationRow({
       <button
         type="button"
         onClick={() => !notification.read && onRead(notification._id)}
-        className={`flex w-full flex-col gap-1 rounded-lg px-3 py-2 text-left transition-colors hover:bg-zinc-50 ${
+        className={`flex w-full flex-col gap-1 rounded-lg px-3 py-2 text-left transition-colors hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 dark:hover:bg-zinc-800 ${
           notification.read ? 'opacity-60' : ''
         }`}
       >
@@ -41,14 +41,14 @@ function NotificationRow({
           >
             {notification.type.replace('_', ' ')}
           </span>
-          <span className="shrink-0 text-[11px] text-zinc-500">
+          <span className="shrink-0 text-[11px] text-zinc-500 dark:text-zinc-400">
             {formatRelativeTime(notification.createdAt)}
           </span>
         </div>
-        <p className="text-sm font-medium text-zinc-900">
+        <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
           {notification.title}
         </p>
-        <p className="text-xs text-zinc-500">{notification.message}</p>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">{notification.message}</p>
       </button>
     </li>
   );
@@ -99,7 +99,7 @@ export function NotificationCenter() {
         aria-expanded={open}
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
         onClick={() => setOpen((o) => !o)}
-        className="relative flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="relative flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
       >
         <svg
           aria-hidden="true"
@@ -129,26 +129,26 @@ export function NotificationCenter() {
         <div
           role="menu"
           aria-label="Notifications"
-          className="absolute right-0 z-20 mt-2 w-80 rounded-xl border border-zinc-200 bg-white shadow-lg"
+          className="absolute right-0 z-20 mt-2 w-80 rounded-xl border border-zinc-200 bg-surface shadow-lg dark:border-zinc-800"
         >
-          <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">
-            <p className="text-sm font-medium text-zinc-900">Notifications</p>
+          <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
+            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">Notifications</p>
             <button
               type="button"
               onClick={() => markAllAsRead.mutate()}
               disabled={unreadCount === 0 || markAllAsRead.isPending}
-              className="text-xs font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-40"
+              className="rounded text-xs font-medium text-indigo-600 hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-40 dark:text-indigo-400 dark:hover:text-indigo-300"
             >
               Mark all read
             </button>
           </div>
 
           {pushPermission !== 'granted' && (
-            <div className="border-b border-zinc-100 px-4 py-2">
+            <div className="border-b border-zinc-100 px-4 py-2 dark:border-zinc-800">
               <button
                 type="button"
                 onClick={() => void handleEnablePush()}
-                className="text-xs font-medium text-zinc-500 hover:text-zinc-700"
+                className="rounded text-xs font-medium text-zinc-500 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-zinc-400 dark:hover:text-zinc-200"
               >
                 Enable push notifications
               </button>
@@ -157,12 +157,12 @@ export function NotificationCenter() {
 
           <div className="max-h-80 overflow-y-auto p-2">
             {isLoading && (
-              <p className="px-3 py-6 text-center text-sm text-zinc-500">
+              <p className="px-3 py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
                 Loading…
               </p>
             )}
             {!isLoading && (notifications ?? []).length === 0 && (
-              <p className="px-3 py-6 text-center text-sm text-zinc-500">
+              <p className="px-3 py-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
                 You&apos;re all caught up.
               </p>
             )}

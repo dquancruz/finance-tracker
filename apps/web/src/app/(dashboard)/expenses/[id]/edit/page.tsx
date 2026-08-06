@@ -17,22 +17,24 @@ export default function EditExpensePage() {
   const updateExpense = useUpdateExpense();
 
   if (isLoading) {
-    return <p className="p-6 text-sm text-zinc-500">Loading expense…</p>;
+    return <p className="p-6 text-sm text-zinc-500 dark:text-zinc-400">Loading expense…</p>;
   }
   if (isError || !expense) {
     return (
-      <p role="alert" className="p-6 text-sm text-red-600">
+      <p role="alert" className="p-6 text-sm text-red-600 dark:text-red-400">
         Could not load this expense.
       </p>
     );
   }
 
   return (
-    <div className="mx-auto max-w-2xl p-6">
-      <h1 className="text-2xl font-semibold text-zinc-900">Edit expense</h1>
-      <p className="mt-2 text-zinc-500 capitalize">{expense.type} expense</p>
+    <div className="mx-auto max-w-2xl p-4 sm:p-6">
+      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+        Edit expense
+      </h1>
+      <p className="mt-2 capitalize text-zinc-500 dark:text-zinc-400">{expense.type} expense</p>
 
-      <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <div className="mt-6 rounded-xl border border-zinc-200 bg-surface p-6 shadow-sm dark:border-zinc-800">
         {expense.type === 'simple' && (
           <SimpleExpenseForm
             submitLabel="Save changes"

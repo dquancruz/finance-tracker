@@ -19,11 +19,11 @@ export function InstallmentSchedule({
 
   return (
     <div className="mt-6">
-      <h2 className="text-sm font-semibold text-zinc-900">Payment schedule</h2>
-      <div className="mt-3 overflow-x-auto rounded-xl border border-zinc-200">
-        <table className="min-w-full divide-y divide-zinc-200 text-sm">
+      <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Payment schedule</h2>
+      <div className="mt-3 overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
+        <table className="min-w-full divide-y divide-zinc-200 text-sm dark:divide-zinc-800">
           <thead>
-            <tr className="text-left text-xs font-medium uppercase tracking-wider text-zinc-500">
+            <tr className="text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
               <th scope="col" className="px-4 py-2">#</th>
               <th scope="col" className="px-4 py-2">Due date</th>
               <th scope="col" className="px-4 py-2 text-right">Principal</th>
@@ -33,23 +33,23 @@ export function InstallmentSchedule({
               <th scope="col" className="px-4 py-2" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100">
+          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
             {schedule.map((row) => (
               <tr key={row.installmentNumber}>
-                <td className="px-4 py-2 text-zinc-500">{row.installmentNumber}</td>
-                <td className="px-4 py-2 text-zinc-500">{formatDate(row.dueDate)}</td>
-                <td className="px-4 py-2 text-right">{formatCurrency(row.principal, currency)}</td>
-                <td className="px-4 py-2 text-right">{formatCurrency(row.interest, currency)}</td>
-                <td className="px-4 py-2 text-right font-medium text-zinc-900">
+                <td className="px-4 py-2 tabular-nums text-zinc-500 dark:text-zinc-400">{row.installmentNumber}</td>
+                <td className="px-4 py-2 text-zinc-500 dark:text-zinc-400">{formatDate(row.dueDate)}</td>
+                <td className="px-4 py-2 text-right tabular-nums text-zinc-700 dark:text-zinc-300">{formatCurrency(row.principal, currency)}</td>
+                <td className="px-4 py-2 text-right tabular-nums text-zinc-700 dark:text-zinc-300">{formatCurrency(row.interest, currency)}</td>
+                <td className="px-4 py-2 text-right font-medium tabular-nums text-zinc-900 dark:text-zinc-50">
                   {formatCurrency(row.totalDue, currency)}
                 </td>
                 <td className="px-4 py-2">
                   {row.paidAt ? (
-                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
                       Paid {formatDate(row.paidAt)}
                     </span>
                   ) : (
-                    <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600">
+                    <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
                       Pending
                     </span>
                   )}
@@ -65,7 +65,7 @@ export function InstallmentSchedule({
                         })
                       }
                       disabled={payInstallment.isPending}
-                      className="rounded-md px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
+                      className="rounded-md px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
                     >
                       Mark paid
                     </button>

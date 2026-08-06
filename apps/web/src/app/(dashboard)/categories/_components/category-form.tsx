@@ -49,15 +49,15 @@ export function CategoryForm() {
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
+      className="rounded-xl border border-zinc-200 bg-surface p-6 shadow-sm dark:border-zinc-800"
       aria-label="Create category"
     >
-      <h2 className="text-sm font-semibold text-zinc-900">New category</h2>
+      <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">New category</h2>
 
       {error && (
         <div
           role="alert"
-          className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700"
+          className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400"
         >
           {error}
         </div>
@@ -65,7 +65,7 @@ export function CategoryForm() {
 
       <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="col-span-2 sm:col-span-2">
-          <label htmlFor="cat-name" className="block text-xs font-medium text-zinc-700">
+          <label htmlFor="cat-name" className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
             Name
           </label>
           <input
@@ -73,13 +73,13 @@ export function CategoryForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
             placeholder="Subscriptions"
           />
         </div>
 
         <div>
-          <label htmlFor="cat-icon" className="block text-xs font-medium text-zinc-700">
+          <label htmlFor="cat-icon" className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
             Icon
           </label>
           <input
@@ -87,12 +87,12 @@ export function CategoryForm() {
             value={icon}
             onChange={(e) => setIcon(e.target.value)}
             maxLength={2}
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-center text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-center text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
           />
         </div>
 
         <div>
-          <label htmlFor="cat-color" className="block text-xs font-medium text-zinc-700">
+          <label htmlFor="cat-color" className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
             Color
           </label>
           <div className="mt-1 flex items-center gap-2">
@@ -101,13 +101,13 @@ export function CategoryForm() {
               type="color"
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="h-9 w-9 shrink-0 rounded-lg border border-zinc-300"
+              className="h-9 w-9 shrink-0 rounded-lg border border-zinc-300 dark:border-zinc-700"
             />
             <input
               aria-label="Color hex value"
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="block w-full rounded-lg border border-zinc-300 px-2 py-2 text-xs uppercase focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="block w-full rounded-lg border border-zinc-300 px-2 py-2 text-xs uppercase focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
             />
           </div>
         </div>
@@ -115,7 +115,7 @@ export function CategoryForm() {
         <div>
           <label
             htmlFor="cat-budget-limit"
-            className="block text-xs font-medium text-zinc-700"
+            className="block text-xs font-medium text-zinc-700 dark:text-zinc-300"
           >
             Budget limit
           </label>
@@ -127,14 +127,14 @@ export function CategoryForm() {
             value={budgetLimit}
             onChange={(e) => setBudgetLimit(e.target.value)}
             placeholder="Optional"
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
           />
         </div>
 
         <div>
           <label
             htmlFor="cat-budget-period"
-            className="block text-xs font-medium text-zinc-700"
+            className="block text-xs font-medium text-zinc-700 dark:text-zinc-300"
           >
             Budget period
           </label>
@@ -145,7 +145,7 @@ export function CategoryForm() {
             onChange={(e) =>
               setBudgetPeriod(e.target.value as (typeof BUDGET_PERIODS)[number])
             }
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
           >
             {BUDGET_PERIODS.map((period) => (
               <option key={period} value={period}>
@@ -159,7 +159,7 @@ export function CategoryForm() {
       <button
         type="submit"
         disabled={createCategory.isPending}
-        className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus-visible:ring-offset-zinc-900"
       >
         {createCategory.isPending ? 'Creating…' : 'Add category'}
       </button>

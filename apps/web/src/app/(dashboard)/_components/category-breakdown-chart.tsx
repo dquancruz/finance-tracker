@@ -14,13 +14,13 @@ export function CategoryBreakdownChart({
   return (
     <article
       aria-label="Spending by category"
-      className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
+      className="rounded-xl border border-zinc-200 bg-surface p-6 shadow-sm dark:border-zinc-800"
     >
-      <p className="text-sm font-medium text-zinc-700">Category breakdown</p>
-      <p className="mt-1 text-xs text-zinc-500">This month&apos;s spending by category</p>
+      <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Category breakdown</p>
+      <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">This month&apos;s spending by category</p>
 
       {breakdown.length === 0 ? (
-        <p className="mt-8 text-sm text-zinc-500">
+        <p className="mt-8 text-sm text-zinc-500 dark:text-zinc-400">
           No expenses recorded this month yet.
         </p>
       ) : (
@@ -42,7 +42,17 @@ export function CategoryBreakdownChart({
                     <Cell key={entry.categoryId} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                <Tooltip
+                  formatter={(value: number) => formatCurrency(value)}
+                  contentStyle={{
+                    background: 'var(--surface)',
+                    borderColor: 'var(--border)',
+                    borderRadius: 8,
+                    fontSize: 13,
+                  }}
+                  labelStyle={{ color: 'var(--foreground)' }}
+                  itemStyle={{ color: 'var(--foreground)' }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -59,11 +69,11 @@ export function CategoryBreakdownChart({
                     className="h-2.5 w-2.5 shrink-0 rounded-full"
                     style={{ backgroundColor: category.color }}
                   />
-                  <span className="truncate text-zinc-700">
+                  <span className="truncate text-zinc-700 dark:text-zinc-300">
                     {category.categoryName}
                   </span>
                 </span>
-                <span className="shrink-0 text-zinc-500">
+                <span className="shrink-0 tabular-nums text-zinc-500 dark:text-zinc-400">
                   {formatCurrency(category.amount)} ({category.percentage.toFixed(0)}%)
                 </span>
               </li>

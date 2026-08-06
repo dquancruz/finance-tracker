@@ -1,26 +1,66 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens — `quiet` preset.
+ *
+ * Neutral (zinc) surface scale + a single indigo accent. Light and dark
+ * values live side by side here so every component that consumes the
+ * `--color-*` theme tokens (via `bg-background`, `text-foreground`, etc.)
+ * automatically gets a correct dark appearance from the OS-level
+ * `prefers-color-scheme`, with no per-component JS/toggle required.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fafafa; /* zinc-50 */
+  --foreground: #18181b; /* zinc-900 */
+  --surface: #ffffff; /* card/panel background */
+  --muted-foreground: #71717a; /* zinc-500 */
+  --border: #e4e4e7; /* zinc-200 */
+  /* recharts renders via inline SVG styles, so chart primitives are exposed
+     as plain CSS vars (not Tailwind utilities) for use in `style={}` props. */
+  --chart-grid: #f4f4f5; /* zinc-100 */
+  --chart-tick: #71717a; /* zinc-500 */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #09090b; /* zinc-950 */
+    --foreground: #fafafa; /* zinc-50 */
+    --surface: #18181b; /* zinc-900 */
+    --muted-foreground: #a1a1aa; /* zinc-400 */
+    --border: #27272a; /* zinc-800 */
+    --chart-grid: #27272a; /* zinc-800 */
+    --chart-tick: #a1a1aa; /* zinc-400 */
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  /* Let native form controls, scrollbars, etc. pick the right (light or
+     dark) UA rendering automatically instead of always defaulting to light. */
+  color-scheme: light dark;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

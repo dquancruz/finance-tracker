@@ -16,9 +16,9 @@ export function CategoryList({ categories }: CategoryListProps) {
   return (
     <div className="mt-8 space-y-8">
       <section aria-label="Custom categories">
-        <h2 className="text-sm font-semibold text-zinc-900">My categories</h2>
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">My categories</h2>
         {customCategories.length === 0 ? (
-          <p className="mt-2 text-sm text-zinc-500">
+          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
             You haven&apos;t created any custom categories yet.
           </p>
         ) : (
@@ -31,10 +31,10 @@ export function CategoryList({ categories }: CategoryListProps) {
       </section>
 
       <section aria-label="System categories">
-        <h2 className="text-sm font-semibold text-zinc-900">
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
           System categories
         </h2>
-        <p className="mt-1 text-xs text-zinc-500">
+        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
           Built-in categories available to everyone — budgets and edits are
           not supported on these.
         </p>
@@ -77,7 +77,7 @@ function CategoryRow({
   }
 
   return (
-    <li className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-white px-4 py-3">
+    <li className="flex flex-wrap items-center gap-4 rounded-lg border border-zinc-200 bg-surface px-4 py-3 dark:border-zinc-800">
       <span
         aria-hidden="true"
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base"
@@ -87,7 +87,7 @@ function CategoryRow({
       </span>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-zinc-900">
+        <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-50">
           {category.name}
         </p>
         {editing ? (
@@ -100,7 +100,7 @@ function CategoryRow({
               onChange={(e) => setBudgetLimit(e.target.value)}
               placeholder="No limit"
               aria-label={`Budget limit for ${category.name}`}
-              className="w-28 rounded-md border border-zinc-300 px-2 py-1 text-xs"
+              className="w-28 rounded-md border border-zinc-300 px-2 py-1 text-xs tabular-nums focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
             />
             <select
               value={budgetPeriod}
@@ -109,7 +109,7 @@ function CategoryRow({
                 setBudgetPeriod(e.target.value as 'monthly' | 'yearly')
               }
               aria-label={`Budget period for ${category.name}`}
-              className="rounded-md border border-zinc-300 px-2 py-1 text-xs disabled:opacity-50"
+              className="rounded-md border border-zinc-300 px-2 py-1 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50 dark:border-zinc-700"
             >
               <option value="monthly">monthly</option>
               <option value="yearly">yearly</option>
@@ -118,20 +118,20 @@ function CategoryRow({
               type="button"
               onClick={() => void handleSaveBudget()}
               disabled={updateCategory.isPending}
-              className="rounded-md bg-indigo-600 px-2 py-1 text-xs font-medium text-white hover:bg-indigo-700"
+              className="rounded-md bg-indigo-600 px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-60 dark:focus-visible:ring-offset-zinc-900"
             >
               Save
             </button>
             <button
               type="button"
               onClick={() => setEditing(false)}
-              className="rounded-md px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-100"
+              className="rounded-md px-2 py-1 text-xs text-zinc-500 transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-zinc-400 dark:hover:bg-zinc-800"
             >
               Cancel
             </button>
           </div>
         ) : (
-          <p className="mt-0.5 text-xs text-zinc-500">
+          <p className="mt-0.5 text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
             {category.budgetLimit
               ? `Budget: ${formatCurrency(category.budgetLimit)} / ${category.budgetPeriod}`
               : 'No budget set'}
@@ -144,7 +144,7 @@ function CategoryRow({
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="rounded-md px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50"
+            className="rounded-md px-2 py-1 text-xs font-medium text-indigo-600 transition-colors hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-indigo-400 dark:hover:bg-indigo-500/10"
           >
             Edit budget
           </button>
@@ -152,7 +152,7 @@ function CategoryRow({
             type="button"
             onClick={() => void deleteCategory.mutateAsync(category._id)}
             disabled={deleteCategory.isPending}
-            className="rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+            className="rounded-md px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-60 dark:text-red-400 dark:hover:bg-red-500/10"
           >
             Delete
           </button>

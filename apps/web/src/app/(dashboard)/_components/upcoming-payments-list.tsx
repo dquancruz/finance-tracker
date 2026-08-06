@@ -13,30 +13,30 @@ function dueLabel(daysUntilDue: number): string {
 }
 
 function dueBadgeClasses(daysUntilDue: number): string {
-  if (daysUntilDue < 0) return 'bg-red-100 text-red-700';
-  if (daysUntilDue <= 3) return 'bg-amber-100 text-amber-700';
-  return 'bg-zinc-100 text-zinc-600';
+  if (daysUntilDue < 0) return 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400';
+  if (daysUntilDue <= 3) return 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400';
+  return 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400';
 }
 
 function typeBadgeClasses(type: IUpcomingItem['type']): string {
   return type === 'recurring'
-    ? 'bg-indigo-100 text-indigo-700'
-    : 'bg-amber-100 text-amber-700';
+    ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300'
+    : 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400';
 }
 
 export function UpcomingPaymentsList({ payments }: UpcomingPaymentsListProps) {
   return (
     <article
       aria-label="Upcoming payments"
-      className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
+      className="rounded-xl border border-zinc-200 bg-surface p-6 shadow-sm dark:border-zinc-800"
     >
-      <p className="text-sm font-medium text-zinc-700">Upcoming payments</p>
-      <p className="mt-1 text-xs text-zinc-500">
+      <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Upcoming payments</p>
+      <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
         Recurring and installment payments due in the next 30 days
       </p>
 
       {payments.length === 0 ? (
-        <p className="mt-8 text-sm text-zinc-500">
+        <p className="mt-8 text-sm text-zinc-500 dark:text-zinc-400">
           Nothing due in the next 30 days.
         </p>
       ) : (
@@ -44,7 +44,7 @@ export function UpcomingPaymentsList({ payments }: UpcomingPaymentsListProps) {
           {payments.map((payment, index) => (
             <li
               key={`${payment.expenseId}-${index}`}
-              className="flex items-center gap-4"
+              className="flex flex-wrap items-center gap-x-4 gap-y-1"
             >
               <span
                 className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${typeBadgeClasses(payment.type)}`}
@@ -52,10 +52,10 @@ export function UpcomingPaymentsList({ payments }: UpcomingPaymentsListProps) {
                 {payment.type}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-zinc-900">
+                <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-50">
                   {payment.description}
                 </p>
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
                   {formatDate(payment.dueDate)}
                 </p>
               </div>
@@ -64,7 +64,7 @@ export function UpcomingPaymentsList({ payments }: UpcomingPaymentsListProps) {
               >
                 {dueLabel(payment.daysUntilDue)}
               </span>
-              <span className="w-20 shrink-0 text-right text-sm font-medium text-zinc-900">
+              <span className="w-20 shrink-0 text-right text-sm font-medium tabular-nums text-zinc-900 dark:text-zinc-50">
                 {formatCurrency(payment.amount)}
               </span>
             </li>
