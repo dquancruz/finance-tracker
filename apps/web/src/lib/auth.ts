@@ -2,6 +2,12 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import type { User } from 'next-auth';
+import { assertProductionAuthSecret } from './auth-secret';
+
+assertProductionAuthSecret(
+  process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  process.env.NODE_ENV,
+);
 
 // Extend next-auth types to carry the API access token.
 // JWT augmentation lives here because next-auth/jwt sub-path is not
