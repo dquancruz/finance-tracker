@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.3] - 2026-08-27
+
+- chore(deps-dev): bump @nestjs/testing from 11.1.27 to 11.2.1 (#29)
+
+
 ## [0.8.2] - 2026-08-27
 
 - fix(security): address QA review and restore public landing and login (#24)
