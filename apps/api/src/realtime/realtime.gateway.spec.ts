@@ -1,7 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { isSocketOriginAllowed, RealtimeGateway } from './realtime.gateway';
+import { createServer } from 'node:http';
+import type { AddressInfo } from 'node:net';
+import { io as createClient } from 'socket.io-client';
+import { Server as SocketIoServer } from 'socket.io';
+import {
+  createSocketOriginPolicy,
+  isSocketOriginAllowed,
+  RealtimeGateway,
+} from './realtime.gateway';
 
 function buildSocket(overrides: Record<string, unknown> = {}) {
   return {
@@ -181,5 +189,55 @@ describe('isSocketOriginAllowed', () => {
     expect(
       isSocketOriginAllowed('http://localhost:3000', undefined, false),
     ).toBe(true);
+  });
+});
+
+describe('Socket.IO handshake origin policy', () => {
+  it('refuses a websocket upgrade from a disallowed browser origin', async () => {
+    const httpServer = createServer();
+    const socketServer = new SocketIoServer(httpServer, {
+      transports: ['websocket'],
+      ...createSocketOriginPolicy(() => ({
+        configuredOrigins: 'https://app.example.com',
+        isProduction: true,
+      })),
+    });
+
+    await new Promise<void>((resolve) => {
+      httpServer.listen(0, '127.0.0.1', resolve);
+    });
+    const { port } = httpServer.address() as AddressInfo;
+    const client = createClient(`http://127.0.0.1:${port}`, {
+      transports: ['websocket'],
+      extraHeaders: { Origin: 'https://attacker.example' },
+      reconnection: false,
+      timeout: 1000,
+    });
+
+    try {
+      const outcome = await new Promise<'connected' | 'rejected'>(
+        (resolve, reject) => {
+          const timer = setTimeout(
+            () => reject(new Error('WebSocket handshake timed out')),
+            2000,
+          );
+          client.once('connect', () => {
+            clearTimeout(timer);
+            resolve('connected');
+          });
+          client.once('connect_error', () => {
+            clearTimeout(timer);
+            resolve('rejected');
+          });
+        },
+      );
+
+      expect(outcome).toBe('rejected');
+    } finally {
+      client.close();
+      await new Promise<void>((resolve) => {
+        void socketServer.close(() => resolve());
+      });
+    }
   });
 });

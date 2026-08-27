@@ -7,7 +7,8 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import type { Server, Socket } from 'socket.io';
+import type { IncomingMessage } from 'node:http';
+import type { Server, ServerOptions, Socket } from 'socket.io';
 
 interface JwtPayload {
   sub: string;
@@ -39,6 +40,46 @@ export function isSocketOriginAllowed(
     : !isProduction;
 }
 
+interface SocketOriginConfig {
+  configuredOrigins: string | undefined;
+  isProduction: boolean;
+}
+
+export function createSocketOriginPolicy(
+  getConfig: () => SocketOriginConfig,
+): Pick<ServerOptions, 'cors' | 'allowRequest'> {
+  const isAllowed = (origin: string | undefined) => {
+    const config = getConfig();
+    return isSocketOriginAllowed(
+      origin,
+      config.configuredOrigins,
+      config.isProduction,
+    );
+  };
+
+  return {
+    // CORS protects Socket.IO's HTTP long-polling transport.
+    cors: {
+      origin: (origin, callback) => callback(null, isAllowed(origin)),
+    },
+    // Browsers do not apply CORS to WebSocket upgrades. allowRequest is the
+    // server-side admission check that protects websocket-only clients.
+    allowRequest: (
+      request: IncomingMessage,
+      callback: (error: string | null | undefined, success: boolean) => void,
+    ) => {
+      const header: unknown = request.headers.origin;
+      const origin =
+        typeof header === 'string'
+          ? header
+          : Array.isArray(header) && typeof header[0] === 'string'
+            ? header[0]
+            : undefined;
+      callback(null, isAllowed(origin));
+    },
+  };
+}
+
 /**
  * Real-time gateway — every authenticated socket joins a per-user room
  * (`user:{userId}`), so all emits are scoped to that user only.
@@ -50,18 +91,14 @@ export function isSocketOriginAllowed(
  * `installment:paid`, `analytics:refresh` (debounced 500ms per user),
  * `budget:alert`, `recurring:due_soon`.
  */
-@WebSocketGateway({
-  cors: {
-    origin: (origin, callback) => {
-      const allowed = isSocketOriginAllowed(
-        origin,
-        process.env['CORS_ORIGIN'],
-        process.env['NODE_ENV'] === 'production',
-      );
-      callback(null, allowed);
-    },
-  },
-})
+@WebSocketGateway(
+  createSocketOriginPolicy(() => ({
+    // These callbacks execute when a request arrives, after ConfigModule has
+    // loaded and validated the same process environment used by ConfigService.
+    configuredOrigins: process.env['CORS_ORIGIN'],
+    isProduction: process.env['NODE_ENV'] === 'production',
+  })),
+)
 export class RealtimeGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
