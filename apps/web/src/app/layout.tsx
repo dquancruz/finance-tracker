@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { headers } from 'next/headers';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Providers } from '@/components/providers';
 import { ServiceWorkerRegister } from '@/components/service-worker-register';
@@ -34,11 +35,15 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Bind this layout to the incoming request so Next.js can stamp the
+  // middleware `x-nonce` onto its runtime scripts (nonce CSP).
+  await headers();
+
   return (
     <html
       lang="en"

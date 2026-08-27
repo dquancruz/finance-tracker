@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   buildConnectSrcDirective,
   connectSourcesFor,
+  contentSecurityPolicy,
+  scriptSrcDirective,
 } from "./csp-connect-src";
 
 describe("connectSourcesFor", () => {
@@ -43,5 +45,41 @@ describe("buildConnectSrcDirective", () => {
     expect(buildConnectSrcDirective("http://127.0.0.1:3100")).toContain(
       "ws://127.0.0.1:3100",
     );
+  });
+});
+
+describe("scriptSrcDirective", () => {
+  it("uses a nonce and strict-dynamic without unsafe-inline", () => {
+    const directive = scriptSrcDirective("abc123", "production");
+    expect(directive).toContain("'nonce-abc123'");
+    expect(directive).toContain("'strict-dynamic'");
+    expect(directive).toContain("'self'");
+    expect(directive).not.toContain("'unsafe-inline'");
+  });
+
+  it("falls back to script-src self when no nonce is available", () => {
+    expect(scriptSrcDirective(undefined, "production")).toBe("script-src 'self'");
+  });
+
+  it("allows unsafe-eval in development only", () => {
+    expect(scriptSrcDirective("abc123", "development")).toContain(
+      "'unsafe-eval'",
+    );
+    expect(scriptSrcDirective("abc123", "production")).not.toContain(
+      "'unsafe-eval'",
+    );
+  });
+});
+
+describe("contentSecurityPolicy", () => {
+  it("embeds the nonce script policy and connect-src websocket origins", () => {
+    const policy = contentSecurityPolicy({
+      nonce: "test-nonce",
+      connectUrls: ["https://api.example.com"],
+      nodeEnv: "production",
+    });
+    expect(policy).toContain("script-src 'self' 'nonce-test-nonce' 'strict-dynamic'");
+    expect(policy).not.toMatch(/script-src[^;]*'unsafe-inline'/);
+    expect(policy).toContain("wss://api.example.com");
   });
 });

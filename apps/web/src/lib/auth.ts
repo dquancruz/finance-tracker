@@ -59,6 +59,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 email: credentials.email,
                 password: credentials.password,
               }),
+              cache: "no-store",
             },
           );
 
@@ -108,6 +109,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       const accessToken = token["accessToken"];
       if (typeof accessToken === "string") {
+        // Client-readable until a BFF can proxy API/WebSocket calls.
+        // Nonce CSP shrinks XSS blast radius; it does not remove this token.
         session.accessToken = accessToken;
       }
       return session;

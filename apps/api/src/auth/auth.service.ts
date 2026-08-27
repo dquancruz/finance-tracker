@@ -37,6 +37,7 @@ export class AuthService {
       name: dto.name,
       email,
       passwordHash,
+      emailVerified: false,
     });
     return this.buildAuthResponse(user);
   }

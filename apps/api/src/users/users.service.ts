@@ -8,6 +8,7 @@ export interface CreateUserInput {
   passwordHash?: string;
   name: string;
   avatar?: string;
+  emailVerified?: boolean;
   oauthProviders?: Array<{
     provider: 'google' | 'github';
     providerId: string;
@@ -70,22 +71,75 @@ export class UsersService {
     if (byProvider) return byProvider;
 
     const existing = await this.findByEmail(email);
-
     if (existing) {
-      // Password registration does not verify email ownership yet. Linking a
-      // Google identity by email alone would let a pre-registered password
-      // account retain access to the real Google owner's financial data.
-      throw new ConflictException(
-        'An account with this email already exists. Sign in with your password before linking Google.',
-      );
+      return this.claimUnverifiedAccountWithGoogle(existing, input);
     }
 
     return this.create({
       email,
       name: input.name,
       avatar: input.avatar,
+      emailVerified: true,
       oauthProviders: [{ provider: 'google', providerId: input.providerId }],
     });
+  }
+
+  /**
+   * Google has already verified the address. Recover an unverified password
+   * squat (`emailVerified === false` only): attach Google and `$unset` the
+   * password so the attacker cannot keep access.
+   *
+   * Legacy password accounts (field missing) and verified accounts still
+   * require an explicit in-app link — do not steal those.
+   */
+  private async claimUnverifiedAccountWithGoogle(
+    existing: UserDocument,
+    input: {
+      providerId: string;
+      name: string;
+      avatar?: string;
+    },
+  ): Promise<UserDocument> {
+    const alreadyLinked = existing.oauthProviders?.some(
+      (provider) => provider.provider === 'google',
+    );
+
+    if (existing.emailVerified !== false || alreadyLinked) {
+      throw new ConflictException(
+        'An account with this email already exists. Sign in with your password before linking Google.',
+      );
+    }
+
+    const $set: {
+      emailVerified: boolean;
+      oauthProviders: UserDocument['oauthProviders'];
+      avatar?: string;
+      name?: string;
+    } = {
+      emailVerified: true,
+      oauthProviders: [
+        ...(existing.oauthProviders ?? []),
+        { provider: 'google', providerId: input.providerId },
+      ],
+    };
+    if (input.avatar && !existing.avatar) $set.avatar = input.avatar;
+    if (!existing.name) $set.name = input.name;
+
+    const claimed = await this.userModel
+      .findByIdAndUpdate(
+        existing._id,
+        { $set, $unset: { passwordHash: 1 } },
+        { new: true },
+      )
+      .exec();
+
+    if (!claimed) {
+      throw new ConflictException(
+        'An account with this email already exists. Sign in with your password before linking Google.',
+      );
+    }
+
+    return claimed;
   }
 
   async updateById(

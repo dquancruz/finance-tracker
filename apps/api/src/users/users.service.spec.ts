@@ -19,8 +19,10 @@ describe('UsersService Google identities', () => {
 
     const model = jest.fn(() => savedDocument) as unknown as jest.Mock & {
       findOne: jest.Mock;
+      findByIdAndUpdate: jest.Mock;
     };
     model.findOne = jest.fn();
+    model.findByIdAndUpdate = jest.fn();
 
     return {
       service: new UsersService(model as unknown as Model<UserDocument>),
@@ -50,7 +52,28 @@ describe('UsersService Google identities', () => {
     });
   });
 
-  it('rejects silent linking to an existing password account by email', async () => {
+  it('rejects silent linking to a verified password account', async () => {
+    const { service, model } = buildService();
+    model.findOne
+      .mockReturnValueOnce({
+        exec: jest.fn().mockResolvedValue(null),
+      })
+      .mockReturnValueOnce({
+        exec: jest.fn().mockResolvedValue({
+          email: identity.email,
+          passwordHash: 'password-hash',
+          emailVerified: true,
+        }),
+      });
+
+    await expect(
+      service.findOrCreateGoogleUser(identity),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(model.findByIdAndUpdate).not.toHaveBeenCalled();
+    expect(model).not.toHaveBeenCalled();
+  });
+
+  it('rejects silent linking to a legacy password account without emailVerified', async () => {
     const { service, model } = buildService();
     model.findOne
       .mockReturnValueOnce({
@@ -66,7 +89,53 @@ describe('UsersService Google identities', () => {
     await expect(
       service.findOrCreateGoogleUser(identity),
     ).rejects.toBeInstanceOf(ConflictException);
-    expect(model).not.toHaveBeenCalled();
+    expect(model.findByIdAndUpdate).not.toHaveBeenCalled();
+  });
+
+  it('recovers an unverified password squat by linking Google and unsetting the password', async () => {
+    const { service, model } = buildService();
+    const existing = {
+      _id: 'user-1',
+      email: identity.email,
+      name: 'Squatter',
+      passwordHash: 'password-hash',
+      emailVerified: false,
+      oauthProviders: [],
+    };
+    const claimed = {
+      ...existing,
+      emailVerified: true,
+      passwordHash: undefined,
+      oauthProviders: [{ provider: 'google', providerId: identity.providerId }],
+    };
+    model.findOne
+      .mockReturnValueOnce({
+        exec: jest.fn().mockResolvedValue(null),
+      })
+      .mockReturnValueOnce({
+        exec: jest.fn().mockResolvedValue(existing),
+      });
+    model.findByIdAndUpdate.mockReturnValue({
+      exec: jest.fn().mockResolvedValue(claimed),
+    });
+
+    await expect(service.findOrCreateGoogleUser(identity)).resolves.toBe(
+      claimed,
+    );
+    expect(model.findByIdAndUpdate).toHaveBeenCalledWith(
+      existing._id,
+      {
+        $set: {
+          emailVerified: true,
+          oauthProviders: [
+            { provider: 'google', providerId: identity.providerId },
+          ],
+          avatar: identity.avatar,
+        },
+        $unset: { passwordHash: 1 },
+      },
+      { new: true },
+    );
   });
 
   it('creates an OAuth-only user when provider and email are both new', async () => {
@@ -86,6 +155,7 @@ describe('UsersService Google identities', () => {
       email: identity.email,
       name: identity.name,
       avatar: identity.avatar,
+      emailVerified: true,
       oauthProviders: [{ provider: 'google', providerId: identity.providerId }],
     });
     expect(savedDocument.save).toHaveBeenCalled();

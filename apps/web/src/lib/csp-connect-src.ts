@@ -41,9 +41,30 @@ export function buildConnectSrcDirective(
   return Array.from(sources).join(" ");
 }
 
-export function contentSecurityPolicy(
-  ...connectUrls: Array<string | undefined>
+export function scriptSrcDirective(
+  nonce?: string,
+  nodeEnv: string | undefined = process.env.NODE_ENV,
 ): string {
+  // Nonce + `'strict-dynamic'` lets Next.js stamp its runtime scripts while
+  // ignoring host allowlists in CSP3 browsers. `'self'` remains as a
+  // fallback for browsers that do not understand `'strict-dynamic'`.
+  // `'unsafe-inline'` is intentionally omitted: it would let XSS run and
+  // read `session.accessToken` (API JWTs still live on the client session
+  // until a BFF/proxy follow-up can keep them server-side).
+  // React's development runtime still needs `'unsafe-eval'`; production does not.
+  const unsafeEval = nodeEnv === "development" ? " 'unsafe-eval'" : "";
+  if (nonce) {
+    return `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${unsafeEval}`;
+  }
+  return `script-src 'self'${unsafeEval}`;
+}
+
+export function contentSecurityPolicy(options?: {
+  nonce?: string;
+  connectUrls?: Array<string | undefined>;
+  nodeEnv?: string;
+}): string {
+  const connectUrls = options?.connectUrls ?? [];
   return [
     "default-src 'self'",
     "base-uri 'self'",
@@ -53,7 +74,7 @@ export function contentSecurityPolicy(
     `connect-src ${buildConnectSrcDirective(...connectUrls)}`,
     "img-src 'self' data: https://lh3.googleusercontent.com",
     "font-src 'self' data:",
-    "script-src 'self' 'unsafe-inline'",
+    scriptSrcDirective(options?.nonce, options?.nodeEnv),
     "style-src 'self' 'unsafe-inline'",
   ].join("; ");
 }

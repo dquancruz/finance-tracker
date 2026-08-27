@@ -48,6 +48,15 @@ test.describe("product landing page", () => {
     ).toHaveAttribute("href", "/register");
   });
 
+  test("keeps the landing page public and opens login", async ({ page }) => {
+    await expect(page).not.toHaveURL(/\/login/);
+    await page.getByRole("link", { name: "Sign in" }).first().click();
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+  });
+});
+
+test.describe("landing page security headers", () => {
   test("serves browser security headers", async ({ request }) => {
     const response = await request.get("/");
 
@@ -62,12 +71,33 @@ test.describe("product landing page", () => {
     expect(response.headers()["content-security-policy"]).toMatch(
       /connect-src[^;]*(ws:|wss:)/,
     );
+    const scriptSrc = response
+      .headers()
+      ["content-security-policy"]?.match(/script-src[^;]*/)?.[0];
+    expect(scriptSrc).toMatch(/'nonce-[A-Za-z0-9+/=]+'/);
+    expect(scriptSrc).toContain("'strict-dynamic'");
+    expect(scriptSrc).not.toContain("'unsafe-inline'");
   });
 
-  test("keeps the landing page public and opens login", async ({ page }) => {
-    await expect(page).not.toHaveURL(/\/login/);
-    await page.getByRole("link", { name: "Sign in" }).first().click();
-    await expect(page).toHaveURL(/\/login$/);
-    await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+  test("does not report CSP script violations on the landing page", async ({
+    page,
+  }) => {
+    const cspErrors: string[] = [];
+    page.on("console", (msg) => {
+      if (
+        msg.type() === "error" &&
+        /content security policy/i.test(msg.text())
+      ) {
+        cspErrors.push(msg.text());
+      }
+    });
+
+    await page.goto("/");
+    await expect(
+      page.getByRole("heading", {
+        name: "Know where your money goes—and what comes next.",
+      }),
+    ).toBeVisible();
+    expect(cspErrors).toEqual([]);
   });
 });

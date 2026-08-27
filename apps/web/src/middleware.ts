@@ -9,24 +9,28 @@ import { NextResponse } from "next/server";
 const PUBLIC_PATHS = ["/", "/login", "/register"];
 const AUTH_PATHS = ["/login", "/register"];
 
-function withConnectSrc(response: NextResponse, origin: string) {
+function createCspNonce(): string {
+  return Buffer.from(crypto.randomUUID()).toString("base64");
+}
+
+function buildCsp(origin: string, nonce: string): string {
   // Recompute CSP at request time so `ws:`/`wss:` origins are present even
-  // when NEXT_PUBLIC_* was unset at `next build`. Same-origin sockets are
-  // derived from the request origin; configured API/WS URLs still apply
-  // when the runtime (or the inlined build-time public env) has them.
-  response.headers.set(
-    "Content-Security-Policy",
-    contentSecurityPolicy(
+  // when NEXT_PUBLIC_* was unset at `next build`. A per-request nonce lets
+  // Next stamp its scripts without `script-src 'unsafe-inline'`.
+  return contentSecurityPolicy({
+    nonce,
+    connectUrls: [
       process.env.NEXT_PUBLIC_API_URL,
       process.env.NEXT_PUBLIC_WS_URL,
       origin,
-    ),
-  );
-  return response;
+    ],
+  });
 }
 
 export const middleware = auth((req) => {
   const { pathname } = req.nextUrl;
+  const nonce = createCspNonce();
+  const policy = buildCsp(req.nextUrl.origin, nonce);
 
   const isPublic =
     PUBLIC_PATHS.includes(pathname) ||
@@ -41,22 +45,29 @@ export const middleware = auth((req) => {
   if (!isPublic && !isAuthenticated) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
-    return withConnectSrc(
-      NextResponse.redirect(loginUrl),
-      req.nextUrl.origin,
-    );
+    const redirect = NextResponse.redirect(loginUrl);
+    redirect.headers.set("Content-Security-Policy", policy);
+    return redirect;
   }
 
   // Returning users and installed-PWA launches should enter the app, while
   // unauthenticated visitors can still discover the product at `/`.
   if (isAuthenticated && (pathname === "/" || AUTH_PATHS.includes(pathname))) {
-    return withConnectSrc(
-      NextResponse.redirect(new URL("/dashboard", req.url)),
-      req.nextUrl.origin,
-    );
+    const redirect = NextResponse.redirect(new URL("/dashboard", req.url));
+    redirect.headers.set("Content-Security-Policy", policy);
+    return redirect;
   }
 
-  return withConnectSrc(NextResponse.next(), req.nextUrl.origin);
+  // Next.js extracts the nonce from the *request* CSP header during SSR.
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("Content-Security-Policy", policy);
+
+  const response = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
+  response.headers.set("Content-Security-Policy", policy);
+  return response;
 });
 
 export const config = {

@@ -1,19 +1,13 @@
 import type { NextConfig } from "next";
-import { contentSecurityPolicy } from "./src/lib/csp-connect-src";
 
 const nextConfig: NextConfig = {
   async headers() {
+    // CSP is set in middleware with a per-request nonce. A static
+    // `script-src` here would AND with that policy and block nonce scripts.
     return [
       {
         source: "/(.*)",
         headers: [
-          {
-            key: "Content-Security-Policy",
-            value: contentSecurityPolicy(
-              process.env.NEXT_PUBLIC_API_URL,
-              process.env.NEXT_PUBLIC_WS_URL,
-            ),
-          },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
