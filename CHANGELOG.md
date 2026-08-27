@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.6] - 2026-08-27
+
+- chore(deps-dev): bump turbo from 2.10.2 to 2.10.11 (#28)
+
+
 ## [0.8.5] - 2026-08-27
 
 - chore(deps-dev): bump @playwright/test from 1.61.1 to 1.62.1 (#31)
