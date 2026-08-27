@@ -17,6 +17,8 @@ enum Environment {
   Test = 'test',
 }
 
+const KNOWN_EXAMPLE_SECRETS = new Set(['change-me-to-a-random-32-char-string']);
+
 /**
  * Startup env validation. Fails fast (throws before Nest finishes
  * bootstrapping) instead of letting a misconfigured deploy start with a
@@ -92,6 +94,15 @@ export function validate(
   ) {
     throw new Error(
       'CORS_ORIGIN must be explicitly set when NODE_ENV=production (no wildcard fallback in production)',
+    );
+  }
+
+  if (
+    validatedConfig.NODE_ENV === Environment.Production &&
+    KNOWN_EXAMPLE_SECRETS.has(validatedConfig.JWT_SECRET)
+  ) {
+    throw new Error(
+      'JWT_SECRET must not use the documented example value in production',
     );
   }
 

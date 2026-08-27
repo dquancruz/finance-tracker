@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { RealtimeGateway } from './realtime.gateway';
+import { isSocketOriginAllowed, RealtimeGateway } from './realtime.gateway';
 
 function buildSocket(overrides: Record<string, unknown> = {}) {
   return {
@@ -155,5 +155,31 @@ describe('RealtimeGateway', () => {
         expenseId: 'exp-1',
       });
     });
+  });
+});
+
+describe('isSocketOriginAllowed', () => {
+  it('allows only configured browser origins in production', () => {
+    const configured = 'https://app.example.com, https://admin.example.com';
+
+    expect(
+      isSocketOriginAllowed('https://app.example.com', configured, true),
+    ).toBe(true);
+    expect(
+      isSocketOriginAllowed('https://attacker.example', configured, true),
+    ).toBe(false);
+  });
+
+  it('fails closed for browser origins when production has no allowlist', () => {
+    expect(
+      isSocketOriginAllowed('https://app.example.com', undefined, true),
+    ).toBe(false);
+  });
+
+  it('allows origin-less clients and development origins', () => {
+    expect(isSocketOriginAllowed(undefined, undefined, true)).toBe(true);
+    expect(
+      isSocketOriginAllowed('http://localhost:3000', undefined, false),
+    ).toBe(true);
   });
 });

@@ -20,6 +20,25 @@ interface AuthenticatedSocketData {
 
 const ANALYTICS_REFRESH_DEBOUNCE_MS = 500;
 
+export function isSocketOriginAllowed(
+  origin: string | undefined,
+  configuredOrigins: string | undefined,
+  isProduction: boolean,
+): boolean {
+  // Native/non-browser clients do not send Origin and still authenticate with
+  // a signed bearer token.
+  if (!origin) return true;
+
+  const allowedOrigins = (configuredOrigins ?? '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  return allowedOrigins.length > 0
+    ? allowedOrigins.includes(origin)
+    : !isProduction;
+}
+
 /**
  * Real-time gateway — every authenticated socket joins a per-user room
  * (`user:{userId}`), so all emits are scoped to that user only.
@@ -31,7 +50,18 @@ const ANALYTICS_REFRESH_DEBOUNCE_MS = 500;
  * `installment:paid`, `analytics:refresh` (debounced 500ms per user),
  * `budget:alert`, `recurring:due_soon`.
  */
-@WebSocketGateway({ cors: { origin: '*' } })
+@WebSocketGateway({
+  cors: {
+    origin: (origin, callback) => {
+      const allowed = isSocketOriginAllowed(
+        origin,
+        process.env['CORS_ORIGIN'],
+        process.env['NODE_ENV'] === 'production',
+      );
+      callback(null, allowed);
+    },
+  },
+})
 export class RealtimeGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
