@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
-import type { User } from "next-auth";
+import { isApiAuthResponse, type ApiAuthResponse } from "./api-auth-response";
 import { assertProductionAuthSecret } from "./auth-secret";
 
 assertProductionAuthSecret(
@@ -21,8 +21,22 @@ declare module "next-auth" {
   }
 }
 
-interface ApiAuthResponse {
-  user: User & { accessToken: string };
+async function exchangeGoogleToken(idToken: string): Promise<ApiAuthResponse> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!apiUrl) throw new Error("NEXT_PUBLIC_API_URL is not configured");
+
+  const response = await fetch(`${apiUrl}/auth/google`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ idToken }),
+    cache: "no-store",
+  });
+  if (!response.ok) throw new Error("Google API identity exchange failed");
+  const body: unknown = await response.json();
+  if (!isApiAuthResponse(body)) {
+    throw new Error("Google API identity exchange returned an invalid user");
+  }
+  return body;
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -50,8 +64,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           if (!res.ok) return null;
 
-          const data = (await res.json()) as ApiAuthResponse;
-          return data.user ?? null;
+          const data: unknown = await res.json();
+          return isApiAuthResponse(data) ? data.user : null;
         } catch {
           return null;
         }
@@ -63,8 +77,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider !== "google") return true;
+      if (!account.id_token) return false;
+
+      try {
+        const data = await exchangeGoogleToken(account.id_token);
+        if (!isApiAuthResponse(data)) return false;
+        user.id = data.user.id;
+        user.accessToken = data.user.accessToken;
+        return true;
+      } catch {
+        return false;
+      }
+    },
     async jwt({ token, user }) {
-      if (user?.accessToken) {
+      if (user?.id) token.sub = user.id;
+      if (typeof user?.accessToken === "string") {
         token["accessToken"] = user.accessToken;
       }
       return token;
