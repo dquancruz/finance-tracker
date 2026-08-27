@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
-import type { ExpenseFilters } from '../expense-query';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import type { ExpenseFilters } from "../expense-query";
 import {
   createExpense,
   deleteExpense,
@@ -14,17 +14,18 @@ import {
   updateExpense,
   type CreateExpenseInput,
   type UpdateExpenseInput,
-} from '../api/expenses';
+} from "../api/expenses";
 
-const EXPENSES_KEY = ['expenses'] as const;
-const UPCOMING_RECURRING_KEY = ['expenses', 'recurring', 'upcoming'] as const;
+const EXPENSES_KEY = ["expenses"] as const;
+const UPCOMING_RECURRING_KEY = ["expenses", "recurring", "upcoming"] as const;
 
 export function useExpenses(filters: ExpenseFilters) {
   const { data: session } = useSession();
   const token = session?.accessToken;
+  const identity = session?.user?.email;
 
   return useQuery({
-    queryKey: [...EXPENSES_KEY, filters],
+    queryKey: [...EXPENSES_KEY, identity, filters],
     queryFn: () => fetchExpenses(filters, token),
     enabled: Boolean(token),
     placeholderData: (previous) => previous,
@@ -34,9 +35,10 @@ export function useExpenses(filters: ExpenseFilters) {
 export function useExpense(id: string | undefined) {
   const { data: session } = useSession();
   const token = session?.accessToken;
+  const identity = session?.user?.email;
 
   return useQuery({
-    queryKey: [...EXPENSES_KEY, id],
+    queryKey: [...EXPENSES_KEY, identity, id],
     queryFn: () => fetchExpense(id!, token),
     enabled: Boolean(token) && Boolean(id),
   });
@@ -45,9 +47,10 @@ export function useExpense(id: string | undefined) {
 export function useUpcomingRecurring(withinDays?: number) {
   const { data: session } = useSession();
   const token = session?.accessToken;
+  const identity = session?.user?.email;
 
   return useQuery({
-    queryKey: [...UPCOMING_RECURRING_KEY, withinDays],
+    queryKey: [...UPCOMING_RECURRING_KEY, identity, withinDays],
     queryFn: () => fetchUpcomingRecurring(withinDays, token),
     enabled: Boolean(token),
   });
