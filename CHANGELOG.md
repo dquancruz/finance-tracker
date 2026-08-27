@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.2] - 2026-08-27
+
+- fix(security): address QA review and restore public landing and login (#24)
+
+
 ## [0.8.1] - 2026-08-27
 
 - fix(security): harden authentication boundaries (#19)
