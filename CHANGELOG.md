@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.7] - 2026-08-27
+
+- chore(deps-dev): bump prettier from 3.9.4 to 3.9.6 (#32)
+
+
 ## [0.8.6] - 2026-08-27
 
 - chore(deps-dev): bump turbo from 2.10.2 to 2.10.11 (#28)
