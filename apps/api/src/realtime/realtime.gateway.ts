@@ -8,7 +8,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import type { IncomingMessage } from 'node:http';
-import type { Server, ServerOptions, Socket } from 'socket.io';
+import type { Server, Socket } from 'socket.io';
 
 interface JwtPayload {
   sub: string;
@@ -40,44 +40,41 @@ export function isSocketOriginAllowed(
     : !isProduction;
 }
 
-interface SocketOriginConfig {
-  configuredOrigins: string | undefined;
-  isProduction: boolean;
+/**
+ * Decorator options run before Nest DI, so this reads the same process.env
+ * values `ConfigService` exposes after `env.validation` has already run.
+ */
+export function isConfiguredSocketOriginAllowed(
+  origin: string | undefined,
+): boolean {
+  return isSocketOriginAllowed(
+    origin,
+    process.env['CORS_ORIGIN'],
+    process.env['NODE_ENV'] === 'production',
+  );
 }
 
-export function createSocketOriginPolicy(
-  getConfig: () => SocketOriginConfig,
-): Pick<ServerOptions, 'cors' | 'allowRequest'> {
-  const isAllowed = (origin: string | undefined) => {
-    const config = getConfig();
-    return isSocketOriginAllowed(
-      origin,
-      config.configuredOrigins,
-      config.isProduction,
-    );
-  };
+/**
+ * Socket.IO `cors.origin` only sets HTTP polling headers. Browsers skip CORS
+ * on WebSocket upgrades, so origin policy must also run in `allowRequest`.
+ */
+export function allowSocketHandshake(
+  req: Pick<IncomingMessage, 'headers'>,
+  callback: (err: string | null, allowed: boolean) => void,
+): void {
+  callback(
+    null,
+    isConfiguredSocketOriginAllowed(readOriginHeader(req.headers)),
+  );
+}
 
-  return {
-    // CORS protects Socket.IO's HTTP long-polling transport.
-    cors: {
-      origin: (origin, callback) => callback(null, isAllowed(origin)),
-    },
-    // Browsers do not apply CORS to WebSocket upgrades. allowRequest is the
-    // server-side admission check that protects websocket-only clients.
-    allowRequest: (
-      request: IncomingMessage,
-      callback: (error: string | null | undefined, success: boolean) => void,
-    ) => {
-      const header: unknown = request.headers.origin;
-      const origin =
-        typeof header === 'string'
-          ? header
-          : Array.isArray(header) && typeof header[0] === 'string'
-            ? header[0]
-            : undefined;
-      callback(null, isAllowed(origin));
-    },
-  };
+function readOriginHeader(
+  headers: IncomingMessage['headers'],
+): string | undefined {
+  const value: unknown = headers.origin;
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value) && typeof value[0] === 'string') return value[0];
+  return undefined;
 }
 
 /**
@@ -91,14 +88,14 @@ export function createSocketOriginPolicy(
  * `installment:paid`, `analytics:refresh` (debounced 500ms per user),
  * `budget:alert`, `recurring:due_soon`.
  */
-@WebSocketGateway(
-  createSocketOriginPolicy(() => ({
-    // These callbacks execute when a request arrives, after ConfigModule has
-    // loaded and validated the same process environment used by ConfigService.
-    configuredOrigins: process.env['CORS_ORIGIN'],
-    isProduction: process.env['NODE_ENV'] === 'production',
-  })),
-)
+@WebSocketGateway({
+  cors: {
+    origin: (origin, callback) => {
+      callback(null, isConfiguredSocketOriginAllowed(origin));
+    },
+  },
+  allowRequest: allowSocketHandshake,
+})
 export class RealtimeGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
