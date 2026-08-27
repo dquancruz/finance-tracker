@@ -1,8 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { createServer, request } from 'node:http';
+import type { AddressInfo } from 'node:net';
+import { Server } from 'socket.io';
 import { UsersService } from '../users/users.service';
-import { isSocketOriginAllowed, RealtimeGateway } from './realtime.gateway';
+import {
+  allowSocketHandshake,
+  isSocketOriginAllowed,
+  RealtimeGateway,
+} from './realtime.gateway';
 
 function buildSocket(overrides: Record<string, unknown> = {}) {
   return {
@@ -208,3 +215,118 @@ describe('isSocketOriginAllowed', () => {
     ).toBe(true);
   });
 });
+
+describe('allowSocketHandshake', () => {
+  const originalNodeEnv = process.env['NODE_ENV'];
+  const originalCorsOrigin = process.env['CORS_ORIGIN'];
+
+  afterEach(() => {
+    if (originalNodeEnv === undefined) {
+      delete process.env['NODE_ENV'];
+    } else {
+      process.env['NODE_ENV'] = originalNodeEnv;
+    }
+
+    if (originalCorsOrigin === undefined) {
+      delete process.env['CORS_ORIGIN'];
+    } else {
+      process.env['CORS_ORIGIN'] = originalCorsOrigin;
+    }
+  });
+
+  it('refuses a handshake whose Origin is not on the production allowlist', () => {
+    process.env['NODE_ENV'] = 'production';
+    process.env['CORS_ORIGIN'] = 'https://app.example.com';
+
+    const callback = jest.fn();
+    allowSocketHandshake(
+      { headers: { origin: 'https://attacker.example' } },
+      callback,
+    );
+
+    expect(callback).toHaveBeenCalledWith(null, false);
+  });
+
+  it('accepts a handshake from an allowlisted Origin', () => {
+    process.env['NODE_ENV'] = 'production';
+    process.env['CORS_ORIGIN'] = 'https://app.example.com';
+
+    const callback = jest.fn();
+    allowSocketHandshake(
+      { headers: { origin: 'https://app.example.com' } },
+      callback,
+    );
+
+    expect(callback).toHaveBeenCalledWith(null, true);
+  });
+});
+
+describe('Socket.IO handshake origin enforcement', () => {
+  const originalNodeEnv = process.env['NODE_ENV'];
+  const originalCorsOrigin = process.env['CORS_ORIGIN'];
+
+  afterEach(() => {
+    if (originalNodeEnv === undefined) {
+      delete process.env['NODE_ENV'];
+    } else {
+      process.env['NODE_ENV'] = originalNodeEnv;
+    }
+
+    if (originalCorsOrigin === undefined) {
+      delete process.env['CORS_ORIGIN'];
+    } else {
+      process.env['CORS_ORIGIN'] = originalCorsOrigin;
+    }
+  });
+
+  it('refuses a polling handshake with a disallowed Origin', async () => {
+    process.env['NODE_ENV'] = 'production';
+    process.env['CORS_ORIGIN'] = 'https://app.example.com';
+
+    const status = await handshakeStatus('https://attacker.example');
+    expect(status).toBeGreaterThanOrEqual(400);
+    expect(status).toBeLessThan(500);
+  });
+
+  it('accepts a polling handshake with an allowlisted Origin', async () => {
+    process.env['NODE_ENV'] = 'production';
+    process.env['CORS_ORIGIN'] = 'https://app.example.com';
+
+    const status = await handshakeStatus('https://app.example.com');
+    expect(status).toBe(200);
+  });
+});
+
+async function handshakeStatus(origin: string): Promise<number> {
+  const httpServer = createServer();
+  const io = new Server(httpServer, {
+    allowRequest: allowSocketHandshake,
+    cors: { origin: false },
+  });
+
+  try {
+    await new Promise<void>((resolve) => {
+      httpServer.listen(0, '127.0.0.1', resolve);
+    });
+    const { port } = httpServer.address() as AddressInfo;
+
+    return await new Promise<number>((resolve, reject) => {
+      const req = request(
+        {
+          hostname: '127.0.0.1',
+          port,
+          path: '/socket.io/?EIO=4&transport=polling',
+          headers: { origin },
+        },
+        (res) => {
+          res.resume();
+          resolve(res.statusCode ?? 0);
+        },
+      );
+      req.on('error', reject);
+      req.end();
+    });
+  } finally {
+    await io.close();
+  }
+}

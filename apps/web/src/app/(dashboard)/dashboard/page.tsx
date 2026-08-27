@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { signOut, useSession } from "next-auth/react";
+import { getDashboardView } from "@/lib/dashboard-view";
 import { useDashboardSummary } from "@/lib/hooks/use-analytics";
 import { BudgetStatusCards } from "../_components/budget-status-cards";
 import { SummaryCards } from "../_components/summary-cards";
@@ -62,18 +63,7 @@ const CategoryBreakdownChart = dynamic(
   },
 );
 
-export default function DashboardPage() {
-  const { data: session, status } = useSession();
-  const {
-    data: summary,
-    isLoading,
-    isError,
-    isFetching,
-    refetch,
-  } = useDashboardSummary();
-
-  const missingApiToken = status === "authenticated" && !session?.accessToken;
-
+function PageShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="px-4 py-8 sm:px-6">
       <header className="mb-8">
@@ -84,10 +74,40 @@ export default function DashboardPage() {
           Your financial overview
         </p>
       </header>
+      {children}
+    </div>
+  );
+}
 
-      {(status === "loading" || isLoading) && <DashboardSkeleton />}
+export default function DashboardPage() {
+  const { data: session, status } = useSession();
+  const {
+    data: summary,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useDashboardSummary();
 
-      {missingApiToken && (
+  const view = getDashboardView({
+    sessionStatus: status,
+    hasAccessToken: Boolean(session?.accessToken),
+    isLoading,
+    isError,
+    hasSummary: Boolean(summary),
+  });
+
+  if (view === "loading") {
+    return (
+      <PageShell>
+        <DashboardSkeleton />
+      </PageShell>
+    );
+  }
+
+  if (view === "reauth") {
+    return (
+      <PageShell>
         <div
           role="alert"
           className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200"
@@ -108,9 +128,13 @@ export default function DashboardPage() {
             Sign in again
           </button>
         </div>
-      )}
+      </PageShell>
+    );
+  }
 
-      {isError && !missingApiToken && (
+  if (view === "error") {
+    return (
+      <PageShell>
         <div
           role="alert"
           className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
@@ -128,29 +152,26 @@ export default function DashboardPage() {
             {isFetching ? "Retrying…" : "Try again"}
           </button>
         </div>
-      )}
+      </PageShell>
+    );
+  }
 
-      {summary && (
-        <>
-          <SummaryCards summary={summary} />
+  // getDashboardView only returns "ready" when a summary is present.
+  if (!summary) return null;
 
-          <section
-            aria-label="Charts"
-            className="mt-6 grid gap-6 lg:grid-cols-2"
-          >
-            <MonthlyTrendChart trends={summary.monthlyTrends} />
-            <CategoryBreakdownChart breakdown={summary.categoryBreakdown} />
-          </section>
+  return (
+    <PageShell>
+      <SummaryCards summary={summary} />
 
-          <section
-            aria-label="Details"
-            className="mt-6 grid gap-6 lg:grid-cols-2"
-          >
-            <BudgetStatusCards budgetStatus={summary.budgetStatus} />
-            <UpcomingPaymentsList payments={summary.upcomingPayments} />
-          </section>
-        </>
-      )}
-    </div>
+      <section aria-label="Charts" className="mt-6 grid gap-6 lg:grid-cols-2">
+        <MonthlyTrendChart trends={summary.monthlyTrends} />
+        <CategoryBreakdownChart breakdown={summary.categoryBreakdown} />
+      </section>
+
+      <section aria-label="Details" className="mt-6 grid gap-6 lg:grid-cols-2">
+        <BudgetStatusCards budgetStatus={summary.budgetStatus} />
+        <UpcomingPaymentsList payments={summary.upcomingPayments} />
+      </section>
+    </PageShell>
   );
 }
