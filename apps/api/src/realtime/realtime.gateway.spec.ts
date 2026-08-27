@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { UsersService } from '../users/users.service';
 import { isSocketOriginAllowed, RealtimeGateway } from './realtime.gateway';
 
 function buildSocket(overrides: Record<string, unknown> = {}) {
@@ -19,11 +20,15 @@ describe('RealtimeGateway', () => {
   let jwtService: { verify: jest.Mock };
   let emitMock: jest.Mock;
   let toMock: jest.Mock;
+  let findUserById: jest.Mock;
 
   beforeEach(async () => {
     jwtService = { verify: jest.fn() };
     emitMock = jest.fn();
     toMock = jest.fn().mockReturnValue({ emit: emitMock });
+    findUserById = jest.fn().mockResolvedValue({
+      email: 'a@b.com',
+    });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -32,6 +37,10 @@ describe('RealtimeGateway', () => {
         {
           provide: ConfigService,
           useValue: { get: jest.fn().mockReturnValue('secret') },
+        },
+        {
+          provide: UsersService,
+          useValue: { findById: findUserById },
         },
       ],
     }).compile();
@@ -92,6 +101,22 @@ describe('RealtimeGateway', () => {
       await gateway.handleConnection(socket as never);
 
       expect(socket.disconnect).toHaveBeenCalledWith(true);
+    });
+
+    it('disconnects a valid token when the account is no longer active', async () => {
+      jwtService.verify.mockReturnValue({
+        sub: 'deleted-user',
+        email: 'a@b.com',
+      });
+      findUserById.mockResolvedValue(null);
+      const socket = buildSocket({
+        handshake: { auth: { token: 'valid-token' }, headers: {} },
+      });
+
+      await gateway.handleConnection(socket as never);
+
+      expect(socket.disconnect).toHaveBeenCalledWith(true);
+      expect(socket.join).not.toHaveBeenCalled();
     });
   });
 

@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { CategoriesService } from '../categories/categories.service';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { ExpensesService } from './expenses.service';
 import { Expense } from './schemas/expense.schema';
@@ -30,6 +31,7 @@ describe('ExpensesService', () => {
     countDocuments: jest.Mock;
     discriminators: Record<string, jest.Mock>;
   };
+  let findCategoryForUser: jest.Mock;
 
   beforeEach(async () => {
     modelMock = {
@@ -42,11 +44,16 @@ describe('ExpensesService', () => {
         installment: buildDiscriminatorCtor(),
       },
     };
+    findCategoryForUser = jest.fn().mockResolvedValue({ _id: 'cat-1' });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ExpensesService,
         { provide: getModelToken(Expense.name), useValue: modelMock },
+        {
+          provide: CategoriesService,
+          useValue: { findOneForUser: findCategoryForUser },
+        },
         {
           provide: RealtimeGateway,
           useValue: {
@@ -74,6 +81,7 @@ describe('ExpensesService', () => {
       expect(modelMock.discriminators.simple).toHaveBeenCalledWith(
         expect.objectContaining({ userId: 'user-1', amount: 42 }),
       );
+      expect(findCategoryForUser).toHaveBeenCalledWith('cat-1', 'user-1');
       expect((doc as unknown as MockDoc).save).toHaveBeenCalled();
     });
 

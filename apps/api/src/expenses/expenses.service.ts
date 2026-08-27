@@ -11,6 +11,7 @@ import {
   daysUntilDue,
 } from '@finance-tracker/finance-utils';
 import type { ExpenseType } from '@finance-tracker/shared';
+import { CategoriesService } from '../categories/categories.service';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
 import {
   AnyExpenseDocument,
@@ -40,6 +41,7 @@ export class ExpensesService {
   constructor(
     @InjectModel(Expense.name)
     private readonly expenseModel: Model<ExpenseDocument>,
+    private readonly categoriesService: CategoriesService,
     private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
@@ -56,6 +58,8 @@ export class ExpensesService {
     userId: string,
     dto: CreateExpenseDto,
   ): Promise<AnyExpenseDocument> {
+    await this.categoriesService.findOneForUser(dto.categoryId, userId);
+
     const common = {
       userId,
       categoryId: dto.categoryId,
@@ -179,7 +183,10 @@ export class ExpensesService {
   ): Promise<AnyExpenseDocument> {
     const expense = await this.findOneForUser(id, userId);
 
-    if (dto.categoryId !== undefined) expense.categoryId = dto.categoryId;
+    if (dto.categoryId !== undefined) {
+      await this.categoriesService.findOneForUser(dto.categoryId, userId);
+      expense.categoryId = dto.categoryId;
+    }
     if (dto.currency !== undefined) expense.currency = dto.currency;
     if (dto.notes !== undefined) expense.notes = dto.notes;
 
