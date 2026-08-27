@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CategoriesModule } from '../categories/categories.module';
 import { RealtimeModule } from '../realtime/realtime.module';
 import { ExpensesController } from './expenses.controller';
 import { ExpensesService } from './expenses.service';
@@ -29,6 +30,7 @@ import {
         ],
       },
     ]),
+    CategoriesModule,
     RealtimeModule,
   ],
   controllers: [ExpensesController],

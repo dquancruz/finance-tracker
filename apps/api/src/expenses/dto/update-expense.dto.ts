@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  MaxLength,
   Min,
   MinLength,
 } from 'class-validator';
@@ -21,10 +22,12 @@ export class UpdateCommonExpenseDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(3)
   currency?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(1000)
   notes?: string;
 }
 
@@ -43,6 +46,7 @@ export class UpdateRecurringExpenseDto extends UpdateCommonExpenseDto {
   @IsOptional()
   @IsString()
   @MinLength(1)
+  @MaxLength(200)
   description?: string;
 
   @IsOptional()
@@ -66,6 +70,7 @@ export class UpdateInstallmentExpenseDto extends UpdateCommonExpenseDto {
   @IsOptional()
   @IsString()
   @MinLength(1)
+  @MaxLength(200)
   description?: string;
 
   @IsOptional()

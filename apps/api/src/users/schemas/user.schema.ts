@@ -31,6 +31,15 @@ export class User {
   @Prop({ type: [OAuthProviderSchema], default: [] })
   oauthProviders: OAuthProvider[];
 
+  /**
+   * Password registration does not prove email ownership. Google ID tokens
+   * do (`email_verified`). New password signups set this to `false` so a
+   * later verified Google sign-in can recover the squat. Legacy documents
+   * without the field are treated as already claimed (not recoverable).
+   */
+  @Prop({ default: false })
+  emailVerified: boolean;
+
   @Prop({ default: 'USD' })
   defaultCurrency: string;
 

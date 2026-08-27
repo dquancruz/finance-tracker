@@ -6,21 +6,21 @@ A full-stack personal finance tracker with expense management, recurring payment
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Monorepo | Turborepo |
-| Frontend | Next.js 15 (App Router), React 19, Tailwind CSS v4 |
-| UI Components | shadcn/ui (`@finance-tracker/ui`) |
-| Auth | NextAuth.js v5 (credentials + Google OAuth) |
-| State & Data | TanStack Query v5, Zustand |
-| Backend | NestJS 11 |
-| Database | MongoDB Atlas (Mongoose) |
-| Password Hashing | argon2id |
-| Real-time | Socket.io |
-| Charts | Recharts |
-| Testing | Jest (API + packages), Vitest (web) |
-| CI/CD | GitHub Actions |
-| Infra | AWS + CDK (planned) |
+| Layer            | Technology                                         |
+| ---------------- | -------------------------------------------------- |
+| Monorepo         | Turborepo                                          |
+| Frontend         | Next.js 16 (App Router), React 19, Tailwind CSS v4 |
+| UI Components    | shadcn/ui (`@finance-tracker/ui`)                  |
+| Auth             | NextAuth.js v5 (credentials + Google OAuth)        |
+| State & Data     | TanStack Query v5, Zustand                         |
+| Backend          | NestJS 11                                          |
+| Database         | MongoDB Atlas (Mongoose)                           |
+| Password Hashing | argon2id                                           |
+| Real-time        | Socket.io                                          |
+| Charts           | Recharts                                           |
+| Testing          | Jest (API + packages), Vitest (web)                |
+| CI/CD            | GitHub Actions                                     |
+| Infra            | AWS + CDK (planned)                                |
 
 ---
 
@@ -37,7 +37,8 @@ finance-tracker/
 │       └── src/
 │           ├── app/
 │           │   ├── (auth)/   # Login and register pages
-│           │   └── (dashboard)/ # Protected dashboard pages
+│           │   ├── (dashboard)/ # Protected app pages at /dashboard
+│           │   └── (marketing)/ # Public product landing page at /
 │           ├── components/   # Shared React components
 │           └── lib/          # NextAuth config, API client
 ├── packages/
@@ -80,6 +81,7 @@ cp apps/web/.env.example apps/web/.env.local
 ```
 MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/finance-tracker
 JWT_SECRET=<random 32+ character string>
+GOOGLE_CLIENT_ID=<your Google OAuth client ID>
 PORT=3001
 ```
 
@@ -112,17 +114,17 @@ The web app will be at `http://localhost:3000` and the API at `http://localhost:
 
 Run from the monorepo root:
 
-| Script | Description |
-|---|---|
-| `npm run dev` | Start all apps in watch mode |
-| `npm run build` | Build all apps and packages |
-| `npm run test` | Run all test suites |
-| `npm run lint` | Lint all workspaces |
-| `npm run type-check` | TypeScript type-check all workspaces |
-| `npm run auto-commit` | Automated commit helper |
-| `npm run auto-pr` | Automated PR creation |
-| `npm run auto-jira` | Create Jira tickets from CLI |
-| `npm run dashboard` | Show project progress dashboard |
+| Script                | Description                          |
+| --------------------- | ------------------------------------ |
+| `npm run dev`         | Start all apps in watch mode         |
+| `npm run build`       | Build all apps and packages          |
+| `npm run test`        | Run all test suites                  |
+| `npm run lint`        | Lint all workspaces                  |
+| `npm run type-check`  | TypeScript type-check all workspaces |
+| `npm run auto-commit` | Automated commit helper              |
+| `npm run auto-pr`     | Automated PR creation                |
+| `npm run auto-jira`   | Create Jira tickets from CLI         |
+| `npm run dashboard`   | Show project progress dashboard      |
 
 ---
 
@@ -131,10 +133,10 @@ Run from the monorepo root:
 See [PHASES.md](./PHASES.md) for a full breakdown of what is built in each phase and what is planned.
 
 - **Phase 1** — Foundation & Authentication (complete)
-- **Phase 2** — Expense & Category CRUD (planned)
-- **Phase 3** — Analytics & Dashboard Data (planned)
-- **Phase 4** — Real-time & Notifications (planned)
-- **Phase 5** — Polish & Production (planned)
+- **Phase 2** — Expense & Category CRUD (complete)
+- **Phase 3** — Analytics & Dashboard Data (complete)
+- **Phase 4** — Real-time & Notifications (complete)
+- **Phase 5** — Product experience, security, and assurance (complete)
 
 ---
 

@@ -16,15 +16,35 @@ describe("assertProductionAuthSecret", () => {
     ).not.toThrow();
   });
 
-  it("allows a non-example secret in production", () => {
+  it("allows a non-example secret of sufficient length in production", () => {
     expect(() =>
       assertProductionAuthSecret("a".repeat(32), "production"),
     ).not.toThrow();
   });
 
-  it("does not throw when the secret is unset", () => {
+  it("rejects an unset or short secret when the production server boots", () => {
     expect(() =>
       assertProductionAuthSecret(undefined, "production"),
+    ).toThrow(/at least 32 characters/);
+    expect(() =>
+      assertProductionAuthSecret("short-secret", "production"),
+    ).toThrow(/at least 32 characters/);
+    expect(() =>
+      assertProductionAuthSecret(
+        undefined,
+        "production",
+        "phase-production-server",
+      ),
+    ).toThrow(/at least 32 characters/);
+  });
+
+  it("does not throw during next build when the secret is not yet available", () => {
+    expect(() =>
+      assertProductionAuthSecret(
+        undefined,
+        "production",
+        "phase-production-build",
+      ),
     ).not.toThrow();
   });
 });

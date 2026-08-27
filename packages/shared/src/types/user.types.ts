@@ -10,6 +10,7 @@ export interface IUser {
   name: string;
   avatar?: string;
   oauthProviders: IOAuthProvider[];
+  emailVerified?: boolean;
   defaultCurrency: string;
   timezone: string;
   createdAt: Date;
