@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.4] - 2026-08-27
+
+- chore(deps): bump the production-patches group with 7 updates (#26)
+- Merge pull request #30 from dquancruz/dependabot/npm_and_yarn/tailwindcss/postcss-4.3.3
+- chore(deps-dev): bump @tailwindcss/postcss from 4.3.2 to 4.3.3
+
+
 ## [0.8.3] - 2026-08-27
 
 - chore(deps-dev): bump @nestjs/testing from 11.1.27 to 11.2.1 (#29)
