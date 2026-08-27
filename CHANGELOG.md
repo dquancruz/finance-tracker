@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.5] - 2026-08-27
+
+- chore(deps-dev): bump @playwright/test from 1.61.1 to 1.62.1 (#31)
+
+
 ## [0.8.4] - 2026-08-27
 
 - chore(deps): bump the production-patches group with 7 updates (#26)
