@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.8] - 2026-08-27
+
+- Merge pull request #33 from dquancruz/dependabot/npm_and_yarn/globals-17.11.0
+- chore(deps-dev): bump globals from 17.7.0 to 17.11.0
+
+
 ## [0.8.7] - 2026-08-27
 
 - chore(deps-dev): bump prettier from 3.9.4 to 3.9.6 (#32)
