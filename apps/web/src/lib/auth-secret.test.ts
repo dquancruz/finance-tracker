@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { assertProductionAuthSecret } from "./auth-secret";
 
-const EXAMPLE_SECRET = "change-me-to-a-random-32-char-string";
+const DOCUMENTED_PLACEHOLDER = "change-me-to-a-random-32-char-string";
 
 describe("assertProductionAuthSecret", () => {
   it("rejects the documented example secret in production", () => {
     expect(() =>
-      assertProductionAuthSecret(EXAMPLE_SECRET, "production"),
+      assertProductionAuthSecret(DOCUMENTED_PLACEHOLDER, "production"),
     ).toThrow(/example value/);
   });
 
   it("allows the example secret outside production", () => {
     expect(() =>
-      assertProductionAuthSecret(EXAMPLE_SECRET, "development"),
+      assertProductionAuthSecret(DOCUMENTED_PLACEHOLDER, "development"),
     ).not.toThrow();
   });
 
