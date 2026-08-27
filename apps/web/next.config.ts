@@ -1,31 +1,18 @@
 import type { NextConfig } from "next";
-import { buildConnectSrcDirective } from "./src/lib/csp-connect-src";
+import { contentSecurityPolicy } from "./src/lib/csp-connect-src";
 
 const nextConfig: NextConfig = {
   async headers() {
-    const connectSources = buildConnectSrcDirective(
-      process.env.NEXT_PUBLIC_API_URL,
-      process.env.NEXT_PUBLIC_WS_URL,
-    );
-
     return [
       {
         source: "/(.*)",
         headers: [
           {
             key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              "base-uri 'self'",
-              "object-src 'none'",
-              "frame-ancestors 'none'",
-              "form-action 'self' https://accounts.google.com",
-              `connect-src ${connectSources}`,
-              "img-src 'self' data: https://lh3.googleusercontent.com",
-              "font-src 'self' data:",
-              "script-src 'self' 'unsafe-inline'",
-              "style-src 'self' 'unsafe-inline'",
-            ].join("; "),
+            value: contentSecurityPolicy(
+              process.env.NEXT_PUBLIC_API_URL,
+              process.env.NEXT_PUBLIC_WS_URL,
+            ),
           },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Content-Type-Options", value: "nosniff" },

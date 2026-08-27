@@ -38,4 +38,10 @@ describe("buildConnectSrcDirective", () => {
       ),
     ).toBe("'self' http://localhost:3001 ws://localhost:3001");
   });
+
+  it("includes explicit ws/wss for the page origin when env URLs are unset", () => {
+    expect(buildConnectSrcDirective("http://127.0.0.1:3100")).toContain(
+      "ws://127.0.0.1:3100",
+    );
+  });
 });

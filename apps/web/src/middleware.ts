@@ -3,10 +3,27 @@
  * Protects all dashboard routes and redirects unauthenticated users to /login.
  */
 import { auth } from "@/lib/auth";
+import { contentSecurityPolicy } from "@/lib/csp-connect-src";
 import { NextResponse } from "next/server";
 
 const PUBLIC_PATHS = ["/", "/login", "/register"];
 const AUTH_PATHS = ["/login", "/register"];
+
+function withConnectSrc(response: NextResponse, origin: string) {
+  // Recompute CSP at request time so `ws:`/`wss:` origins are present even
+  // when NEXT_PUBLIC_* was unset at `next build`. Same-origin sockets are
+  // derived from the request origin; configured API/WS URLs still apply
+  // when the runtime (or the inlined build-time public env) has them.
+  response.headers.set(
+    "Content-Security-Policy",
+    contentSecurityPolicy(
+      process.env.NEXT_PUBLIC_API_URL,
+      process.env.NEXT_PUBLIC_WS_URL,
+      origin,
+    ),
+  );
+  return response;
+}
 
 export const middleware = auth((req) => {
   const { pathname } = req.nextUrl;
@@ -24,16 +41,22 @@ export const middleware = auth((req) => {
   if (!isPublic && !isAuthenticated) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(loginUrl);
+    return withConnectSrc(
+      NextResponse.redirect(loginUrl),
+      req.nextUrl.origin,
+    );
   }
 
   // Returning users and installed-PWA launches should enter the app, while
   // unauthenticated visitors can still discover the product at `/`.
   if (isAuthenticated && (pathname === "/" || AUTH_PATHS.includes(pathname))) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return withConnectSrc(
+      NextResponse.redirect(new URL("/dashboard", req.url)),
+      req.nextUrl.origin,
+    );
   }
 
-  return NextResponse.next();
+  return withConnectSrc(NextResponse.next(), req.nextUrl.origin);
 });
 
 export const config = {

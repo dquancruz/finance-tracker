@@ -40,3 +40,20 @@ export function buildConnectSrcDirective(
   }
   return Array.from(sources).join(" ");
 }
+
+export function contentSecurityPolicy(
+  ...connectUrls: Array<string | undefined>
+): string {
+  return [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'none'",
+    "form-action 'self' https://accounts.google.com",
+    `connect-src ${buildConnectSrcDirective(...connectUrls)}`,
+    "img-src 'self' data: https://lh3.googleusercontent.com",
+    "font-src 'self' data:",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+  ].join("; ");
+}
