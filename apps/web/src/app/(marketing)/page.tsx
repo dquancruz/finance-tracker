@@ -60,19 +60,19 @@ export default function HomePage() {
           <div className="hidden items-center gap-7 text-sm text-zinc-600 sm:flex dark:text-zinc-300">
             <a
               href="#features"
-              className="hover:text-zinc-950 dark:hover:text-white"
+              className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 hover:text-zinc-950 dark:hover:text-white"
             >
               Features
             </a>
             <a
               href="#product"
-              className="hover:text-zinc-950 dark:hover:text-white"
+              className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 hover:text-zinc-950 dark:hover:text-white"
             >
               Product
             </a>
             <a
               href="#security"
-              className="hover:text-zinc-950 dark:hover:text-white"
+              className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 hover:text-zinc-950 dark:hover:text-white"
             >
               Security
             </a>

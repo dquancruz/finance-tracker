@@ -27,8 +27,9 @@ export const middleware = auth((req) => {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Redirect logged-in users away from auth pages
-  if (isAuthenticated && AUTH_PATHS.includes(pathname)) {
+  // Returning users and installed-PWA launches should enter the app, while
+  // unauthenticated visitors can still discover the product at `/`.
+  if (isAuthenticated && (pathname === "/" || AUTH_PATHS.includes(pathname))) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
