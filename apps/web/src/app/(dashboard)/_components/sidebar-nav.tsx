@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
-  { href: '/', label: 'Dashboard', icon: 'grid' },
-  { href: '/expenses', label: 'Expenses', icon: 'receipt' },
-  { href: '/categories', label: 'Categories', icon: 'tag' },
-  { href: '/installments', label: 'Installments', icon: 'calendar' },
+  { href: "/dashboard", label: "Dashboard", icon: "grid" },
+  { href: "/expenses", label: "Expenses", icon: "receipt" },
+  { href: "/categories", label: "Categories", icon: "tag" },
+  { href: "/installments", label: "Installments", icon: "calendar" },
 ] as const;
 
-function NavIcon({ name }: { name: (typeof NAV_ITEMS)[number]['icon'] }) {
+function NavIcon({ name }: { name: (typeof NAV_ITEMS)[number]["icon"] }) {
   switch (name) {
-    case 'grid':
+    case "grid":
       return (
         <svg
           aria-hidden="true"
@@ -28,7 +28,7 @@ function NavIcon({ name }: { name: (typeof NAV_ITEMS)[number]['icon'] }) {
           <rect x="14" y="14" width="7" height="7" rx="1" />
         </svg>
       );
-    case 'receipt':
+    case "receipt":
       return (
         <svg
           aria-hidden="true"
@@ -45,7 +45,7 @@ function NavIcon({ name }: { name: (typeof NAV_ITEMS)[number]['icon'] }) {
           />
         </svg>
       );
-    case 'tag':
+    case "tag":
       return (
         <svg
           aria-hidden="true"
@@ -62,7 +62,7 @@ function NavIcon({ name }: { name: (typeof NAV_ITEMS)[number]['icon'] }) {
           />
         </svg>
       );
-    case 'calendar':
+    case "calendar":
       return (
         <svg
           aria-hidden="true"
@@ -94,20 +94,18 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
       <ul role="list" className="space-y-1">
         {NAV_ITEMS.map((item) => {
           const isActive =
-            item.href === '/'
-              ? pathname === '/'
-              : pathname === item.href || pathname.startsWith(`${item.href}/`);
+            pathname === item.href || pathname.startsWith(`${item.href}/`);
 
           return (
             <li key={item.href}>
               <Link
                 href={item.href}
                 onClick={onNavigate}
-                aria-current={isActive ? 'page' : undefined}
+                aria-current={isActive ? "page" : undefined}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 ${
                   isActive
-                    ? 'bg-indigo-50 font-medium text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300'
-                    : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50'
+                    ? "bg-indigo-50 font-medium text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"
+                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
                 }`}
               >
                 <NavIcon name={item.icon} />

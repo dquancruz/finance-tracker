@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { signIn } from 'next-auth/react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState, type FormEvent } from 'react';
+import { signIn } from "next-auth/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, type FormEvent } from "react";
 
 interface FieldErrors {
   name?: string;
@@ -14,9 +14,9 @@ interface FieldErrors {
 export default function RegisterPage() {
   const router = useRouter();
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -24,13 +24,13 @@ export default function RegisterPage() {
   function validate(): FieldErrors {
     const errors: FieldErrors = {};
     if (!name.trim() || name.trim().length < 2) {
-      errors.name = 'Name must be at least 2 characters.';
+      errors.name = "Name must be at least 2 characters.";
     }
-    if (!email.includes('@')) {
-      errors.email = 'Please enter a valid email address.';
+    if (!email.includes("@")) {
+      errors.email = "Please enter a valid email address.";
     }
     if (password.length < 8) {
-      errors.password = 'Password must be at least 8 characters.';
+      errors.password = "Password must be at least 8 characters.";
     }
     return errors;
   }
@@ -51,20 +51,24 @@ export default function RegisterPage() {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, email, password }),
-        }
+        },
       );
 
       if (!res.ok) {
-        const body = (await res.json().catch(() => ({}))) as { message?: string };
-        setServerError(body.message ?? 'Registration failed. Please try again.');
+        const body = (await res.json().catch(() => ({}))) as {
+          message?: string;
+        };
+        setServerError(
+          body.message ?? "Registration failed. Please try again.",
+        );
         return;
       }
 
       // Auto-login after successful registration
-      const result = await signIn('credentials', {
+      const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
@@ -72,13 +76,13 @@ export default function RegisterPage() {
 
       if (result?.error) {
         // Registration succeeded but auto-login failed; redirect to login
-        router.push('/login');
+        router.push("/login");
       } else {
-        router.push('/');
+        router.push("/dashboard");
         router.refresh();
       }
     } catch {
-      setServerError('Something went wrong. Please try again.');
+      setServerError("Something went wrong. Please try again.");
     } finally {
       setPending(false);
     }
@@ -122,13 +126,17 @@ export default function RegisterPage() {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              aria-describedby={fieldErrors.name ? 'name-error' : undefined}
+              aria-describedby={fieldErrors.name ? "name-error" : undefined}
               aria-invalid={!!fieldErrors.name}
               className="mt-1 block w-full rounded-lg border border-zinc-300 bg-surface px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 aria-[invalid=true]:border-red-400 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-50"
               placeholder="Jane Smith"
             />
             {fieldErrors.name && (
-              <p id="name-error" role="alert" className="mt-1 text-xs text-red-600 dark:text-red-400">
+              <p
+                id="name-error"
+                role="alert"
+                className="mt-1 text-xs text-red-600 dark:text-red-400"
+              >
                 {fieldErrors.name}
               </p>
             )}
@@ -149,13 +157,17 @@ export default function RegisterPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              aria-describedby={fieldErrors.email ? 'email-error' : undefined}
+              aria-describedby={fieldErrors.email ? "email-error" : undefined}
               aria-invalid={!!fieldErrors.email}
               className="mt-1 block w-full rounded-lg border border-zinc-300 bg-surface px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 aria-[invalid=true]:border-red-400 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-50"
               placeholder="you@example.com"
             />
             {fieldErrors.email && (
-              <p id="email-error" role="alert" className="mt-1 text-xs text-red-600 dark:text-red-400">
+              <p
+                id="email-error"
+                role="alert"
+                className="mt-1 text-xs text-red-600 dark:text-red-400"
+              >
                 {fieldErrors.email}
               </p>
             )}
@@ -176,17 +188,26 @@ export default function RegisterPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              aria-describedby={fieldErrors.password ? 'password-error' : 'password-hint'}
+              aria-describedby={
+                fieldErrors.password ? "password-error" : "password-hint"
+              }
               aria-invalid={!!fieldErrors.password}
               className="mt-1 block w-full rounded-lg border border-zinc-300 bg-surface px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 aria-[invalid=true]:border-red-400 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-50"
               placeholder="••••••••"
             />
             {fieldErrors.password ? (
-              <p id="password-error" role="alert" className="mt-1 text-xs text-red-600 dark:text-red-400">
+              <p
+                id="password-error"
+                role="alert"
+                className="mt-1 text-xs text-red-600 dark:text-red-400"
+              >
                 {fieldErrors.password}
               </p>
             ) : (
-              <p id="password-hint" className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              <p
+                id="password-hint"
+                className="mt-1 text-xs text-zinc-500 dark:text-zinc-400"
+              >
                 Must be at least 8 characters.
               </p>
             )}
@@ -198,12 +219,12 @@ export default function RegisterPage() {
           disabled={pending}
           className="mt-6 flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus:ring-offset-zinc-900"
         >
-          {pending ? 'Creating account…' : 'Create account'}
+          {pending ? "Creating account…" : "Create account"}
         </button>
       </form>
 
       <p className="mt-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
-        Already have an account?{' '}
+        Already have an account?{" "}
         <Link
           href="/login"
           className="font-medium text-indigo-600 hover:text-indigo-700 focus:outline-none focus:underline dark:text-indigo-400 dark:hover:text-indigo-300"
