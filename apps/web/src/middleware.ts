@@ -4,18 +4,21 @@
  */
 import { auth } from '@/lib/auth';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
 const PUBLIC_PATHS = ['/login', '/register'];
 
-export const middleware = auth((req: NextRequest & { auth: unknown }) => {
+export const middleware = auth((req) => {
   const { pathname } = req.nextUrl;
 
   const isPublic =
-    PUBLIC_PATHS.some((p) => pathname.startsWith(p)) ||
-    pathname.startsWith('/api/auth');
+    PUBLIC_PATHS.includes(pathname) ||
+    pathname === '/api/auth' ||
+    pathname.startsWith('/api/auth/');
 
-  const isAuthenticated = !!(req as { auth?: unknown }).auth;
+  // Check the expected identity claim instead of treating any truthy auth
+  // object as authenticated. This remains fail-closed if Auth.js attaches an
+  // error-shaped object to the request.
+  const isAuthenticated = Boolean(req.auth?.user?.email);
 
   if (!isPublic && !isAuthenticated) {
     const loginUrl = new URL('/login', req.url);
@@ -24,7 +27,7 @@ export const middleware = auth((req: NextRequest & { auth: unknown }) => {
   }
 
   // Redirect logged-in users away from auth pages
-  if (isAuthenticated && PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
+  if (isAuthenticated && PUBLIC_PATHS.includes(pathname)) {
     return NextResponse.redirect(new URL('/', req.url));
   }
 

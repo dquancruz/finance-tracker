@@ -44,6 +44,17 @@ describe('env.validation', () => {
     expect(result.CORS_ORIGIN).toBe('https://app.example.com');
   });
 
+  it('rejects the documented example JWT secret in production', () => {
+    expect(() =>
+      validate({
+        ...validBaseEnv,
+        NODE_ENV: 'production',
+        CORS_ORIGIN: 'https://app.example.com',
+        JWT_SECRET: 'change-me-to-a-random-32-char-string',
+      }),
+    ).toThrow(/example value/);
+  });
+
   it('rejects an unrecognized NODE_ENV value', () => {
     expect(() =>
       validate({ ...validBaseEnv, NODE_ENV: 'staging-typo' }),

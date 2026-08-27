@@ -7,6 +7,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import type { IncomingMessage } from 'node:http';
 import type { Server, Socket } from 'socket.io';
 
 interface JwtPayload {
@@ -20,6 +21,62 @@ interface AuthenticatedSocketData {
 
 const ANALYTICS_REFRESH_DEBOUNCE_MS = 500;
 
+export function isSocketOriginAllowed(
+  origin: string | undefined,
+  configuredOrigins: string | undefined,
+  isProduction: boolean,
+): boolean {
+  // Native/non-browser clients do not send Origin and still authenticate with
+  // a signed bearer token.
+  if (!origin) return true;
+
+  const allowedOrigins = (configuredOrigins ?? '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  return allowedOrigins.length > 0
+    ? allowedOrigins.includes(origin)
+    : !isProduction;
+}
+
+/**
+ * Decorator options run before Nest DI, so this reads the same process.env
+ * values `ConfigService` exposes after `env.validation` has already run.
+ */
+export function isConfiguredSocketOriginAllowed(
+  origin: string | undefined,
+): boolean {
+  return isSocketOriginAllowed(
+    origin,
+    process.env['CORS_ORIGIN'],
+    process.env['NODE_ENV'] === 'production',
+  );
+}
+
+/**
+ * Socket.IO `cors.origin` only sets HTTP polling headers. Browsers skip CORS
+ * on WebSocket upgrades, so origin policy must also run in `allowRequest`.
+ */
+export function allowSocketHandshake(
+  req: Pick<IncomingMessage, 'headers'>,
+  callback: (err: string | null, allowed: boolean) => void,
+): void {
+  callback(
+    null,
+    isConfiguredSocketOriginAllowed(readOriginHeader(req.headers)),
+  );
+}
+
+function readOriginHeader(
+  headers: IncomingMessage['headers'],
+): string | undefined {
+  const value: unknown = headers.origin;
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value) && typeof value[0] === 'string') return value[0];
+  return undefined;
+}
+
 /**
  * Real-time gateway — every authenticated socket joins a per-user room
  * (`user:{userId}`), so all emits are scoped to that user only.
@@ -31,7 +88,14 @@ const ANALYTICS_REFRESH_DEBOUNCE_MS = 500;
  * `installment:paid`, `analytics:refresh` (debounced 500ms per user),
  * `budget:alert`, `recurring:due_soon`.
  */
-@WebSocketGateway({ cors: { origin: '*' } })
+@WebSocketGateway({
+  cors: {
+    origin: (origin, callback) => {
+      callback(null, isConfiguredSocketOriginAllowed(origin));
+    },
+  },
+  allowRequest: allowSocketHandshake,
+})
 export class RealtimeGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
