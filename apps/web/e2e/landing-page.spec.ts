@@ -47,4 +47,27 @@ test.describe("product landing page", () => {
       page.getByRole("link", { name: "Create your free account" }),
     ).toHaveAttribute("href", "/register");
   });
+
+  test("serves browser security headers", async ({ request }) => {
+    const response = await request.get("/");
+
+    expect(response.headers()["content-security-policy"]).toContain(
+      "frame-ancestors 'none'",
+    );
+    expect(response.headers()["x-content-type-options"]).toBe("nosniff");
+    expect(response.headers()["x-frame-options"]).toBe("DENY");
+    expect(response.headers()["referrer-policy"]).toBe(
+      "strict-origin-when-cross-origin",
+    );
+    expect(response.headers()["content-security-policy"]).toMatch(
+      /connect-src[^;]*(ws:|wss:)/,
+    );
+  });
+
+  test("keeps the landing page public and opens login", async ({ page }) => {
+    await expect(page).not.toHaveURL(/\/login/);
+    await page.getByRole("link", { name: "Sign in" }).first().click();
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+  });
 });

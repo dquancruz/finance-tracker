@@ -9,6 +9,8 @@ import {
 } from '@nestjs/websockets';
 import type { IncomingMessage } from 'node:http';
 import type { Server, Socket } from 'socket.io';
+import { JWT_VERIFY_OPTIONS } from '../auth/jwt.constants';
+import { UsersService } from '../users/users.service';
 
 interface JwtPayload {
   sub: string;
@@ -111,13 +113,21 @@ export class RealtimeGateway
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly usersService: UsersService,
   ) {}
 
   async handleConnection(client: Socket): Promise<void> {
     try {
       const token = this.extractToken(client);
       const secret = this.configService.get<string>('JWT_SECRET');
-      const payload = this.jwtService.verify<JwtPayload>(token, { secret });
+      const payload = this.jwtService.verify<JwtPayload>(token, {
+        secret,
+        ...JWT_VERIFY_OPTIONS,
+      });
+      const user = await this.usersService.findById(payload.sub);
+      if (!user || user.email !== payload.email) {
+        throw new Error('Account is unavailable');
+      }
       (client.data as AuthenticatedSocketData).userId = payload.sub;
       await client.join(this.roomFor(payload.sub));
     } catch {

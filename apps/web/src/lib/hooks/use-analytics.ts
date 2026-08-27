@@ -9,13 +9,14 @@ import {
   fetchMonthlyTrends,
   fetchUpcomingPayments,
 } from "../api/analytics";
+import { sessionIdentity } from "../session-identity";
 
 const ANALYTICS_KEY = ["analytics"] as const;
 
 export function useDashboardSummary() {
   const { data: session } = useSession();
   const token = session?.accessToken;
-  const identity = session?.user?.email;
+  const identity = sessionIdentity(session);
 
   return useQuery({
     queryKey: [...ANALYTICS_KEY, identity, "summary"],
@@ -29,7 +30,7 @@ export function useCategoryBreakdown(
 ) {
   const { data: session } = useSession();
   const token = session?.accessToken;
-  const identity = session?.user?.email;
+  const identity = sessionIdentity(session);
 
   return useQuery({
     queryKey: [...ANALYTICS_KEY, identity, "category-breakdown", params],
@@ -41,7 +42,7 @@ export function useCategoryBreakdown(
 export function useMonthlyTrends(months?: number) {
   const { data: session } = useSession();
   const token = session?.accessToken;
-  const identity = session?.user?.email;
+  const identity = sessionIdentity(session);
 
   return useQuery({
     queryKey: [...ANALYTICS_KEY, identity, "monthly-trends", months],
@@ -53,7 +54,7 @@ export function useMonthlyTrends(months?: number) {
 export function useBudgetStatus() {
   const { data: session } = useSession();
   const token = session?.accessToken;
-  const identity = session?.user?.email;
+  const identity = sessionIdentity(session);
 
   return useQuery({
     queryKey: [...ANALYTICS_KEY, identity, "budget-status"],
@@ -65,7 +66,7 @@ export function useBudgetStatus() {
 export function useUpcomingPayments(days?: number) {
   const { data: session } = useSession();
   const token = session?.accessToken;
-  const identity = session?.user?.email;
+  const identity = sessionIdentity(session);
 
   return useQuery({
     queryKey: [...ANALYTICS_KEY, identity, "upcoming-payments", days],

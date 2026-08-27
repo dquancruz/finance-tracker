@@ -13,7 +13,10 @@ import {
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ExpensesService } from './expenses.service';
-import { QueryExpenseDto } from './dto/query-expense.dto';
+import {
+  QueryExpenseDto,
+  UpcomingRecurringQueryDto,
+} from './dto/query-expense.dto';
 import { PayInstallmentDto } from './dto/pay-installment.dto';
 import {
   validateCreateExpenseDto,
@@ -36,10 +39,9 @@ export class ExpensesController {
   @Get('recurring/upcoming')
   findUpcomingRecurring(
     @CurrentUser('userId') userId: string,
-    @Query('withinDays') withinDays?: string,
+    @Query() query: UpcomingRecurringQueryDto,
   ) {
-    const days = withinDays ? Number(withinDays) : undefined;
-    return this.expensesService.findUpcomingRecurring(userId, days);
+    return this.expensesService.findUpcomingRecurring(userId, query.withinDays);
   }
 
   @Get(':id')

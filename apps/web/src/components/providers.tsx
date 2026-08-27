@@ -1,11 +1,29 @@
 'use client';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SessionProvider } from 'next-auth/react';
-import { useState } from 'react';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { SessionProvider, useSession } from 'next-auth/react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 interface ProvidersProps {
-  children: React.ReactNode;
+  children: ReactNode;
+}
+
+function ClearCacheOnSignOut({ children }: { children: ReactNode }) {
+  const { status } = useSession();
+  const queryClient = useQueryClient();
+  const previousStatus = useRef(status);
+
+  useEffect(() => {
+    if (
+      previousStatus.current === 'authenticated' &&
+      status === 'unauthenticated'
+    ) {
+      queryClient.clear();
+    }
+    previousStatus.current = status;
+  }, [status, queryClient]);
+
+  return children;
 }
 
 export function Providers({ children }: ProvidersProps) {
@@ -17,12 +35,14 @@ export function Providers({ children }: ProvidersProps) {
             staleTime: 60 * 1000,
           },
         },
-      })
+      }),
   );
 
   return (
     <SessionProvider>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <ClearCacheOnSignOut>{children}</ClearCacheOnSignOut>
+      </QueryClientProvider>
     </SessionProvider>
   );
 }

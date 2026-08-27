@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { CategoriesService } from '../categories/categories.service';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { ExpensesService } from './expenses.service';
 import { Expense } from './schemas/expense.schema';
@@ -30,6 +31,7 @@ describe('ExpensesService', () => {
     countDocuments: jest.Mock;
     discriminators: Record<string, jest.Mock>;
   };
+  let findCategoryForUser: jest.Mock;
 
   beforeEach(async () => {
     modelMock = {
@@ -42,11 +44,16 @@ describe('ExpensesService', () => {
         installment: buildDiscriminatorCtor(),
       },
     };
+    findCategoryForUser = jest.fn().mockResolvedValue({ _id: 'cat-1' });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ExpensesService,
         { provide: getModelToken(Expense.name), useValue: modelMock },
+        {
+          provide: CategoriesService,
+          useValue: { findOneForUser: findCategoryForUser },
+        },
         {
           provide: RealtimeGateway,
           useValue: {
@@ -74,7 +81,25 @@ describe('ExpensesService', () => {
       expect(modelMock.discriminators.simple).toHaveBeenCalledWith(
         expect.objectContaining({ userId: 'user-1', amount: 42 }),
       );
+      expect(findCategoryForUser).toHaveBeenCalledWith('cat-1', 'user-1');
       expect((doc as unknown as MockDoc).save).toHaveBeenCalled();
+    });
+
+    it('does not persist when the category is not visible to the user', async () => {
+      findCategoryForUser.mockRejectedValue(
+        new NotFoundException('Category not found'),
+      );
+
+      await expect(
+        service.create('user-1', {
+          type: 'simple',
+          categoryId: 'foreign-cat',
+          amount: 10,
+          date: '2026-01-01',
+        }),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(modelMock.discriminators.simple).not.toHaveBeenCalled();
     });
 
     it('creates a recurring expense with nextDueDate seeded from startDate', async () => {
@@ -167,6 +192,24 @@ describe('ExpensesService', () => {
       await expect(service.findOneForUser('x', 'user-1')).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('update', () => {
+    it('does not persist when the new category is not visible to the user', async () => {
+      const doc = buildDoc({ type: 'simple', categoryId: 'cat-1' });
+      modelMock.findOne.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(doc),
+      });
+      findCategoryForUser.mockRejectedValue(
+        new NotFoundException('Category not found'),
+      );
+
+      await expect(
+        service.update('exp-1', 'user-1', { categoryId: 'foreign-cat' }),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(doc.save).not.toHaveBeenCalled();
     });
   });
 

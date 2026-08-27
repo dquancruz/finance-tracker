@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { createServer, request } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { Server } from 'socket.io';
+import { UsersService } from '../users/users.service';
 import {
   allowSocketHandshake,
   isSocketOriginAllowed,
@@ -26,11 +27,15 @@ describe('RealtimeGateway', () => {
   let jwtService: { verify: jest.Mock };
   let emitMock: jest.Mock;
   let toMock: jest.Mock;
+  let findUserById: jest.Mock;
 
   beforeEach(async () => {
     jwtService = { verify: jest.fn() };
     emitMock = jest.fn();
     toMock = jest.fn().mockReturnValue({ emit: emitMock });
+    findUserById = jest.fn().mockResolvedValue({
+      email: 'a@b.com',
+    });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -39,6 +44,10 @@ describe('RealtimeGateway', () => {
         {
           provide: ConfigService,
           useValue: { get: jest.fn().mockReturnValue('secret') },
+        },
+        {
+          provide: UsersService,
+          useValue: { findById: findUserById },
         },
       ],
     }).compile();
@@ -61,6 +70,14 @@ describe('RealtimeGateway', () => {
 
       await gateway.handleConnection(socket as never);
 
+      expect(jwtService.verify).toHaveBeenCalledWith(
+        'valid-token',
+        expect.objectContaining({
+          algorithms: ['HS256'],
+          issuer: 'finance-tracker-api',
+          audience: 'finance-tracker-web',
+        }),
+      );
       expect(socket.join).toHaveBeenCalledWith('user:user-1');
       expect(socket.disconnect).not.toHaveBeenCalled();
     });
@@ -99,6 +116,22 @@ describe('RealtimeGateway', () => {
       await gateway.handleConnection(socket as never);
 
       expect(socket.disconnect).toHaveBeenCalledWith(true);
+    });
+
+    it('disconnects a valid token when the account is no longer active', async () => {
+      jwtService.verify.mockReturnValue({
+        sub: 'deleted-user',
+        email: 'a@b.com',
+      });
+      findUserById.mockResolvedValue(null);
+      const socket = buildSocket({
+        handshake: { auth: { token: 'valid-token' }, headers: {} },
+      });
+
+      await gateway.handleConnection(socket as never);
+
+      expect(socket.disconnect).toHaveBeenCalledWith(true);
+      expect(socket.join).not.toHaveBeenCalled();
     });
   });
 

@@ -13,6 +13,15 @@ import type { ExpenseType } from '@finance-tracker/shared';
 export type ExpenseSortBy = 'date' | 'amount' | 'createdAt';
 export type SortOrder = 'asc' | 'desc';
 
+export class UpcomingRecurringQueryDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(90)
+  withinDays?: number;
+}
+
 export class QueryExpenseDto {
   @IsOptional()
   @IsIn(['simple', 'recurring', 'installment'])

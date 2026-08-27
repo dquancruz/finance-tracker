@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import {
   createCategory,
   deleteCategory,
@@ -9,16 +9,18 @@ import {
   updateCategory,
   type CreateCategoryInput,
   type UpdateCategoryInput,
-} from '../api/categories';
+} from "../api/categories";
+import { sessionIdentity } from "../session-identity";
 
-const CATEGORIES_KEY = ['categories'] as const;
+const CATEGORIES_KEY = ["categories"] as const;
 
 export function useCategories() {
   const { data: session } = useSession();
   const token = session?.accessToken;
+  const identity = sessionIdentity(session);
 
   return useQuery({
-    queryKey: CATEGORIES_KEY,
+    queryKey: [...CATEGORIES_KEY, identity],
     queryFn: () => fetchCategories(token),
     enabled: Boolean(token),
   });
