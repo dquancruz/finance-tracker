@@ -15,6 +15,10 @@ import {
   type CreateExpenseInput,
   type UpdateExpenseInput,
 } from "../api/expenses";
+import {
+  keepPreviousDataForIdentity,
+  sessionIdentity,
+} from "../session-identity";
 
 const EXPENSES_KEY = ["expenses"] as const;
 const UPCOMING_RECURRING_KEY = ["expenses", "recurring", "upcoming"] as const;
@@ -22,20 +26,20 @@ const UPCOMING_RECURRING_KEY = ["expenses", "recurring", "upcoming"] as const;
 export function useExpenses(filters: ExpenseFilters) {
   const { data: session } = useSession();
   const token = session?.accessToken;
-  const identity = session?.user?.email;
+  const identity = sessionIdentity(session);
 
   return useQuery({
     queryKey: [...EXPENSES_KEY, identity, filters],
     queryFn: () => fetchExpenses(filters, token),
     enabled: Boolean(token),
-    placeholderData: (previous) => previous,
+    placeholderData: keepPreviousDataForIdentity(identity),
   });
 }
 
 export function useExpense(id: string | undefined) {
   const { data: session } = useSession();
   const token = session?.accessToken;
-  const identity = session?.user?.email;
+  const identity = sessionIdentity(session);
 
   return useQuery({
     queryKey: [...EXPENSES_KEY, identity, id],
@@ -47,7 +51,7 @@ export function useExpense(id: string | undefined) {
 export function useUpcomingRecurring(withinDays?: number) {
   const { data: session } = useSession();
   const token = session?.accessToken;
-  const identity = session?.user?.email;
+  const identity = sessionIdentity(session);
 
   return useQuery({
     queryKey: [...UPCOMING_RECURRING_KEY, identity, withinDays],

@@ -1,6 +1,7 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../../users/users.service';
+import { JWT_VERIFY_OPTIONS } from '../jwt.constants';
 import { JwtStrategy } from './jwt.strategy';
 
 describe('JwtStrategy', () => {
@@ -14,6 +15,31 @@ describe('JwtStrategy', () => {
 
   beforeEach(() => {
     findById.mockReset();
+  });
+
+  it('configures Passport JWT verification with issuer, audience, and HS256', () => {
+    const verifyOptions = (
+      strategy as unknown as {
+        _verifOpts?: {
+          algorithms?: string[];
+          issuer?: string;
+          audience?: string;
+        };
+      }
+    )._verifOpts;
+
+    expect(JWT_VERIFY_OPTIONS).toEqual({
+      algorithms: ['HS256'],
+      issuer: 'finance-tracker-api',
+      audience: 'finance-tracker-web',
+    });
+    expect(verifyOptions).toEqual(
+      expect.objectContaining({
+        algorithms: ['HS256'],
+        issuer: 'finance-tracker-api',
+        audience: 'finance-tracker-web',
+      }),
+    );
   });
 
   it('accepts claims only for the current active account', async () => {

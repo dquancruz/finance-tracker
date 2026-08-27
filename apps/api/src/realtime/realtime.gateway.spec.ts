@@ -70,6 +70,14 @@ describe('RealtimeGateway', () => {
 
       await gateway.handleConnection(socket as never);
 
+      expect(jwtService.verify).toHaveBeenCalledWith(
+        'valid-token',
+        expect.objectContaining({
+          algorithms: ['HS256'],
+          issuer: 'finance-tracker-api',
+          audience: 'finance-tracker-web',
+        }),
+      );
       expect(socket.join).toHaveBeenCalledWith('user:user-1');
       expect(socket.disconnect).not.toHaveBeenCalled();
     });

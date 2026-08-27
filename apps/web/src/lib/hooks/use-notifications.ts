@@ -8,13 +8,14 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
 } from "../api/notifications";
+import { sessionIdentity } from "../session-identity";
 
 const NOTIFICATIONS_KEY = ["notifications"] as const;
 
 export function useNotifications() {
   const { data: session } = useSession();
   const token = session?.accessToken;
-  const identity = session?.user?.email;
+  const identity = sessionIdentity(session);
 
   return useQuery({
     queryKey: [...NOTIFICATIONS_KEY, identity, "list"],
@@ -26,7 +27,7 @@ export function useNotifications() {
 export function useUnreadNotificationCount() {
   const { data: session } = useSession();
   const token = session?.accessToken;
-  const identity = session?.user?.email;
+  const identity = sessionIdentity(session);
 
   return useQuery({
     queryKey: [...NOTIFICATIONS_KEY, identity, "unread-count"],

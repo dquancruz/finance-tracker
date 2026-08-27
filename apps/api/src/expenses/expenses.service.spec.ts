@@ -85,6 +85,23 @@ describe('ExpensesService', () => {
       expect((doc as unknown as MockDoc).save).toHaveBeenCalled();
     });
 
+    it('does not persist when the category is not visible to the user', async () => {
+      findCategoryForUser.mockRejectedValue(
+        new NotFoundException('Category not found'),
+      );
+
+      await expect(
+        service.create('user-1', {
+          type: 'simple',
+          categoryId: 'foreign-cat',
+          amount: 10,
+          date: '2026-01-01',
+        }),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(modelMock.discriminators.simple).not.toHaveBeenCalled();
+    });
+
     it('creates a recurring expense with nextDueDate seeded from startDate', async () => {
       const doc = await service.create('user-1', {
         type: 'recurring',
@@ -175,6 +192,24 @@ describe('ExpensesService', () => {
       await expect(service.findOneForUser('x', 'user-1')).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('update', () => {
+    it('does not persist when the new category is not visible to the user', async () => {
+      const doc = buildDoc({ type: 'simple', categoryId: 'cat-1' });
+      modelMock.findOne.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(doc),
+      });
+      findCategoryForUser.mockRejectedValue(
+        new NotFoundException('Category not found'),
+      );
+
+      await expect(
+        service.update('exp-1', 'user-1', { categoryId: 'foreign-cat' }),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(doc.save).not.toHaveBeenCalled();
     });
   });
 

@@ -71,10 +71,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       },
     }),
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? [
+          Google({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          }),
+        ]
+      : []),
   ],
   callbacks: {
     async signIn({ user, account }) {
@@ -99,6 +103,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     async session({ session, token }) {
+      if (typeof token.sub === "string" && token.sub.length > 0) {
+        session.user.id = token.sub;
+      }
       const accessToken = token["accessToken"];
       if (typeof accessToken === "string") {
         session.accessToken = accessToken;

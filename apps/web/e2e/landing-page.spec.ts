@@ -59,5 +59,15 @@ test.describe("product landing page", () => {
     expect(response.headers()["referrer-policy"]).toBe(
       "strict-origin-when-cross-origin",
     );
+    expect(response.headers()["content-security-policy"]).toMatch(
+      /connect-src[^;]*(ws:|wss:)/,
+    );
+  });
+
+  test("keeps the landing page public and opens login", async ({ page }) => {
+    await expect(page).not.toHaveURL(/\/login/);
+    await page.getByRole("link", { name: "Sign in" }).first().click();
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
   });
 });

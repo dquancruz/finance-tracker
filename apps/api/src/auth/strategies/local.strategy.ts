@@ -13,6 +13,8 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     if (
       typeof email !== 'string' ||
       typeof password !== 'string' ||
+      email.length === 0 ||
+      email.length > 254 ||
       password.length === 0 ||
       password.length > 128
     ) {

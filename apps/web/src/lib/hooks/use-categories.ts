@@ -10,13 +10,14 @@ import {
   type CreateCategoryInput,
   type UpdateCategoryInput,
 } from "../api/categories";
+import { sessionIdentity } from "../session-identity";
 
 const CATEGORIES_KEY = ["categories"] as const;
 
 export function useCategories() {
   const { data: session } = useSession();
   const token = session?.accessToken;
-  const identity = session?.user?.email;
+  const identity = sessionIdentity(session);
 
   return useQuery({
     queryKey: [...CATEGORIES_KEY, identity],

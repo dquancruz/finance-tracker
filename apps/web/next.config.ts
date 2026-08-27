@@ -1,15 +1,13 @@
 import type { NextConfig } from "next";
-
-const connectSources = [
-  "'self'",
-  process.env.NEXT_PUBLIC_API_URL,
-  process.env.NEXT_PUBLIC_WS_URL,
-]
-  .filter((value): value is string => Boolean(value))
-  .join(" ");
+import { buildConnectSrcDirective } from "./src/lib/csp-connect-src";
 
 const nextConfig: NextConfig = {
   async headers() {
+    const connectSources = buildConnectSrcDirective(
+      process.env.NEXT_PUBLIC_API_URL,
+      process.env.NEXT_PUBLIC_WS_URL,
+    );
+
     return [
       {
         source: "/(.*)",

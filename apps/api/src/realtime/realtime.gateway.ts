@@ -9,7 +9,7 @@ import {
 } from '@nestjs/websockets';
 import type { IncomingMessage } from 'node:http';
 import type { Server, Socket } from 'socket.io';
-import { JWT_ALGORITHM, JWT_AUDIENCE, JWT_ISSUER } from '../auth/jwt.constants';
+import { JWT_VERIFY_OPTIONS } from '../auth/jwt.constants';
 import { UsersService } from '../users/users.service';
 
 interface JwtPayload {
@@ -122,9 +122,7 @@ export class RealtimeGateway
       const secret = this.configService.get<string>('JWT_SECRET');
       const payload = this.jwtService.verify<JwtPayload>(token, {
         secret,
-        algorithms: [JWT_ALGORITHM],
-        issuer: JWT_ISSUER,
-        audience: JWT_AUDIENCE,
+        ...JWT_VERIFY_OPTIONS,
       });
       const user = await this.usersService.findById(payload.sub);
       if (!user || user.email !== payload.email) {
