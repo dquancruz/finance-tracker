@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.1] - 2026-08-27
+
+- fix(security): harden authentication boundaries (#19)
+
+
 ## [0.8.0] - 2026-08-06
 
 - feat(installments): replace placeholder with a real payoff dashboard (#18)
