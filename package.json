@@ -19,7 +19,7 @@
     "dashboard": "node scripts/dashboard.js"
   },
   "devDependencies": {
-    "turbo": "^2.3.3",
+    "turbo": "^2.10.11",
     "typescript": "^5.7.3",
     "husky": "^9.1.7"
   },
