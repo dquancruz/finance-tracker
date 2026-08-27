@@ -1,7 +1,9 @@
 import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
+import { GoogleLoginDto } from './dto/google-login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { GoogleIdentityService } from './google-identity.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 
 interface AuthenticatedRequest {
@@ -21,7 +23,10 @@ const AUTH_THROTTLE = { default: { limit: 5, ttl: 60000 } };
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly googleIdentityService: GoogleIdentityService,
+  ) {}
 
   @Throttle(AUTH_THROTTLE)
   @Post('register')
@@ -34,5 +39,12 @@ export class AuthController {
   @Post('login')
   login(@Request() req: AuthenticatedRequest) {
     return this.authService.login(req.user);
+  }
+
+  @Throttle(AUTH_THROTTLE)
+  @Post('google')
+  async googleLogin(@Body() dto: GoogleLoginDto) {
+    const identity = await this.googleIdentityService.verify(dto.idToken);
+    return this.authService.loginWithGoogle(identity);
   }
 }

@@ -8,6 +8,10 @@ export interface CreateUserInput {
   passwordHash?: string;
   name: string;
   avatar?: string;
+  oauthProviders?: Array<{
+    provider: 'google' | 'github';
+    providerId: string;
+  }>;
 }
 
 export interface UpdateUserInput {
@@ -43,6 +47,39 @@ export class UsersService {
   async create(dto: CreateUserInput): Promise<UserDocument> {
     const user = new this.userModel(dto);
     return user.save();
+  }
+
+  async findOrCreateGoogleUser(input: {
+    providerId: string;
+    email: string;
+    name: string;
+    avatar?: string;
+  }): Promise<UserDocument> {
+    const email = input.email.toLowerCase().trim();
+    const existing = await this.findByEmail(email);
+
+    if (existing) {
+      const alreadyLinked = existing.oauthProviders.some(
+        (provider) =>
+          provider.provider === 'google' &&
+          provider.providerId === input.providerId,
+      );
+      if (!alreadyLinked) {
+        existing.oauthProviders.push({
+          provider: 'google',
+          providerId: input.providerId,
+        });
+      }
+      if (!existing.avatar && input.avatar) existing.avatar = input.avatar;
+      return existing.save();
+    }
+
+    return this.create({
+      email,
+      name: input.name,
+      avatar: input.avatar,
+      oauthProviders: [{ provider: 'google', providerId: input.providerId }],
+    });
   }
 
   async updateById(

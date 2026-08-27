@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { NotificationCenter } from './notification-center';
-import { SidebarNav } from './sidebar-nav';
+import { signOut } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { NotificationCenter } from "./notification-center";
+import { SidebarNav } from "./sidebar-nav";
 
 interface DashboardShellProps {
   userName: string;
@@ -29,23 +30,32 @@ function UserFooter({
   userEmail?: string | null;
 }) {
   return (
-    <div className="flex items-center gap-3 border-t border-zinc-200 px-4 py-3 dark:border-zinc-800">
-      <div
-        aria-hidden="true"
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300"
-      >
-        {userInitial}
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-medium text-zinc-900 dark:text-zinc-50">
-          {userName}
-        </p>
-        {userEmail && (
-          <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
-            {userEmail}
+    <div className="border-t border-zinc-200 px-4 py-3 dark:border-zinc-800">
+      <div className="flex items-center gap-3">
+        <div
+          aria-hidden="true"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300"
+        >
+          {userInitial}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-xs font-medium text-zinc-900 dark:text-zinc-50">
+            {userName}
           </p>
-        )}
+          {userEmail && (
+            <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+              {userEmail}
+            </p>
+          )}
+        </div>
       </div>
+      <button
+        type="button"
+        onClick={() => void signOut({ callbackUrl: "/" })}
+        className="mt-3 w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+      >
+        Sign out
+      </button>
     </div>
   );
 }
@@ -65,19 +75,19 @@ export function DashboardShell({
     if (!open) return;
 
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setOpen(false);
+      if (event.key === "Escape") setOpen(false);
     }
 
-    const mql = window.matchMedia('(min-width: 64rem)');
+    const mql = window.matchMedia("(min-width: 64rem)");
     function handleViewportChange() {
       if (mql.matches) setOpen(false);
     }
 
-    document.addEventListener('keydown', handleKeyDown);
-    mql.addEventListener('change', handleViewportChange);
+    document.addEventListener("keydown", handleKeyDown);
+    mql.addEventListener("change", handleViewportChange);
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      mql.removeEventListener('change', handleViewportChange);
+      document.removeEventListener("keydown", handleKeyDown);
+      mql.removeEventListener("change", handleViewportChange);
     };
   }, [open]);
 
@@ -107,7 +117,7 @@ export function DashboardShell({
           inert={!open}
           onClick={() => setOpen(false)}
           className={`fixed inset-0 z-40 bg-zinc-950/50 transition-opacity duration-200 motion-reduce:transition-none ${
-            open ? 'opacity-100' : 'pointer-events-none opacity-0'
+            open ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         />
         <aside
@@ -117,7 +127,7 @@ export function DashboardShell({
           aria-label="Main navigation"
           inert={!open}
           className={`fixed inset-y-0 left-0 z-50 flex w-64 max-w-[80vw] flex-col border-r border-zinc-200 bg-surface transition-transform duration-200 ease-out motion-reduce:transition-none dark:border-zinc-800 ${
-            open ? 'translate-x-0' : '-translate-x-full'
+            open ? "translate-x-0" : "-translate-x-full"
           }`}
         >
           <div className="flex h-14 items-center justify-between border-b border-zinc-200 px-4 dark:border-zinc-800">
@@ -136,7 +146,11 @@ export function DashboardShell({
                 strokeWidth={2}
                 viewBox="0 0 24 24"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -168,7 +182,11 @@ export function DashboardShell({
               strokeWidth={2}
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           </button>
           <span className="text-sm font-semibold tracking-tight text-zinc-900 lg:hidden dark:text-zinc-50">

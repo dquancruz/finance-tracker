@@ -49,6 +49,11 @@ class EnvironmentVariables {
   })
   JWT_SECRET: string;
 
+  /** OAuth audience used to verify Google ID tokens from the web app. */
+  @IsOptional()
+  @IsString()
+  GOOGLE_CLIENT_ID?: string;
+
   @IsOptional()
   @IsInt()
   @Min(1)
