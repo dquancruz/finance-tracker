@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 /*
- * Design tokens — `quiet` preset.
+ * Design tokens — `quiet` preset (teal accent).
  *
- * Neutral (zinc) surface scale + a single indigo accent. Light and dark
- * values live side by side here so every component that consumes the
- * `--color-*` theme tokens (via `bg-background`, `text-foreground`, etc.)
- * automatically gets a correct dark appearance from the OS-level
- * `prefers-color-scheme`, with no per-component JS/toggle required.
+ * Neutral (zinc) surface scale + a teal accent. Light and dark values live
+ * side by side here so every component that consumes the `--color-*` theme
+ * tokens (via `bg-background`, `text-foreground`, etc.) automatically gets
+ * a correct dark appearance from the OS-level `prefers-color-scheme`, with
+ * no per-component JS/toggle required.
  */
 :root {
   --background: #fafafa; /* zinc-50 */
@@ -15,10 +15,14 @@
   --surface: #ffffff; /* card/panel background */
   --muted-foreground: #71717a; /* zinc-500 */
   --border: #e4e4e7; /* zinc-200 */
+  --accent: #0d9488; /* teal-600 */
+  --accent-hover: #0f766e; /* teal-700 */
+  --accent-muted: #ccfbf1; /* teal-100 */
   /* recharts renders via inline SVG styles, so chart primitives are exposed
      as plain CSS vars (not Tailwind utilities) for use in `style={}` props. */
   --chart-grid: #f4f4f5; /* zinc-100 */
   --chart-tick: #71717a; /* zinc-500 */
+  --chart-line: #0d9488; /* teal-600 */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -28,8 +32,12 @@
     --surface: #18181b; /* zinc-900 */
     --muted-foreground: #a1a1aa; /* zinc-400 */
     --border: #27272a; /* zinc-800 */
+    --accent: #2dd4bf; /* teal-400 */
+    --accent-hover: #5eead4; /* teal-300 */
+    --accent-muted: #134e4a; /* teal-900 */
     --chart-grid: #27272a; /* zinc-800 */
     --chart-tick: #a1a1aa; /* zinc-400 */
+    --chart-line: #2dd4bf; /* teal-400 */
   }
 }
 
@@ -39,6 +47,9 @@
   --color-surface: var(--surface);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-muted: var(--accent-muted);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

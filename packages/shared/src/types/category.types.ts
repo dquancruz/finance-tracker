@@ -8,6 +8,8 @@ export interface ICategory {
   color: string;
   budgetLimit?: number;
   budgetPeriod?: BudgetPeriod;
+  /** ISO 4217 code the budget was entered in (defaults to USD for legacy rows). */
+  budgetCurrency?: string;
   isSystem: boolean;
   createdAt: Date;
   updatedAt: Date;

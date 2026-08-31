@@ -3,6 +3,8 @@
 import type { ICategory, IInstallmentExpense } from '@finance-tracker/shared';
 import { useState } from 'react';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { useExchangeRates } from '@/lib/hooks/use-exchange-rates';
+import { usePreferredCurrency } from '@/lib/hooks/use-preferred-currency';
 import { summarizeInstallment } from '@/lib/installment-summary';
 import { InstallmentSchedule } from '../../expenses/_components/installment-schedule';
 
@@ -16,8 +18,11 @@ export function InstallmentPlanCard({
   category,
 }: InstallmentPlanCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const { currency: displayCurrency } = usePreferredCurrency();
+  const { convert } = useExchangeRates();
   const summary = summarizeInstallment(expense);
   const total = expense.paymentSchedule.length;
+  const showConverted = expense.currency !== displayCurrency;
 
   return (
     <li className="rounded-xl border border-zinc-200 bg-surface p-4 shadow-sm dark:border-zinc-800">
@@ -48,6 +53,20 @@ export function InstallmentPlanCard({
           </p>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             remaining of {formatCurrency(expense.totalAmount, expense.currency)}
+            {showConverted && (() => {
+              const converted = convert(
+                summary.remainingBalance,
+                expense.currency,
+                displayCurrency,
+              );
+              if (converted === null) return null;
+              return (
+                <>
+                  {' '}
+                  · {formatCurrency(converted, displayCurrency)} in {displayCurrency}
+                </>
+              );
+            })()}
           </p>
         </div>
       </div>
@@ -62,7 +81,7 @@ export function InstallmentPlanCard({
           className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800"
         >
           <div
-            className="h-full rounded-full bg-indigo-600 transition-[width]"
+            className="h-full rounded-full bg-teal-600 transition-[width]"
             style={{ width: `${summary.progressPercentage}%` }}
           />
         </div>
@@ -82,7 +101,7 @@ export function InstallmentPlanCard({
         type="button"
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
-        className="mt-3 rounded-md px-2 py-1 text-xs font-medium text-indigo-600 transition-colors hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-indigo-400 dark:hover:bg-indigo-500/10"
+        className="mt-3 rounded-md px-2 py-1 text-xs font-medium text-teal-600 transition-colors hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-teal-400 dark:hover:bg-teal-500/10"
       >
         {expanded ? 'Hide schedule' : 'View schedule'}
       </button>

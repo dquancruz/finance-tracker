@@ -50,7 +50,7 @@ export default function HomePage() {
           <Link
             href="/"
             aria-label="Finance Tracker home"
-            className="flex items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            className="flex items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
           >
             <AppIconMark size={32} />
             <span className="text-sm font-semibold tracking-tight">
@@ -60,19 +60,19 @@ export default function HomePage() {
           <div className="hidden items-center gap-7 text-sm text-zinc-600 sm:flex dark:text-zinc-300">
             <a
               href="#features"
-              className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 hover:text-zinc-950 dark:hover:text-white"
+              className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 hover:text-zinc-950 dark:hover:text-white"
             >
               Features
             </a>
             <a
               href="#product"
-              className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 hover:text-zinc-950 dark:hover:text-white"
+              className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 hover:text-zinc-950 dark:hover:text-white"
             >
               Product
             </a>
             <a
               href="#security"
-              className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 hover:text-zinc-950 dark:hover:text-white"
+              className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 hover:text-zinc-950 dark:hover:text-white"
             >
               Security
             </a>
@@ -80,13 +80,13 @@ export default function HomePage() {
           <div className="flex items-center gap-2">
             <Link
               href="/login"
-              className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-zinc-300 dark:hover:text-white"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-zinc-300 dark:hover:text-white"
             >
               Sign in
             </Link>
             <Link
               href="/register"
-              className="rounded-lg bg-zinc-900 px-3.5 py-2 text-sm font-medium text-white hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:bg-white dark:text-zinc-950"
+              className="rounded-lg bg-zinc-900 px-3.5 py-2 text-sm font-medium text-white hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:bg-white dark:text-zinc-950"
             >
               Get started
             </Link>
@@ -102,7 +102,7 @@ export default function HomePage() {
           />
           <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-20 sm:px-6 sm:pt-28 lg:px-8">
             <div className="mx-auto max-w-3xl text-center">
-              <p className="inline-flex rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-300">
+              <p className="inline-flex rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-medium text-teal-700 dark:border-teal-500/30 dark:bg-teal-500/10 dark:text-teal-300">
                 Your complete financial picture, without the noise
               </p>
               <h1 className="mt-6 text-balance text-4xl font-semibold tracking-[-0.035em] text-zinc-950 sm:text-6xl dark:text-white">
@@ -115,13 +115,13 @@ export default function HomePage() {
               <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                 <Link
                   href="/register"
-                  className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  className="rounded-xl bg-teal-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-600/20 hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
                 >
                   Create your free account
                 </Link>
                 <a
                   href="#product"
-                  className="rounded-xl border border-zinc-300 bg-surface px-5 py-3 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                  className="rounded-xl border border-zinc-300 bg-surface px-5 py-3 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
                 >
                   Explore the product
                 </a>
@@ -142,7 +142,7 @@ export default function HomePage() {
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
-              <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
+              <p className="text-sm font-semibold text-teal-600 dark:text-teal-400">
                 Built for real life
               </p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -156,7 +156,7 @@ export default function HomePage() {
             <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-200 sm:grid-cols-2 dark:border-zinc-800 dark:bg-zinc-800">
               {FEATURES.map(([title, description], index) => (
                 <article key={title} className="bg-surface p-7 sm:p-8">
-                  <span className="font-mono text-xs text-indigo-600 dark:text-indigo-400">
+                  <span className="font-mono text-xs text-teal-600 dark:text-teal-400">
                     0{index + 1}
                   </span>
                   <h3 className="mt-5 text-lg font-semibold">{title}</h3>
@@ -172,7 +172,7 @@ export default function HomePage() {
         <section id="product" className="py-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
-              <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
+              <p className="text-sm font-semibold text-teal-600 dark:text-teal-400">
                 Product previews
               </p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -203,7 +203,7 @@ export default function HomePage() {
         <section id="security" className="bg-zinc-950 py-20 text-white">
           <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_1.2fr] lg:px-8">
             <div>
-              <p className="text-sm font-semibold text-indigo-300">
+              <p className="text-sm font-semibold text-teal-300">
                 Security by design
               </p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight">
@@ -241,7 +241,7 @@ export default function HomePage() {
         </section>
 
         <section className="px-4 py-24 sm:px-6">
-          <div className="mx-auto max-w-4xl rounded-3xl border border-indigo-200 bg-indigo-50 px-6 py-14 text-center sm:px-12 dark:border-indigo-500/20 dark:bg-indigo-500/10">
+          <div className="mx-auto max-w-4xl rounded-3xl border border-teal-200 bg-teal-50 px-6 py-14 text-center sm:px-12 dark:border-teal-500/20 dark:bg-teal-500/10">
             <h2 className="text-3xl font-semibold tracking-tight">
               Start with clarity today.
             </h2>
@@ -251,7 +251,7 @@ export default function HomePage() {
             </p>
             <Link
               href="/register"
-              className="mt-8 inline-flex rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              className="mt-8 inline-flex rounded-xl bg-teal-600 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
             >
               Create your account
             </Link>

@@ -3,6 +3,7 @@ import { formatCurrency, formatDate } from '@/lib/format';
 
 interface UpcomingPaymentsListProps {
   payments: IUpcomingItem[];
+  currency: string;
 }
 
 function dueLabel(daysUntilDue: number): string {
@@ -20,11 +21,14 @@ function dueBadgeClasses(daysUntilDue: number): string {
 
 function typeBadgeClasses(type: IUpcomingItem['type']): string {
   return type === 'recurring'
-    ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300'
+    ? 'bg-teal-100 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300'
     : 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400';
 }
 
-export function UpcomingPaymentsList({ payments }: UpcomingPaymentsListProps) {
+export function UpcomingPaymentsList({
+  payments,
+  currency,
+}: UpcomingPaymentsListProps) {
   return (
     <article
       aria-label="Upcoming payments"
@@ -65,7 +69,7 @@ export function UpcomingPaymentsList({ payments }: UpcomingPaymentsListProps) {
                 {dueLabel(payment.daysUntilDue)}
               </span>
               <span className="w-20 shrink-0 text-right text-sm font-medium tabular-nums text-zinc-900 dark:text-zinc-50">
-                {formatCurrency(payment.amount)}
+                {formatCurrency(payment.amount, currency)}
               </span>
             </li>
           ))}

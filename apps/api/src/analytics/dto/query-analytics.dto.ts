@@ -1,5 +1,14 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, Max, Min } from 'class-validator';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  Matches,
+  Max,
+  Min,
+} from 'class-validator';
+
+const CURRENCY_CODE = /^[A-Z]{3}$/;
 
 export class CategoryBreakdownQueryDto {
   @IsOptional()
@@ -33,4 +42,13 @@ export class UpcomingPaymentsQueryDto {
   @Min(1)
   @Max(365)
   days?: number;
+}
+
+export class SummaryQueryDto {
+  @IsOptional()
+  @IsString()
+  @Matches(CURRENCY_CODE, {
+    message: 'displayCurrency must be a 3-letter ISO code',
+  })
+  displayCurrency?: string;
 }

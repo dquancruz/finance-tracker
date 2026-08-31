@@ -25,6 +25,7 @@ export interface IUpcomingItem {
   expenseId: string;
   description: string;
   amount: number;
+  currency: string;
   dueDate: Date;
   daysUntilDue: number;
   type: 'recurring' | 'installment';

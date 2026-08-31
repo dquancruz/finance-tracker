@@ -1,7 +1,9 @@
-"use client";
+'use client';
 
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { CurrencySelect } from "@/components/currency-select";
+import { usePreferredCurrency } from "@/lib/hooks/use-preferred-currency";
 import { NotificationCenter } from "./notification-center";
 import { SidebarNav } from "./sidebar-nav";
 
@@ -29,12 +31,14 @@ function UserFooter({
   userInitial: string;
   userEmail?: string | null;
 }) {
+  const { currency, setCurrency } = usePreferredCurrency();
+
   return (
     <div className="border-t border-zinc-200 px-4 py-3 dark:border-zinc-800">
       <div className="flex items-center gap-3">
         <div
           aria-hidden="true"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-100 text-xs font-semibold text-teal-700 dark:bg-teal-500/20 dark:text-teal-300"
         >
           {userInitial}
         </div>
@@ -49,10 +53,22 @@ function UserFooter({
           )}
         </div>
       </div>
+      <div className="mt-3">
+        <label htmlFor="preferred-currency" className="block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+          Display currency
+        </label>
+        <CurrencySelect
+          id="preferred-currency"
+          value={currency}
+          onChange={setCurrency}
+          compact
+          className="mt-1 block w-full rounded-lg border border-zinc-300 bg-surface px-2 py-1.5 text-xs focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
+        />
+      </div>
       <button
         type="button"
         onClick={() => void signOut({ callbackUrl: "/" })}
-        className="mt-3 w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+        className="mt-3 w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
       >
         Sign out
       </button>
@@ -136,7 +152,7 @@ export function DashboardShell({
               type="button"
               onClick={() => setOpen(false)}
               aria-label="Close navigation"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
             >
               <svg
                 aria-hidden="true"
@@ -172,7 +188,7 @@ export function DashboardShell({
             aria-label="Open navigation"
             aria-expanded={open}
             aria-controls="mobile-nav"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 lg:hidden dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 lg:hidden dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
           >
             <svg
               aria-hidden="true"

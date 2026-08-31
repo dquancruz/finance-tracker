@@ -8,9 +8,13 @@ import type {
 import { apiClient } from '../api-client';
 
 export function fetchDashboardSummary(
+  displayCurrency?: string,
   token?: string,
 ): Promise<IDashboardSummary> {
-  return apiClient<IDashboardSummary>('/analytics/summary', undefined, token);
+  const qs = displayCurrency
+    ? `?displayCurrency=${encodeURIComponent(displayCurrency)}`
+    : '';
+  return apiClient<IDashboardSummary>(`/analytics/summary${qs}`, undefined, token);
 }
 
 export function fetchCategoryBreakdown(

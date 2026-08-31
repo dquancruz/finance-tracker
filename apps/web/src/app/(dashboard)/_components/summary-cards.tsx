@@ -1,9 +1,12 @@
+'use client';
+
 import type { IDashboardSummary } from '@finance-tracker/shared';
 import { formatCurrency } from '@/lib/format';
 import { formatPercentageChange } from '@/lib/analytics-format';
 
 interface SummaryCardsProps {
   summary: IDashboardSummary;
+  currency: string;
 }
 
 function SummaryCard({
@@ -33,7 +36,7 @@ function SummaryCard({
   );
 }
 
-export function SummaryCards({ summary }: SummaryCardsProps) {
+export function SummaryCards({ summary, currency }: SummaryCardsProps) {
   const overBudgetCount = summary.budgetStatus.filter(
     (b) => b.percentage >= 100,
   ).length;
@@ -45,12 +48,12 @@ export function SummaryCards({ summary }: SummaryCardsProps) {
         <SummaryCard
           title="Total This Month"
           description="All expenses in the current calendar month"
-          value={formatCurrency(summary.totalThisMonth)}
+          value={formatCurrency(summary.totalThisMonth, currency)}
         />
         <SummaryCard
           title="Last Month"
           description={`${formatPercentageChange(summary.monthOverMonthChange)} vs. last month`}
-          value={formatCurrency(summary.totalLastMonth)}
+          value={formatCurrency(summary.totalLastMonth, currency)}
           valueClassName={
             changeIsIncrease
               ? 'text-red-600 dark:text-red-400'

@@ -1,5 +1,5 @@
 const SPENDING = [
-  { label: "Housing", amount: "$1,420", width: "78%", color: "bg-indigo-500" },
+  { label: "Housing", amount: "$1,420", width: "78%", color: "bg-teal-500" },
   { label: "Food", amount: "$486", width: "48%", color: "bg-violet-400" },
   { label: "Transport", amount: "$264", width: "31%", color: "bg-sky-400" },
 ] as const;
@@ -15,7 +15,7 @@ function WindowFrame({
     <div
       role="img"
       aria-label={label}
-      className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl shadow-indigo-950/10 dark:border-zinc-700 dark:bg-zinc-900"
+      className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl shadow-teal-950/10 dark:border-zinc-700 dark:bg-zinc-900"
     >
       <div
         aria-hidden="true"
@@ -37,7 +37,7 @@ export function DashboardPreview() {
         <div className="border-r border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950">
           <p className="font-semibold text-zinc-800 dark:text-zinc-100">FT</p>
           <div className="mt-6 space-y-3 text-zinc-400">
-            <p className="font-medium text-indigo-600">Overview</p>
+            <p className="font-medium text-teal-600">Overview</p>
             <p>Expenses</p>
             <p>Budgets</p>
             <p>Plans</p>
@@ -117,7 +117,7 @@ export function ExpensePreview() {
               Everything in one searchable view
             </p>
           </div>
-          <span className="rounded-lg bg-indigo-600 px-3 py-2 text-xs font-medium text-white">
+          <span className="rounded-lg bg-teal-600 px-3 py-2 text-xs font-medium text-white">
             Add expense
           </span>
         </div>
@@ -154,7 +154,7 @@ export function InstallmentPreview() {
   return (
     <WindowFrame label="Installment plan preview with payoff progress and upcoming payment">
       <div className="p-5">
-        <p className="text-xs font-medium uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+        <p className="text-xs font-medium uppercase tracking-wider text-teal-600 dark:text-teal-400">
           Payoff plan
         </p>
         <div className="mt-2 flex items-end justify-between gap-4">
@@ -169,7 +169,7 @@ export function InstallmentPreview() {
           </p>
         </div>
         <div className="mt-4 h-2 rounded-full bg-zinc-100 dark:bg-zinc-800">
-          <div className="h-2 w-1/2 rounded-full bg-indigo-600" />
+          <div className="h-2 w-1/2 rounded-full bg-teal-600" />
         </div>
         <div className="mt-6 rounded-xl bg-zinc-50 p-4 dark:bg-zinc-950">
           <div className="flex justify-between text-xs">

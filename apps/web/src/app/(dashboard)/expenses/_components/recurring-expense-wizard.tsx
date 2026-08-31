@@ -4,14 +4,17 @@ import type { RecurringFrequency } from '@finance-tracker/shared';
 import { computeNextDueDate } from '@finance-tracker/finance-utils';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { CurrencySelect } from '@/components/currency-select';
 import { formatCurrency, formatDate, toDateInputValue } from '@/lib/format';
 import { useCategories } from '@/lib/hooks/use-categories';
+import { usePreferredCurrency } from '@/lib/hooks/use-preferred-currency';
 import { CategorySelect } from './category-select';
 
 export interface RecurringExpenseValues {
   categoryId: string;
   description: string;
   amount: number;
+  currency?: string;
   frequency: RecurringFrequency;
   startDate: string;
   endDate?: string;
@@ -41,11 +44,13 @@ function nextOccurrences(
 export function RecurringExpenseWizard({ onSubmit }: RecurringExpenseWizardProps) {
   const router = useRouter();
   const { data: categories } = useCategories();
+  const { currency: preferredCurrency } = usePreferredCurrency();
   const [step, setStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   const [categoryId, setCategoryId] = useState('');
+  const [currency, setCurrency] = useState(preferredCurrency);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [frequency, setFrequency] = useState<RecurringFrequency>('monthly');
@@ -96,6 +101,7 @@ export function RecurringExpenseWizard({ onSubmit }: RecurringExpenseWizardProps
         categoryId,
         description: description.trim(),
         amount: Number(amount),
+        currency,
         frequency,
         startDate,
         endDate: endDate || undefined,
@@ -118,7 +124,7 @@ export function RecurringExpenseWizard({ onSubmit }: RecurringExpenseWizardProps
               aria-current={step === index ? 'step' : undefined}
               className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ${
                 index <= step
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-teal-600 text-white'
                   : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
               }`}
             >
@@ -157,23 +163,31 @@ export function RecurringExpenseWizard({ onSubmit }: RecurringExpenseWizardProps
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Netflix subscription"
-              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
+              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
             />
           </div>
-          <div>
-            <label htmlFor="rec-amount" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Amount per occurrence
-            </label>
-            <input
-              id="rec-amount"
-              type="number"
-              min={0}
-              step="0.01"
-              required
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
-            />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="rec-amount" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Amount per occurrence
+              </label>
+              <input
+                id="rec-amount"
+                type="number"
+                min={0}
+                step="0.01"
+                required
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
+              />
+            </div>
+            <div>
+              <label htmlFor="rec-currency" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Currency
+              </label>
+              <CurrencySelect id="rec-currency" value={currency} onChange={setCurrency} compact />
+            </div>
           </div>
         </div>
       )}
@@ -188,7 +202,7 @@ export function RecurringExpenseWizard({ onSubmit }: RecurringExpenseWizardProps
               id="rec-frequency"
               value={frequency}
               onChange={(e) => setFrequency(e.target.value as RecurringFrequency)}
-              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
+              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
             >
               {FREQUENCIES.map((freq) => (
                 <option key={freq} value={freq}>
@@ -208,7 +222,7 @@ export function RecurringExpenseWizard({ onSubmit }: RecurringExpenseWizardProps
                 required
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
+                className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
               />
             </div>
             <div>
@@ -220,7 +234,7 @@ export function RecurringExpenseWizard({ onSubmit }: RecurringExpenseWizardProps
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
+                className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
               />
             </div>
           </div>
@@ -251,7 +265,7 @@ export function RecurringExpenseWizard({ onSubmit }: RecurringExpenseWizardProps
           </p>
           <p className="tabular-nums">
             <span className="font-medium text-zinc-700 dark:text-zinc-300">Amount:</span>{' '}
-            {amount ? formatCurrency(Number(amount)) : '—'} / {frequency}
+            {amount ? formatCurrency(Number(amount), currency) : '—'} / {frequency}
           </p>
           <p>
             <span className="font-medium text-zinc-700 dark:text-zinc-300">Starts:</span> {formatDate(startDate)}
@@ -269,7 +283,7 @@ export function RecurringExpenseWizard({ onSubmit }: RecurringExpenseWizardProps
           type="button"
           onClick={goBack}
           disabled={step === 0}
-          className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-400 dark:hover:bg-zinc-800"
+          className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-400 dark:hover:bg-zinc-800"
         >
           Back
         </button>
@@ -278,7 +292,7 @@ export function RecurringExpenseWizard({ onSubmit }: RecurringExpenseWizardProps
           <button
             type="button"
             onClick={goNext}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900"
+            className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900"
           >
             Next
           </button>
@@ -287,7 +301,7 @@ export function RecurringExpenseWizard({ onSubmit }: RecurringExpenseWizardProps
             type="button"
             onClick={() => void handleConfirm()}
             disabled={pending}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus-visible:ring-offset-zinc-900"
+            className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus-visible:ring-offset-zinc-900"
           >
             {pending ? 'Creating…' : 'Create recurring expense'}
           </button>

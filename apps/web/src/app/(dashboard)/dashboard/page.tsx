@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { signOut, useSession } from "next-auth/react";
 import { getDashboardView } from "@/lib/dashboard-view";
 import { useDashboardSummary } from "@/lib/hooks/use-analytics";
+import { usePreferredCurrency } from '@/lib/hooks/use-preferred-currency';
 import { BudgetStatusCards } from "../_components/budget-status-cards";
 import { SummaryCards } from "../_components/summary-cards";
 import { UpcomingPaymentsList } from "../_components/upcoming-payments-list";
@@ -81,13 +82,14 @@ function PageShell({ children }: { children: React.ReactNode }) {
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
+  const { currency } = usePreferredCurrency();
   const {
     data: summary,
     isLoading,
     isError,
     isFetching,
     refetch,
-  } = useDashboardSummary();
+  } = useDashboardSummary(currency);
 
   const view = getDashboardView({
     sessionStatus: status,
@@ -161,16 +163,16 @@ export default function DashboardPage() {
 
   return (
     <PageShell>
-      <SummaryCards summary={summary} />
+      <SummaryCards summary={summary} currency={currency} />
 
       <section aria-label="Charts" className="mt-6 grid gap-6 lg:grid-cols-2">
-        <MonthlyTrendChart trends={summary.monthlyTrends} />
-        <CategoryBreakdownChart breakdown={summary.categoryBreakdown} />
+        <MonthlyTrendChart trends={summary.monthlyTrends} currency={currency} />
+        <CategoryBreakdownChart breakdown={summary.categoryBreakdown} currency={currency} />
       </section>
 
       <section aria-label="Details" className="mt-6 grid gap-6 lg:grid-cols-2">
-        <BudgetStatusCards budgetStatus={summary.budgetStatus} />
-        <UpcomingPaymentsList payments={summary.upcomingPayments} />
+        <BudgetStatusCards budgetStatus={summary.budgetStatus} currency={currency} />
+        <UpcomingPaymentsList payments={summary.upcomingPayments} currency={currency} />
       </section>
     </PageShell>
   );

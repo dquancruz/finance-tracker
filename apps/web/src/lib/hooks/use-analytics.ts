@@ -13,14 +13,14 @@ import { sessionIdentity } from "../session-identity";
 
 const ANALYTICS_KEY = ["analytics"] as const;
 
-export function useDashboardSummary() {
+export function useDashboardSummary(displayCurrency?: string) {
   const { data: session } = useSession();
   const token = session?.accessToken;
   const identity = sessionIdentity(session);
 
   return useQuery({
-    queryKey: [...ANALYTICS_KEY, identity, "summary"],
-    queryFn: () => fetchDashboardSummary(token),
+    queryKey: [...ANALYTICS_KEY, identity, 'summary', displayCurrency ?? 'USD'],
+    queryFn: () => fetchDashboardSummary(displayCurrency, token),
     enabled: Boolean(token),
   });
 }

@@ -20,7 +20,7 @@ function typeBadgeClasses(type: IExpense['type']): string {
     case 'simple':
       return 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300';
     case 'recurring':
-      return 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300';
+      return 'bg-teal-100 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300';
     case 'installment':
       return 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400';
   }
@@ -92,14 +92,14 @@ export function ExpenseTable({ expenses, categories }: ExpenseTableProps) {
                         type="button"
                         onClick={() => void payRecurring.mutateAsync(expense._id)}
                         disabled={payRecurring.isPending}
-                        className="rounded-md px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                        className="rounded-md px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 disabled:opacity-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
                       >
                         Mark paid
                       </button>
                     )}
                     <Link
                       href={`/expenses/${expense._id}/edit`}
-                      className="rounded-md px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-indigo-400 dark:hover:bg-indigo-500/10"
+                      className="rounded-md px-2 py-1 text-xs font-medium text-teal-600 hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-teal-400 dark:hover:bg-teal-500/10"
                     >
                       Edit
                     </Link>
@@ -107,7 +107,7 @@ export function ExpenseTable({ expenses, categories }: ExpenseTableProps) {
                       type="button"
                       onClick={() => void deleteExpense.mutateAsync(expense._id)}
                       disabled={deleteExpense.isPending}
-                      className="rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-500/10"
+                      className="rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-500/10"
                     >
                       Delete
                     </button>
