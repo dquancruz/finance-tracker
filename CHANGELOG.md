@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.9] - 2026-08-31
+
+- chore(deps): bump softprops/action-gh-release from 2 to 3 (#25)
+- fix(api): resolve Railway Docker build failure for argon2 (#37)
+
+
 ## [0.8.8] - 2026-08-27
 
 - Merge pull request #33 from dquancruz/dependabot/npm_and_yarn/globals-17.11.0
