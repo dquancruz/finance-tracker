@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.9.1] - 2026-08-31
+
+- chore(deps-dev): bump eslint-config-next from 16.2.9 to 16.3.2 (#38)
+
+
 ## [0.9.0] - 2026-08-31
 
 - feat(api): bootstrap admin user from environment variables (#36)
