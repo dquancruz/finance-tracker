@@ -16,6 +16,7 @@ describe('AuthService', () => {
     name: 'Person',
     avatar: undefined,
     passwordHash: 'password-hash',
+    role: 'user' as const,
   };
 
   let usersService: {
@@ -126,6 +127,7 @@ describe('AuthService', () => {
     expect(jwtService.sign).toHaveBeenCalledWith({
       sub: 'user-1',
       email: user.email,
+      role: 'user',
     });
   });
 });

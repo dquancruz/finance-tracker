@@ -86,4 +86,27 @@ describe('env.validation', () => {
       /PORT/,
     );
   });
+
+  it('accepts optional admin bootstrap env vars when both are set', () => {
+    const result = validate({
+      ...validBaseEnv,
+      ADMIN_EMAIL: 'admin@example.com',
+      ADMIN_PASSWORD: 'password12',
+      ADMIN_NAME: 'Admin',
+    });
+
+    expect(result.ADMIN_EMAIL).toBe('admin@example.com');
+    expect(result.ADMIN_PASSWORD).toBe('password12');
+    expect(result.ADMIN_NAME).toBe('Admin');
+  });
+
+  it('rejects admin bootstrap env vars when only one is set', () => {
+    expect(() =>
+      validate({ ...validBaseEnv, ADMIN_EMAIL: 'admin@example.com' }),
+    ).toThrow(/ADMIN_PASSWORD is required/);
+
+    expect(() =>
+      validate({ ...validBaseEnv, ADMIN_PASSWORD: 'password12' }),
+    ).toThrow(/ADMIN_EMAIL is required/);
+  });
 });

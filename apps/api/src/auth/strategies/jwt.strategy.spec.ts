@@ -43,13 +43,14 @@ describe('JwtStrategy', () => {
   });
 
   it('accepts claims only for the current active account', async () => {
-    findById.mockResolvedValue({ email: 'person@example.com' });
+    findById.mockResolvedValue({ email: 'person@example.com', role: 'admin' });
 
     await expect(
       strategy.validate({ sub: 'user-1', email: 'person@example.com' }),
     ).resolves.toEqual({
       userId: 'user-1',
       email: 'person@example.com',
+      role: 'admin',
     });
   });
 

@@ -1,5 +1,13 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import type { UserRole } from '@finance-tracker/shared';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
+import * as argon2 from 'argon2';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 
@@ -9,6 +17,7 @@ export interface CreateUserInput {
   name: string;
   avatar?: string;
   emailVerified?: boolean;
+  role?: UserRole;
   oauthProviders?: Array<{
     provider: 'google' | 'github';
     providerId: string;
@@ -23,10 +32,70 @@ export interface UpdateUserInput {
 }
 
 @Injectable()
-export class UsersService {
+export class UsersService implements OnModuleInit {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    private readonly config: ConfigService,
   ) {}
+
+  async onModuleInit(): Promise<void> {
+    await this.bootstrapAdminFromEnv();
+  }
+
+  /**
+   * Idempotently ensures the configured admin account exists. When
+   * `ADMIN_EMAIL` and `ADMIN_PASSWORD` are set, creates the user on first
+   * boot or promotes an existing account to `admin`.
+   */
+  async bootstrapAdminFromEnv(): Promise<void> {
+    const email = this.config.get<string>('ADMIN_EMAIL')?.toLowerCase().trim();
+    const password = this.config.get<string>('ADMIN_PASSWORD');
+    if (!email || !password) return;
+
+    const name = this.config.get<string>('ADMIN_NAME')?.trim() || 'Admin';
+    const existing = await this.findByEmail(email);
+
+    if (!existing) {
+      const passwordHash = await argon2.hash(password);
+      await this.create({
+        email,
+        name,
+        passwordHash,
+        emailVerified: true,
+        role: 'admin',
+      });
+      this.logger.log(`Created admin user for ${email}`);
+      return;
+    }
+
+    const updates: {
+      role: UserRole;
+      emailVerified: boolean;
+      passwordHash?: string;
+    } = {
+      role: 'admin',
+      emailVerified: true,
+    };
+    if (!existing.passwordHash) {
+      updates.passwordHash = await argon2.hash(password);
+    }
+
+    if (existing.role === 'admin' && existing.passwordHash) {
+      return;
+    }
+
+    await this.userModel
+      .findByIdAndUpdate(existing._id, { $set: updates })
+      .exec();
+
+    if (existing.role !== 'admin') {
+      this.logger.log(`Promoted existing user ${email} to admin`);
+    } else if (!existing.passwordHash) {
+      this.logger.log(`Set password for admin user ${email}`);
+    }
+  }
 
   async findByEmail(email: string): Promise<UserDocument | null> {
     return this.userModel

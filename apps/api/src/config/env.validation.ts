@@ -1,11 +1,13 @@
 import 'reflect-metadata';
 import { plainToInstance } from 'class-transformer';
 import {
+  IsEmail,
   IsIn,
   IsInt,
   IsOptional,
   IsString,
   Matches,
+  MaxLength,
   Min,
   MinLength,
   validateSync,
@@ -73,6 +75,24 @@ class EnvironmentVariables {
   @IsInt()
   @Min(1)
   THROTTLE_LIMIT: number = 100;
+
+  /** Optional bootstrap admin — both email and password must be set together. */
+  @IsOptional()
+  @IsEmail()
+  @MaxLength(254)
+  ADMIN_EMAIL?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(8)
+  @MaxLength(128)
+  ADMIN_PASSWORD?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(50)
+  ADMIN_NAME?: string;
 }
 
 export function validate(
@@ -109,6 +129,13 @@ export function validate(
     throw new Error(
       'JWT_SECRET must not use the documented example value in production',
     );
+  }
+
+  if (validatedConfig.ADMIN_EMAIL && !validatedConfig.ADMIN_PASSWORD) {
+    throw new Error('ADMIN_PASSWORD is required when ADMIN_EMAIL is set');
+  }
+  if (validatedConfig.ADMIN_PASSWORD && !validatedConfig.ADMIN_EMAIL) {
+    throw new Error('ADMIN_EMAIL is required when ADMIN_PASSWORD is set');
   }
 
   return validatedConfig;

@@ -1,5 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import type { UserRole } from '@finance-tracker/shared';
 import * as argon2 from 'argon2';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
@@ -10,6 +11,7 @@ interface AuthenticatableUser {
   email: string;
   name: string;
   avatar?: string;
+  role?: UserRole;
 }
 
 @Injectable()
@@ -55,9 +57,11 @@ export class AuthService {
   // NextAuth Credentials authorize() callback expects — it reads
   // `data.user` off the response body (see apps/web/src/lib/auth.ts).
   private buildAuthResponse(user: AuthenticatableUser) {
+    const role = user.role ?? 'user';
     const accessToken = this.jwtService.sign({
       sub: user._id.toString(),
       email: user.email,
+      role,
     });
     return {
       user: {
@@ -65,6 +69,7 @@ export class AuthService {
         email: user.email,
         name: user.name,
         avatar: user.avatar,
+        role,
         accessToken,
       },
     };
