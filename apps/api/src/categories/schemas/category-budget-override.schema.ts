@@ -27,6 +27,9 @@ export class CategoryBudgetOverride {
 
   @Prop({ type: String, enum: ['monthly', 'yearly'] })
   budgetPeriod?: BudgetPeriod;
+
+  @Prop({ type: String, uppercase: true, trim: true, maxlength: 3 })
+  budgetCurrency?: string;
 }
 
 export const CategoryBudgetOverrideSchema = SchemaFactory.createForClass(

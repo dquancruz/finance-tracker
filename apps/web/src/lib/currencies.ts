@@ -22,5 +22,6 @@ export const SUPPORTED_CURRENCIES: CurrencyOption[] = [
 export const DEFAULT_CURRENCY = 'USD';
 
 export function getCurrencyOption(code: string): CurrencyOption | undefined {
-  return SUPPORTED_CURRENCIES.find((currency) => currency.code === code);
+  const normalized = code.trim().toUpperCase();
+  return SUPPORTED_CURRENCIES.find((currency) => currency.code === normalized);
 }

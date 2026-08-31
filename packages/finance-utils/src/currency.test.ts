@@ -21,18 +21,18 @@ describe('convertCurrency', () => {
 
   it('converts between two non-USD currencies via USD', () => {
     const eur = convertCurrency(100, 'USD', 'EUR', RATES);
-    const backToUsd = convertCurrency(eur, 'EUR', 'USD', RATES);
+    const backToUsd = convertCurrency(eur!, 'EUR', 'USD', RATES);
     expect(backToUsd).toBe(100);
   });
 
-  it('returns the original amount when a rate is missing', () => {
-    expect(convertCurrency(50, 'XYZ', 'GTQ', RATES)).toBe(50);
+  it('returns null when a rate is missing', () => {
+    expect(convertCurrency(50, 'XYZ', 'GTQ', RATES)).toBeNull();
   });
 });
 
 describe('sumConvertedAmounts', () => {
   it('converts each item before summing', () => {
-    const total = sumConvertedAmounts(
+    const result = sumConvertedAmounts(
       [
         { amount: 100, currency: 'USD' },
         { amount: 763, currency: 'GTQ' },
@@ -40,6 +40,18 @@ describe('sumConvertedAmounts', () => {
       'GTQ',
       RATES,
     );
-    expect(total).toBe(1526);
+    expect(result).toEqual({ total: 1526, unconvertedCount: 0 });
+  });
+
+  it('skips items that cannot be converted', () => {
+    const result = sumConvertedAmounts(
+      [
+        { amount: 100, currency: 'USD' },
+        { amount: 50, currency: 'XYZ' },
+      ],
+      'GTQ',
+      RATES,
+    );
+    expect(result).toEqual({ total: 763, unconvertedCount: 1 });
   });
 });

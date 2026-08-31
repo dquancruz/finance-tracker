@@ -31,23 +31,25 @@ export default function InstallmentsPage() {
     [data],
   );
 
-  const { active, completed, totalRemaining, hasMixedCurrencies } = useMemo(() => {
+  const { active, completed, totalRemaining, hasMixedCurrencies, unconvertedCount } = useMemo(() => {
     const withSummary = plans.map((expense) => ({
       expense,
       summary: summarizeInstallment(expense),
     }));
     const currencies = new Set(plans.map((plan) => plan.currency ?? 'USD'));
+    const converted = sumConvertedAmounts(
+      withSummary.map(({ expense, summary }) => ({
+        amount: summary.remainingBalance,
+        currency: expense.currency ?? 'USD',
+      })),
+      preferredCurrency,
+      rates,
+    );
     return {
       active: withSummary.filter((p) => !p.summary.isComplete),
       completed: withSummary.filter((p) => p.summary.isComplete),
-      totalRemaining: sumConvertedAmounts(
-        withSummary.map(({ expense, summary }) => ({
-          amount: summary.remainingBalance,
-          currency: expense.currency ?? 'USD',
-        })),
-        preferredCurrency,
-        rates,
-      ),
+      totalRemaining: converted.total,
+      unconvertedCount: converted.unconvertedCount,
       hasMixedCurrencies: currencies.size > 1,
     };
   }, [plans, preferredCurrency, rates]);
@@ -123,9 +125,11 @@ export default function InstallmentsPage() {
                 {ratesLoading ? '…' : formatCurrency(totalRemaining, preferredCurrency)}
               </p>
               <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                {hasMixedCurrencies
-                  ? `Converted to ${preferredCurrency} across all plans`
-                  : 'Across all installment plans'}
+                {unconvertedCount > 0
+                  ? `Some plan balances could not be converted to ${preferredCurrency}`
+                  : hasMixedCurrencies
+                    ? `Converted to ${preferredCurrency} across all plans`
+                    : 'Across all installment plans'}
               </p>
             </div>
           </div>

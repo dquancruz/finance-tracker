@@ -10,6 +10,10 @@ describe('currencies', () => {
     });
   });
 
+  it('matches currency codes case-insensitively', () => {
+    expect(getCurrencyOption('gtq')?.code).toBe('GTQ');
+  });
+
   it('falls back to undefined for unknown codes', () => {
     expect(getCurrencyOption('XYZ')).toBeUndefined();
   });

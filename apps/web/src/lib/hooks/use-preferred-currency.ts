@@ -1,23 +1,12 @@
 'use client';
 
 import { useCallback, useSyncExternalStore } from 'react';
-import { DEFAULT_CURRENCY, getCurrencyOption } from '../currencies';
-
-const STORAGE_KEY = 'finance-tracker:preferred-currency';
-
-function normalizeCurrency(code: string | null | undefined): string {
-  return getCurrencyOption(code ?? '')?.code ?? DEFAULT_CURRENCY;
-}
-
-function readStoredCurrency(): string {
-  if (typeof window === 'undefined') return DEFAULT_CURRENCY;
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return normalizeCurrency(stored);
-  } catch {
-    return DEFAULT_CURRENCY;
-  }
-}
+import {
+  normalizePreferredCurrency,
+  readPreferredCurrencyFromStorage,
+  writePreferredCurrencyToStorage,
+} from '../preferred-currency-store';
+import { DEFAULT_CURRENCY } from '../currencies';
 
 let listeners: Array<() => void> = [];
 
@@ -34,13 +23,13 @@ function emitChange() {
   }
 }
 
+function readStoredCurrency(): string {
+  if (typeof window === 'undefined') return DEFAULT_CURRENCY;
+  return readPreferredCurrencyFromStorage(localStorage);
+}
+
 function setStoredCurrency(code: string) {
-  const normalized = normalizeCurrency(code);
-  try {
-    localStorage.setItem(STORAGE_KEY, normalized);
-  } catch {
-    // Ignore quota / private-mode errors — in-memory updates still work.
-  }
+  writePreferredCurrencyToStorage(localStorage, code);
   emitChange();
 }
 
@@ -58,3 +47,5 @@ export function usePreferredCurrency() {
 
   return { currency, setCurrency };
 }
+
+export { normalizePreferredCurrency };

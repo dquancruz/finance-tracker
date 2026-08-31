@@ -187,6 +187,26 @@ describe('AnalyticsService', () => {
       expect(result[0].remaining).toBe(-100);
       expect(result[0].percentage).toBeCloseTo(108.33, 1);
     });
+
+    it('converts budget limits into the display currency', async () => {
+      categoriesServiceMock.findAllForUser.mockResolvedValue([
+        buildCategory({
+          budgetLimit: 100,
+          budgetPeriod: 'monthly',
+          budgetCurrency: 'USD',
+        }),
+      ]);
+      mockExpenseFind(expenseModelMock, [
+        { categoryId: 'cat-1', amount: 763, currency: 'GTQ' },
+      ]);
+
+      const result = await service.getBudgetStatus('user-1', undefined, 'GTQ');
+
+      expect(result[0].budgetLimit).toBe(763);
+      expect(result[0].spent).toBe(763);
+      expect(result[0].remaining).toBe(0);
+      expect(result[0].percentage).toBe(100);
+    });
   });
 
   describe('getUpcomingPayments', () => {

@@ -2,16 +2,21 @@
 
 import { convertCurrency, type ExchangeRates } from '@finance-tracker/finance-utils';
 import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { useCallback } from 'react';
 import { fetchExchangeRates, FALLBACK_EXCHANGE_RATES } from '../exchange-rates';
 
 export function useExchangeRates() {
+  const { data: session } = useSession();
+  const token = session?.accessToken;
+
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['exchange-rates'],
-    queryFn: fetchExchangeRates,
+    queryKey: ['exchange-rates', token],
+    queryFn: () => fetchExchangeRates(token),
     staleTime: 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
     retry: 1,
+    enabled: Boolean(token),
   });
 
   const rates: ExchangeRates = data ?? FALLBACK_EXCHANGE_RATES;

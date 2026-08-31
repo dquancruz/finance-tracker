@@ -15,7 +15,11 @@ import {
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
-const BUDGET_FIELDS = ['budgetLimit', 'budgetPeriod'] as const;
+const BUDGET_FIELDS = [
+  'budgetLimit',
+  'budgetPeriod',
+  'budgetCurrency',
+] as const;
 
 @Injectable()
 export class CategoriesService implements OnModuleInit {
@@ -69,6 +73,7 @@ export class CategoriesService implements OnModuleInit {
     if (override) {
       category.budgetLimit = override.budgetLimit;
       category.budgetPeriod = override.budgetPeriod;
+      category.budgetCurrency = override.budgetCurrency;
     }
     return category;
   }
@@ -142,7 +147,8 @@ export class CategoriesService implements OnModuleInit {
           {
             $set: {
               budgetLimit: dto.budgetLimit,
-              budgetPeriod: dto.budgetPeriod,
+              budgetPeriod: dto.budgetLimit ? dto.budgetPeriod : undefined,
+              budgetCurrency: dto.budgetLimit ? dto.budgetCurrency : undefined,
             },
           },
           { upsert: true, new: true },

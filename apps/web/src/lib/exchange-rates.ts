@@ -1,4 +1,5 @@
 import type { ExchangeRates } from '@finance-tracker/finance-utils';
+import { apiClient } from './api-client';
 
 /** Static fallback when the live rate API is unavailable (USD-relative). */
 export const FALLBACK_EXCHANGE_RATES: ExchangeRates = {
@@ -15,18 +16,12 @@ export const FALLBACK_EXCHANGE_RATES: ExchangeRates = {
   BRL: 5.05,
 };
 
-const RATES_API_URL = 'https://open.er-api.com/v6/latest/USD';
 const CACHE_KEY = 'finance-tracker:exchange-rates';
 const CACHE_TTL_MS = 60 * 60 * 1000;
 
 interface CachedRates {
   fetchedAt: number;
   rates: ExchangeRates;
-}
-
-interface RatesApiResponse {
-  result: string;
-  rates?: ExchangeRates;
 }
 
 function readCache(): CachedRates | null {
@@ -52,19 +47,13 @@ function writeCache(rates: ExchangeRates) {
   }
 }
 
-/** Fetches USD-relative exchange rates, with localStorage cache + static fallback. */
-export async function fetchExchangeRates(): Promise<ExchangeRates> {
+/** Fetches USD-relative exchange rates from the API, with localStorage cache + static fallback. */
+export async function fetchExchangeRates(token?: string): Promise<ExchangeRates> {
   const cached = readCache();
   if (cached) return cached.rates;
 
   try {
-    const response = await fetch(RATES_API_URL, { cache: 'no-store' });
-    if (!response.ok) throw new Error(`Rates API ${response.status}`);
-    const body = (await response.json()) as RatesApiResponse;
-    if (body.result !== 'success' || !body.rates) {
-      throw new Error('Rates API returned an invalid payload');
-    }
-    const rates: ExchangeRates = { USD: 1, ...body.rates };
+    const rates = await apiClient<ExchangeRates>('/exchange-rates', undefined, token);
     writeCache(rates);
     return rates;
   } catch {

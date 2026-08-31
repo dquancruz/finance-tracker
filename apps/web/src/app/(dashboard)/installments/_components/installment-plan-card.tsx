@@ -53,16 +53,20 @@ export function InstallmentPlanCard({
           </p>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             remaining of {formatCurrency(expense.totalAmount, expense.currency)}
-            {showConverted && (
-              <>
-                {' '}
-                · {formatCurrency(
-                  convert(summary.remainingBalance, expense.currency, displayCurrency),
-                  displayCurrency,
-                )}{' '}
-                in {displayCurrency}
-              </>
-            )}
+            {showConverted && (() => {
+              const converted = convert(
+                summary.remainingBalance,
+                expense.currency,
+                displayCurrency,
+              );
+              if (converted === null) return null;
+              return (
+                <>
+                  {' '}
+                  · {formatCurrency(converted, displayCurrency)} in {displayCurrency}
+                </>
+              );
+            })()}
           </p>
         </div>
       </div>

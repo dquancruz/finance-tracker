@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { SYSTEM_CATEGORIES } from '@finance-tracker/shared';
+import { useDropdownDismiss } from '@/lib/hooks/use-dropdown-dismiss';
 import { useDropdownKeyboard } from '@/lib/hooks/use-dropdown-keyboard';
 
 const CATEGORY_EMOJIS = [
@@ -37,20 +38,10 @@ export function EmojiPicker({ id, value, onChange }: EmojiPickerProps) {
         setOpen(false);
       }
     },
+    getOptionLabel: (index) => EMOJI_OPTIONS[index] ?? '',
   });
 
-  useEffect(() => {
-    if (!open) return;
-
-    function handlePointerDown(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handlePointerDown);
-    return () => document.removeEventListener('mousedown', handlePointerDown);
-  }, [open]);
+  useDropdownDismiss(open, rootRef, () => setOpen(false));
 
   return (
     <div ref={rootRef} className="relative">
@@ -60,6 +51,7 @@ export function EmojiPicker({ id, value, onChange }: EmojiPickerProps) {
       <button
         id={id}
         type="button"
+        role="combobox"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listId}

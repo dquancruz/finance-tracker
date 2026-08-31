@@ -77,6 +77,7 @@ function CategoryRow({
       input: {
         budgetLimit: budgetLimit ? Number(budgetLimit) : undefined,
         budgetPeriod: budgetLimit ? budgetPeriod : undefined,
+        budgetCurrency: budgetLimit ? currency : undefined,
       },
     });
     setEditing(false);
@@ -139,7 +140,7 @@ function CategoryRow({
         ) : (
           <p className="mt-0.5 text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
             {category.budgetLimit
-              ? `Budget: ${formatCurrency(category.budgetLimit, currency)} / ${category.budgetPeriod}`
+              ? `Budget: ${formatCurrency(category.budgetLimit, category.budgetCurrency ?? currency)} / ${category.budgetPeriod}`
               : 'No budget set'}
           </p>
         )}

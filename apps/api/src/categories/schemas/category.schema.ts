@@ -25,6 +25,9 @@ export class Category {
   @Prop({ type: String, enum: ['monthly', 'yearly'] })
   budgetPeriod?: BudgetPeriod;
 
+  @Prop({ type: String, uppercase: true, trim: true, maxlength: 3 })
+  budgetCurrency?: string;
+
   @Prop({ default: false })
   isSystem: boolean;
 

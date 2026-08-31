@@ -34,4 +34,11 @@ export class CreateCategoryDto {
   @IsOptional()
   @IsIn(['monthly', 'yearly'])
   budgetPeriod?: BudgetPeriod;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^[A-Z]{3}$/, {
+    message: 'budgetCurrency must be a 3-letter ISO code',
+  })
+  budgetCurrency?: string;
 }

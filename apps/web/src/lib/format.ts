@@ -1,10 +1,21 @@
+import { DEFAULT_CURRENCY, getCurrencyOption } from './currencies';
+
 /** Formats a number as currency using the given ISO 4217 currency code. */
 export function formatCurrency(amount: number, currency = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 2,
-  }).format(amount);
+  const code = getCurrencyOption(currency)?.code ?? DEFAULT_CURRENCY;
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: code,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: DEFAULT_CURRENCY,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  }
 }
 
 /** Formats an ISO date string/Date as a short, readable date (e.g. "Jan 15, 2026"). */

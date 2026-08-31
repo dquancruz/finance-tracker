@@ -7,6 +7,7 @@ export interface CreateCategoryInput {
   color: string;
   budgetLimit?: number;
   budgetPeriod?: 'monthly' | 'yearly';
+  budgetCurrency?: string;
 }
 
 export type UpdateCategoryInput = Partial<CreateCategoryInput>;

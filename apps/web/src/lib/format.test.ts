@@ -9,6 +9,10 @@ describe('formatCurrency', () => {
   it('respects the provided currency code', () => {
     expect(formatCurrency(10, 'EUR')).toContain('10.00');
   });
+
+  it('falls back to USD for unsupported currency codes', () => {
+    expect(formatCurrency(10, 'NOTREAL')).toBe('$10.00');
+  });
 });
 
 describe('formatDate', () => {

@@ -57,12 +57,15 @@ export class AnalyticsService {
     displayCurrency: string,
     rates: ExchangeRates,
   ): number {
-    return convertCurrency(
-      amount,
-      fromCurrency ?? 'USD',
-      displayCurrency,
-      rates,
+    return (
+      convertCurrency(amount, fromCurrency ?? 'USD', displayCurrency, rates) ??
+      0
     );
+  }
+
+  private normalizeDisplayCurrency(code?: string): string {
+    if (!code || !/^[A-Za-z]{3}$/.test(code)) return 'USD';
+    return code.toUpperCase();
   }
 
   private async aggregateCategorySpend(
@@ -229,7 +232,15 @@ export class AnalyticsService {
       const spendMap =
         category.budgetPeriod === 'yearly' ? yearlySpend : monthlySpend;
       const spent = round2(spendMap.get(id) ?? 0);
-      const budgetLimit = category.budgetLimit!;
+      const budgetSourceCurrency = category.budgetCurrency ?? 'USD';
+      const budgetLimit = round2(
+        this.convertAmount(
+          category.budgetLimit!,
+          budgetSourceCurrency,
+          displayCurrency,
+          rates,
+        ),
+      );
       return {
         categoryId: id,
         categoryName: category.name,
@@ -316,6 +327,7 @@ export class AnalyticsService {
     userId: string,
     displayCurrency = 'USD',
   ): Promise<IDashboardSummary> {
+    const targetCurrency = this.normalizeDisplayCurrency(displayCurrency);
     const rates = await this.exchangeRatesService.getRates();
     const now = new Date();
     const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -337,19 +349,19 @@ export class AnalyticsService {
         userId,
         thisMonthStart,
         thisMonthEnd,
-        displayCurrency,
+        targetCurrency,
         rates,
       ),
       this.aggregateCategorySpend(
         userId,
         lastMonthStart,
         lastMonthEnd,
-        displayCurrency,
+        targetCurrency,
         rates,
       ),
-      this.getBudgetStatus(userId, categories, displayCurrency),
-      this.getUpcomingPayments(userId, 30, displayCurrency),
-      this.getMonthlyTrends(userId, 6, categories, displayCurrency),
+      this.getBudgetStatus(userId, categories, targetCurrency),
+      this.getUpcomingPayments(userId, 30, targetCurrency),
+      this.getMonthlyTrends(userId, 6, categories, targetCurrency),
     ]);
 
     const categoryBreakdown = this.buildCategoryBreakdown(

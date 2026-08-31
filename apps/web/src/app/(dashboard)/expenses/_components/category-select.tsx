@@ -1,8 +1,9 @@
 'use client';
 
 import type { ICategory } from '@finance-tracker/shared';
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useId, useMemo, useRef, useState } from 'react';
 import { useCategories } from '@/lib/hooks/use-categories';
+import { useDropdownDismiss } from '@/lib/hooks/use-dropdown-dismiss';
 import { useDropdownKeyboard } from '@/lib/hooks/use-dropdown-keyboard';
 
 interface CategorySelectProps {
@@ -48,8 +49,10 @@ export function CategorySelect({
 }: CategorySelectProps) {
   const { data: categories, isLoading } = useCategories();
   const [open, setOpen] = useState(false);
+  const [touched, setTouched] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const listId = useId();
+  const errorId = useId();
 
   const selected = categories?.find((category) => category._id === value);
   const optionIds = useMemo(
@@ -68,23 +71,19 @@ export function CategorySelect({
       const categoryId = optionIds[index];
       if (categoryId !== undefined) selectCategory(categoryId);
     },
+    getOptionLabel: (index) => {
+      const categoryId = optionIds[index];
+      if (allowEmpty && categoryId === '') return emptyLabel;
+      const category = categories?.find((item) => item._id === categoryId);
+      return category?.name ?? '';
+    },
   });
 
-  useEffect(() => {
-    if (!open) return;
-
-    function handlePointerDown(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handlePointerDown);
-    return () => document.removeEventListener('mousedown', handlePointerDown);
-  }, [open]);
+  useDropdownDismiss(open, rootRef, () => setOpen(false));
 
   function selectCategory(categoryId: string) {
     onChange(categoryId);
+    setTouched(true);
     setOpen(false);
   }
 
@@ -96,17 +95,22 @@ export function CategorySelect({
         ? emptyLabel
         : 'Select a category';
 
-  const showRequiredError = required && !value && !allowEmpty;
+  const showRequiredError = required && !value && !allowEmpty && touched;
 
   return (
     <div ref={rootRef} className={`relative ${className}`}>
       <button
         id={id}
         type="button"
+        role="combobox"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listId}
+        aria-required={required || undefined}
+        aria-invalid={showRequiredError || undefined}
+        aria-describedby={showRequiredError ? errorId : undefined}
         disabled={isLoading}
+        onBlur={() => setTouched(true)}
         onClick={() => {
           setOpen((current) => {
             if (!current) resetIndex();
@@ -147,7 +151,7 @@ export function CategorySelect({
         </svg>
       </button>
       {showRequiredError && (
-        <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+        <p id={errorId} className="mt-1 text-xs text-red-600 dark:text-red-400">
           Please select a category.
         </p>
       )}

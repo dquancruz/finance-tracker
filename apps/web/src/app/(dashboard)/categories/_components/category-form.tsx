@@ -3,11 +3,13 @@
 import { useState, type FormEvent } from 'react';
 import { EmojiPicker } from '@/components/emoji-picker';
 import { useCreateCategory } from '@/lib/hooks/use-categories';
+import { usePreferredCurrency } from '@/lib/hooks/use-preferred-currency';
 
 const BUDGET_PERIODS = ['monthly', 'yearly'] as const;
 
 export function CategoryForm() {
   const createCategory = useCreateCategory();
+  const { currency } = usePreferredCurrency();
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('🏷️');
   const [color, setColor] = useState('#0D9488');
@@ -36,6 +38,7 @@ export function CategoryForm() {
         color,
         budgetLimit: budgetLimit ? Number(budgetLimit) : undefined,
         budgetPeriod: budgetLimit ? budgetPeriod : undefined,
+        budgetCurrency: budgetLimit ? currency : undefined,
       });
       setName('');
       setIcon('🏷️');
