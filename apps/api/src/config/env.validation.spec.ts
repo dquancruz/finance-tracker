@@ -55,6 +55,18 @@ describe('env.validation', () => {
     ).toThrow(/example value/);
   });
 
+  it('rejects the documented example admin password in production', () => {
+    expect(() =>
+      validate({
+        ...validBaseEnv,
+        NODE_ENV: 'production',
+        CORS_ORIGIN: 'https://app.example.com',
+        ADMIN_EMAIL: 'admin@example.com',
+        ADMIN_PASSWORD: 'change-me-to-a-strong-password',
+      }),
+    ).toThrow(/ADMIN_PASSWORD must not use the documented example value/);
+  });
+
   it('rejects an unrecognized NODE_ENV value', () => {
     expect(() =>
       validate({ ...validBaseEnv, NODE_ENV: 'staging-typo' }),
@@ -85,5 +97,28 @@ describe('env.validation', () => {
     expect(() => validate({ ...validBaseEnv, PORT: 'not-a-port' })).toThrow(
       /PORT/,
     );
+  });
+
+  it('accepts optional admin bootstrap env vars when both are set', () => {
+    const result = validate({
+      ...validBaseEnv,
+      ADMIN_EMAIL: 'admin@example.com',
+      ADMIN_PASSWORD: 'password12',
+      ADMIN_NAME: 'Admin',
+    });
+
+    expect(result.ADMIN_EMAIL).toBe('admin@example.com');
+    expect(result.ADMIN_PASSWORD).toBe('password12');
+    expect(result.ADMIN_NAME).toBe('Admin');
+  });
+
+  it('rejects admin bootstrap env vars when only one is set', () => {
+    expect(() =>
+      validate({ ...validBaseEnv, ADMIN_EMAIL: 'admin@example.com' }),
+    ).toThrow(/ADMIN_PASSWORD is required/);
+
+    expect(() =>
+      validate({ ...validBaseEnv, ADMIN_PASSWORD: 'password12' }),
+    ).toThrow(/ADMIN_EMAIL is required/);
   });
 });

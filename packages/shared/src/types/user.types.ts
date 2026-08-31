@@ -1,3 +1,5 @@
+export type UserRole = 'user' | 'admin';
+
 export interface IOAuthProvider {
   provider: 'google' | 'github';
   providerId: string;
@@ -11,6 +13,7 @@ export interface IUser {
   avatar?: string;
   oauthProviders: IOAuthProvider[];
   emailVerified?: boolean;
+  role: UserRole;
   defaultCurrency: string;
   timezone: string;
   createdAt: Date;
@@ -23,6 +26,7 @@ export interface IUserPublic {
   email: string;
   name: string;
   avatar?: string;
+  role: UserRole;
   defaultCurrency: string;
   timezone: string;
   createdAt: Date;

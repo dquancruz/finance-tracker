@@ -3,6 +3,8 @@ import { HydratedDocument } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
+export type UserRole = 'user' | 'admin';
+
 @Schema({ _id: false })
 class OAuthProvider {
   @Prop({ required: true, enum: ['google', 'github'] })
@@ -39,6 +41,14 @@ export class User {
    */
   @Prop({ default: false })
   emailVerified: boolean;
+
+  @Prop({
+    type: String,
+    required: true,
+    enum: ['user', 'admin'],
+    default: 'user',
+  })
+  role: UserRole;
 
   @Prop({ default: 'USD' })
   defaultCurrency: string;

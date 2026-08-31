@@ -1,11 +1,13 @@
 import 'reflect-metadata';
 import { plainToInstance } from 'class-transformer';
 import {
+  IsEmail,
   IsIn,
   IsInt,
   IsOptional,
   IsString,
   Matches,
+  MaxLength,
   Min,
   MinLength,
   validateSync,
@@ -18,6 +20,9 @@ enum Environment {
 }
 
 const KNOWN_EXAMPLE_SECRETS = new Set(['change-me-to-a-random-32-char-string']);
+const KNOWN_EXAMPLE_ADMIN_PASSWORDS = new Set([
+  'change-me-to-a-strong-password',
+]);
 
 /**
  * Startup env validation. Fails fast (throws before Nest finishes
@@ -73,6 +78,24 @@ class EnvironmentVariables {
   @IsInt()
   @Min(1)
   THROTTLE_LIMIT: number = 100;
+
+  /** Optional bootstrap admin — both email and password must be set together. */
+  @IsOptional()
+  @IsEmail()
+  @MaxLength(254)
+  ADMIN_EMAIL?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(8)
+  @MaxLength(128)
+  ADMIN_PASSWORD?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(50)
+  ADMIN_NAME?: string;
 }
 
 export function validate(
@@ -109,6 +132,23 @@ export function validate(
     throw new Error(
       'JWT_SECRET must not use the documented example value in production',
     );
+  }
+
+  if (
+    validatedConfig.NODE_ENV === Environment.Production &&
+    validatedConfig.ADMIN_PASSWORD &&
+    KNOWN_EXAMPLE_ADMIN_PASSWORDS.has(validatedConfig.ADMIN_PASSWORD)
+  ) {
+    throw new Error(
+      'ADMIN_PASSWORD must not use the documented example value in production',
+    );
+  }
+
+  if (validatedConfig.ADMIN_EMAIL && !validatedConfig.ADMIN_PASSWORD) {
+    throw new Error('ADMIN_PASSWORD is required when ADMIN_EMAIL is set');
+  }
+  if (validatedConfig.ADMIN_PASSWORD && !validatedConfig.ADMIN_EMAIL) {
+    throw new Error('ADMIN_EMAIL is required when ADMIN_PASSWORD is set');
   }
 
   return validatedConfig;
