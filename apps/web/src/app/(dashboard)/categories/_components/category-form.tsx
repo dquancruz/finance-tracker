@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { EmojiPicker } from '@/components/emoji-picker';
 import { useCreateCategory } from '@/lib/hooks/use-categories';
 
 const BUDGET_PERIODS = ['monthly', 'yearly'] as const;
@@ -9,7 +10,7 @@ export function CategoryForm() {
   const createCategory = useCreateCategory();
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('🏷️');
-  const [color, setColor] = useState('#6366F1');
+  const [color, setColor] = useState('#0D9488');
   const [budgetLimit, setBudgetLimit] = useState('');
   const [budgetPeriod, setBudgetPeriod] =
     useState<(typeof BUDGET_PERIODS)[number]>('monthly');
@@ -38,7 +39,7 @@ export function CategoryForm() {
       });
       setName('');
       setIcon('🏷️');
-      setColor('#6366F1');
+      setColor('#0D9488');
       setBudgetLimit('');
     } catch {
       setError('Could not create the category. Please try again.');
@@ -73,23 +74,12 @@ export function CategoryForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
             placeholder="Subscriptions"
           />
         </div>
 
-        <div>
-          <label htmlFor="cat-icon" className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
-            Icon
-          </label>
-          <input
-            id="cat-icon"
-            value={icon}
-            onChange={(e) => setIcon(e.target.value)}
-            maxLength={2}
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-center text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
-          />
-        </div>
+        <EmojiPicker id="cat-icon" value={icon} onChange={setIcon} />
 
         <div>
           <label htmlFor="cat-color" className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
@@ -107,7 +97,7 @@ export function CategoryForm() {
               aria-label="Color hex value"
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="block w-full rounded-lg border border-zinc-300 px-2 py-2 text-xs uppercase focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
+              className="block w-full rounded-lg border border-zinc-300 px-2 py-2 text-xs uppercase focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
             />
           </div>
         </div>
@@ -127,7 +117,7 @@ export function CategoryForm() {
             value={budgetLimit}
             onChange={(e) => setBudgetLimit(e.target.value)}
             placeholder="Optional"
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
           />
         </div>
 
@@ -145,7 +135,7 @@ export function CategoryForm() {
             onChange={(e) =>
               setBudgetPeriod(e.target.value as (typeof BUDGET_PERIODS)[number])
             }
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
           >
             {BUDGET_PERIODS.map((period) => (
               <option key={period} value={period}>
@@ -159,7 +149,7 @@ export function CategoryForm() {
       <button
         type="submit"
         disabled={createCategory.isPending}
-        className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus-visible:ring-offset-zinc-900"
+        className="mt-4 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus-visible:ring-offset-zinc-900"
       >
         {createCategory.isPending ? 'Creating…' : 'Add category'}
       </button>

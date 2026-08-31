@@ -8,9 +8,10 @@ import {
 
 interface BudgetStatusCardsProps {
   budgetStatus: IBudgetStatus[];
+  currency: string;
 }
 
-export function BudgetStatusCards({ budgetStatus }: BudgetStatusCardsProps) {
+export function BudgetStatusCards({ budgetStatus, currency }: BudgetStatusCardsProps) {
   return (
     <article
       aria-label="Budget status"
@@ -38,8 +39,8 @@ export function BudgetStatusCards({ budgetStatus }: BudgetStatusCardsProps) {
                     {budget.categoryName}
                   </span>
                   <span className={`tabular-nums ${budgetToneTextClass(tone)}`}>
-                    {formatCurrency(budget.spent)} /{' '}
-                    {formatCurrency(budget.budgetLimit)}
+                    {formatCurrency(budget.spent, currency)} /{' '}
+                    {formatCurrency(budget.budgetLimit, currency)}
                   </span>
                 </div>
                 <div
@@ -58,8 +59,8 @@ export function BudgetStatusCards({ budgetStatus }: BudgetStatusCardsProps) {
                 <p className="mt-1 text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
                   {budget.percentage.toFixed(0)}% used
                   {budget.remaining >= 0
-                    ? ` — ${formatCurrency(budget.remaining)} remaining`
-                    : ` — ${formatCurrency(Math.abs(budget.remaining))} over budget`}
+                    ? ` — ${formatCurrency(budget.remaining, currency)} remaining`
+                    : ` — ${formatCurrency(Math.abs(budget.remaining), currency)} over budget`}
                 </p>
               </li>
             );

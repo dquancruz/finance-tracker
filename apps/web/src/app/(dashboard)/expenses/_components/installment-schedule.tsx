@@ -65,7 +65,7 @@ export function InstallmentSchedule({
                         })
                       }
                       disabled={payInstallment.isPending}
-                      className="rounded-md px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                      className="rounded-md px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 disabled:opacity-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
                     >
                       Mark paid
                     </button>

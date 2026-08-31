@@ -14,6 +14,7 @@ import { formatCurrency } from '@/lib/format';
 
 interface MonthlyTrendChartProps {
   trends: IMonthlyTrend[];
+  currency: string;
 }
 
 function monthTickLabel(month: string): string {
@@ -22,7 +23,7 @@ function monthTickLabel(month: string): string {
   return new Intl.DateTimeFormat('en-US', { month: 'short' }).format(date);
 }
 
-export function MonthlyTrendChart({ trends }: MonthlyTrendChartProps) {
+export function MonthlyTrendChart({ trends, currency }: MonthlyTrendChartProps) {
   const hasData = trends.some((t) => t.total > 0);
 
   return (
@@ -48,14 +49,14 @@ export function MonthlyTrendChart({ trends }: MonthlyTrendChartProps) {
                 tickLine={false}
               />
               <YAxis
-                tickFormatter={(value: number) => formatCurrency(value)}
+                tickFormatter={(value: number) => formatCurrency(value, currency)}
                 tick={{ fontSize: 11, fill: 'var(--chart-tick)' }}
                 axisLine={false}
                 tickLine={false}
                 width={72}
               />
               <Tooltip
-                formatter={(value: number) => formatCurrency(value)}
+                formatter={(value: number) => formatCurrency(value, currency)}
                 labelFormatter={monthTickLabel}
                 contentStyle={{
                   background: 'var(--surface)',
@@ -70,7 +71,7 @@ export function MonthlyTrendChart({ trends }: MonthlyTrendChartProps) {
                 type="monotone"
                 dataKey="total"
                 name="Total spend"
-                stroke="#6366F1"
+                stroke="var(--chart-line)"
                 strokeWidth={2}
                 dot={{ r: 3 }}
                 activeDot={{ r: 5 }}

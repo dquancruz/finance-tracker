@@ -42,6 +42,7 @@ export default function EditExpensePage() {
               categoryId: expense.categoryId,
               amount: expense.amount,
               date: toDateInputValue(expense.date),
+              currency: expense.currency,
               notes: expense.notes,
             }}
             onSubmit={(values) =>
@@ -75,6 +76,7 @@ export default function EditExpensePage() {
               description: expense.description,
               totalAmount: expense.totalAmount,
               numInstallments: expense.numInstallments,
+              currency: expense.currency,
               interestRate: expense.interestRate,
               interestType: expense.interestType,
               startDate: toDateInputValue(expense.startDate),

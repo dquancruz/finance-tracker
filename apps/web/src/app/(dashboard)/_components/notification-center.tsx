@@ -31,7 +31,7 @@ function NotificationRow({
       <button
         type="button"
         onClick={() => !notification.read && onRead(notification._id)}
-        className={`flex w-full flex-col gap-1 rounded-lg px-3 py-2 text-left transition-colors hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 dark:hover:bg-zinc-800 ${
+        className={`flex w-full flex-col gap-1 rounded-lg px-3 py-2 text-left transition-colors hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-500 dark:hover:bg-zinc-800 ${
           notification.read ? 'opacity-60' : ''
         }`}
       >
@@ -99,7 +99,7 @@ export function NotificationCenter() {
         aria-expanded={open}
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
         onClick={() => setOpen((o) => !o)}
-        className="relative flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+        className="relative flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
       >
         <svg
           aria-hidden="true"
@@ -137,7 +137,7 @@ export function NotificationCenter() {
               type="button"
               onClick={() => markAllAsRead.mutate()}
               disabled={unreadCount === 0 || markAllAsRead.isPending}
-              className="rounded text-xs font-medium text-indigo-600 hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-40 dark:text-indigo-400 dark:hover:text-indigo-300"
+              className="rounded text-xs font-medium text-teal-600 hover:text-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 disabled:opacity-40 dark:text-teal-400 dark:hover:text-teal-300"
             >
               Mark all read
             </button>
@@ -148,7 +148,7 @@ export function NotificationCenter() {
               <button
                 type="button"
                 onClick={() => void handleEnablePush()}
-                className="rounded text-xs font-medium text-zinc-500 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-zinc-400 dark:hover:text-zinc-200"
+                className="rounded text-xs font-medium text-zinc-500 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-zinc-400 dark:hover:text-zinc-200"
               >
                 Enable push notifications
               </button>

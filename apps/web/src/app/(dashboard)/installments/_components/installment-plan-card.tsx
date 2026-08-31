@@ -62,7 +62,7 @@ export function InstallmentPlanCard({
           className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800"
         >
           <div
-            className="h-full rounded-full bg-indigo-600 transition-[width]"
+            className="h-full rounded-full bg-teal-600 transition-[width]"
             style={{ width: `${summary.progressPercentage}%` }}
           />
         </div>
@@ -82,7 +82,7 @@ export function InstallmentPlanCard({
         type="button"
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
-        className="mt-3 rounded-md px-2 py-1 text-xs font-medium text-indigo-600 transition-colors hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-indigo-400 dark:hover:bg-indigo-500/10"
+        className="mt-3 rounded-md px-2 py-1 text-xs font-medium text-teal-600 transition-colors hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-teal-400 dark:hover:bg-teal-500/10"
       >
         {expanded ? 'Hide schedule' : 'View schedule'}
       </button>

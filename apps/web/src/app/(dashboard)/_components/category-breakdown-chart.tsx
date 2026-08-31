@@ -6,10 +6,12 @@ import { formatCurrency } from '@/lib/format';
 
 interface CategoryBreakdownChartProps {
   breakdown: ICategorySpend[];
+  currency: string;
 }
 
 export function CategoryBreakdownChart({
   breakdown,
+  currency,
 }: CategoryBreakdownChartProps) {
   return (
     <article
@@ -43,7 +45,7 @@ export function CategoryBreakdownChart({
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number) => formatCurrency(value)}
+                  formatter={(value: number) => formatCurrency(value, currency)}
                   contentStyle={{
                     background: 'var(--surface)',
                     borderColor: 'var(--border)',
@@ -74,7 +76,7 @@ export function CategoryBreakdownChart({
                   </span>
                 </span>
                 <span className="shrink-0 tabular-nums text-zinc-500 dark:text-zinc-400">
-                  {formatCurrency(category.amount)} ({category.percentage.toFixed(0)}%)
+                  {formatCurrency(category.amount, currency)} ({category.percentage.toFixed(0)}%)
                 </span>
               </li>
             ))}

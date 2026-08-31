@@ -1,10 +1,12 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo } from 'react';
 import type { IInstallmentExpense } from '@finance-tracker/shared';
 import { useCategories } from '@/lib/hooks/use-categories';
 import { useExpenses } from '@/lib/hooks/use-expenses';
 import { formatCurrency } from '@/lib/format';
+import { usePreferredCurrency } from '@/lib/hooks/use-preferred-currency';
 import { summarizeInstallment } from '@/lib/installment-summary';
 import { InstallmentPlanCard } from './_components/installment-plan-card';
 
@@ -17,6 +19,7 @@ const INSTALLMENT_FILTERS = {
 };
 
 export default function InstallmentsPage() {
+  const { currency: preferredCurrency } = usePreferredCurrency();
   const { data: categories } = useCategories();
   const { data, isLoading, isError } = useExpenses(INSTALLMENT_FILTERS);
 
@@ -42,13 +45,23 @@ export default function InstallmentsPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-        Installments
-      </h1>
-      <p className="mt-2 text-zinc-500 dark:text-zinc-400">
-        A consolidated view of every installment plan&apos;s payment schedule
-        and remaining balance.
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+            Installments
+          </h1>
+          <p className="mt-2 text-zinc-500 dark:text-zinc-400">
+            Track payoff progress, upcoming payments, and remaining balances for
+            every installment plan.
+          </p>
+        </div>
+        <Link
+          href="/expenses/new?type=installment"
+          className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+        >
+          Add installment plan
+        </Link>
+      </div>
 
       {isLoading && (
         <p className="mt-8 text-sm text-zinc-500 dark:text-zinc-400">
@@ -67,9 +80,15 @@ export default function InstallmentsPage() {
             No installment plans yet
           </p>
           <p className="mx-auto mt-1 max-w-sm text-sm text-zinc-500 dark:text-zinc-400">
-            Add an installment expense from the Expenses page to see its
-            payment schedule and payoff progress here.
+            Create an installment expense to generate a payment schedule and
+            track payoff progress here.
           </p>
+          <Link
+            href="/expenses/new?type=installment"
+            className="mt-4 inline-flex rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+          >
+            Create installment plan
+          </Link>
         </div>
       )}
 
@@ -92,7 +111,7 @@ export default function InstallmentsPage() {
                 Remaining balance
               </p>
               <p className="mt-3 text-2xl font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
-                {formatCurrency(totalRemaining)}
+                {formatCurrency(totalRemaining, preferredCurrency)}
               </p>
               <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
                 Across all installment plans

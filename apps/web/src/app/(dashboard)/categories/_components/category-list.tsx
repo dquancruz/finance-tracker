@@ -4,12 +4,14 @@ import type { ICategory } from '@finance-tracker/shared';
 import { useState } from 'react';
 import { useDeleteCategory, useUpdateCategory } from '@/lib/hooks/use-categories';
 import { formatCurrency } from '@/lib/format';
+import { usePreferredCurrency } from '@/lib/hooks/use-preferred-currency';
 
 interface CategoryListProps {
   categories: ICategory[];
 }
 
 export function CategoryList({ categories }: CategoryListProps) {
+  const { currency } = usePreferredCurrency();
   const systemCategories = categories.filter((c) => c.isSystem);
   const customCategories = categories.filter((c) => !c.isSystem);
 
@@ -24,7 +26,7 @@ export function CategoryList({ categories }: CategoryListProps) {
         ) : (
           <ul role="list" className="mt-3 space-y-2">
             {customCategories.map((category) => (
-              <CategoryRow key={category._id} category={category} editable />
+              <CategoryRow key={category._id} category={category} currency={currency} editable />
             ))}
           </ul>
         )}
@@ -41,7 +43,7 @@ export function CategoryList({ categories }: CategoryListProps) {
         </p>
         <ul role="list" className="mt-3 space-y-2">
           {systemCategories.map((category) => (
-            <CategoryRow key={category._id} category={category} editable={false} />
+            <CategoryRow key={category._id} category={category} currency={currency} editable={false} />
           ))}
         </ul>
       </section>
@@ -51,9 +53,11 @@ export function CategoryList({ categories }: CategoryListProps) {
 
 function CategoryRow({
   category,
+  currency,
   editable,
 }: {
   category: ICategory;
+  currency: string;
   /** Whether name/icon/color/delete are allowed — false for system categories. */
   editable: boolean;
 }) {
@@ -102,7 +106,7 @@ function CategoryRow({
               onChange={(e) => setBudgetLimit(e.target.value)}
               placeholder="No limit"
               aria-label={`Budget limit for ${category.name}`}
-              className="w-28 rounded-md border border-zinc-300 px-2 py-1 text-xs tabular-nums focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
+              className="w-28 rounded-md border border-zinc-300 px-2 py-1 text-xs tabular-nums focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
             />
             <select
               value={budgetPeriod}
@@ -111,7 +115,7 @@ function CategoryRow({
                 setBudgetPeriod(e.target.value as 'monthly' | 'yearly')
               }
               aria-label={`Budget period for ${category.name}`}
-              className="rounded-md border border-zinc-300 px-2 py-1 text-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50 dark:border-zinc-700"
+              className="rounded-md border border-zinc-300 px-2 py-1 text-xs focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 disabled:opacity-50 dark:border-zinc-700"
             >
               <option value="monthly">monthly</option>
               <option value="yearly">yearly</option>
@@ -120,14 +124,14 @@ function CategoryRow({
               type="button"
               onClick={() => void handleSaveBudget()}
               disabled={updateCategory.isPending}
-              className="rounded-md bg-indigo-600 px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-60 dark:focus-visible:ring-offset-zinc-900"
+              className="rounded-md bg-teal-600 px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 disabled:opacity-60 dark:focus-visible:ring-offset-zinc-900"
             >
               Save
             </button>
             <button
               type="button"
               onClick={() => setEditing(false)}
-              className="rounded-md px-2 py-1 text-xs text-zinc-500 transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-zinc-400 dark:hover:bg-zinc-800"
+              className="rounded-md px-2 py-1 text-xs text-zinc-500 transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-zinc-400 dark:hover:bg-zinc-800"
             >
               Cancel
             </button>
@@ -135,7 +139,7 @@ function CategoryRow({
         ) : (
           <p className="mt-0.5 text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
             {category.budgetLimit
-              ? `Budget: ${formatCurrency(category.budgetLimit)} / ${category.budgetPeriod}`
+              ? `Budget: ${formatCurrency(category.budgetLimit, currency)} / ${category.budgetPeriod}`
               : 'No budget set'}
           </p>
         )}
@@ -146,7 +150,7 @@ function CategoryRow({
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="rounded-md px-2 py-1 text-xs font-medium text-indigo-600 transition-colors hover:bg-indigo-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-indigo-400 dark:hover:bg-indigo-500/10"
+            className="rounded-md px-2 py-1 text-xs font-medium text-teal-600 transition-colors hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-teal-400 dark:hover:bg-teal-500/10"
           >
             Edit budget
           </button>
@@ -155,7 +159,7 @@ function CategoryRow({
               type="button"
               onClick={() => void deleteCategory.mutateAsync(category._id)}
               disabled={deleteCategory.isPending}
-              className="rounded-md px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-60 dark:text-red-400 dark:hover:bg-red-500/10"
+              className="rounded-md px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 disabled:opacity-60 dark:text-red-400 dark:hover:bg-red-500/10"
             >
               Delete
             </button>

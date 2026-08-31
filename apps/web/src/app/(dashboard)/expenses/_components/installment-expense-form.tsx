@@ -3,7 +3,9 @@
 import type { InterestType } from '@finance-tracker/shared';
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { CurrencySelect } from '@/components/currency-select';
 import { toDateInputValue } from '@/lib/format';
+import { usePreferredCurrency } from '@/lib/hooks/use-preferred-currency';
 import { CategorySelect } from './category-select';
 
 const INTEREST_TYPES: InterestType[] = ['none', 'simple', 'compound'];
@@ -13,6 +15,7 @@ export interface InstallmentCreateValues {
   description: string;
   totalAmount: number;
   numInstallments: number;
+  currency?: string;
   interestRate?: number;
   interestType: InterestType;
   startDate: string;
@@ -39,9 +42,11 @@ type InstallmentExpenseFormProps = CreateProps | EditProps;
 
 export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
   const router = useRouter();
+  const { currency: preferredCurrency } = usePreferredCurrency();
   const initial = props.mode === 'edit' ? props.initial : undefined;
 
   const [categoryId, setCategoryId] = useState(initial?.categoryId ?? '');
+  const [currency, setCurrency] = useState(initial?.currency ?? preferredCurrency);
   const [description, setDescription] = useState(initial?.description ?? '');
   const [totalAmount, setTotalAmount] = useState(
     initial?.totalAmount?.toString() ?? '',
@@ -82,6 +87,7 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
           description: description.trim(),
           totalAmount: total,
           numInstallments: installments,
+          currency,
           interestRate: interestRate ? Number(interestRate) : undefined,
           interestType,
           startDate,
@@ -141,12 +147,12 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="New laptop"
-          className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
+          className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
         />
       </div>
 
       {props.mode === 'create' && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
             <label htmlFor="inst-total" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Total amount
@@ -159,8 +165,14 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
               required
               value={totalAmount}
               onChange={(e) => setTotalAmount(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
+              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
             />
+          </div>
+          <div>
+            <label htmlFor="inst-currency" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Currency
+            </label>
+            <CurrencySelect id="inst-currency" value={currency} onChange={setCurrency} compact />
           </div>
           <div>
             <label htmlFor="inst-count" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -173,7 +185,7 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
               required
               value={numInstallments}
               onChange={(e) => setNumInstallments(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
+              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
             />
           </div>
         </div>
@@ -188,7 +200,7 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
             id="inst-interest-type"
             value={interestType}
             onChange={(e) => setInterestType(e.target.value as InterestType)}
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
           >
             {INTEREST_TYPES.map((type) => (
               <option key={type} value={type}>
@@ -210,7 +222,7 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
             value={interestRate}
             onChange={(e) => setInterestRate(e.target.value)}
             placeholder="e.g. 0.15 for 15%"
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm disabled:opacity-50 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm disabled:opacity-50 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
           />
         </div>
       </div>
@@ -226,7 +238,7 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
             required
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700"
+            className="mt-1 block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 dark:border-zinc-700"
           />
         </div>
       )}
@@ -241,7 +253,7 @@ export function InstallmentExpenseForm(props: InstallmentExpenseFormProps) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus-visible:ring-offset-zinc-900"
+        className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus-visible:ring-offset-zinc-900"
       >
         {pending ? 'Saving…' : props.mode === 'create' ? 'Create expense' : 'Save changes'}
       </button>
