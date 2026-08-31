@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.9.0] - 2026-08-31
+
+- feat(api): bootstrap admin user from environment variables (#36)
+
+
 ## [0.8.9] - 2026-08-31
 
 - chore(deps): bump softprops/action-gh-release from 2 to 3 (#25)
