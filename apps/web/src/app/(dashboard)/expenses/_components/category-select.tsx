@@ -40,7 +40,6 @@ export function CategorySelect({
   id,
   value,
   onChange,
-  required: _required,
   allowEmpty = false,
   emptyLabel = 'All categories',
   className = '',
