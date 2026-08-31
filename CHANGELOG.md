@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.10.0] - 2026-08-31
+
+- feat(web): UX/UI improvements — currency, category colors, emoji picker, teal theme (#39)
+
+
 ## [0.9.1] - 2026-08-31
 
 - chore(deps-dev): bump eslint-config-next from 16.2.9 to 16.3.2 (#38)
