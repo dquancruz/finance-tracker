@@ -55,6 +55,18 @@ describe('env.validation', () => {
     ).toThrow(/example value/);
   });
 
+  it('rejects the documented example admin password in production', () => {
+    expect(() =>
+      validate({
+        ...validBaseEnv,
+        NODE_ENV: 'production',
+        CORS_ORIGIN: 'https://app.example.com',
+        ADMIN_EMAIL: 'admin@example.com',
+        ADMIN_PASSWORD: 'change-me-to-a-strong-password',
+      }),
+    ).toThrow(/ADMIN_PASSWORD must not use the documented example value/);
+  });
+
   it('rejects an unrecognized NODE_ENV value', () => {
     expect(() =>
       validate({ ...validBaseEnv, NODE_ENV: 'staging-typo' }),

@@ -8,6 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import * as argon2 from 'argon2';
+import { MongoServerError } from 'mongodb';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 
@@ -55,19 +56,26 @@ export class UsersService implements OnModuleInit {
     if (!email || !password) return;
 
     const name = this.config.get<string>('ADMIN_NAME')?.trim() || 'Admin';
-    const existing = await this.findByEmail(email);
+    let existing = await this.findByEmail(email);
 
     if (!existing) {
       const passwordHash = await argon2.hash(password);
-      await this.create({
-        email,
-        name,
-        passwordHash,
-        emailVerified: true,
-        role: 'admin',
-      });
-      this.logger.log(`Created admin user for ${email}`);
-      return;
+      try {
+        await this.create({
+          email,
+          name,
+          passwordHash,
+          emailVerified: true,
+          role: 'admin',
+        });
+        this.logger.log(`Created admin user for ${email}`);
+        return;
+      } catch (error) {
+        if (!isDuplicateKeyError(error)) throw error;
+        // Another replica may have created the admin during a concurrent rollout.
+        existing = await this.findByEmail(email);
+        if (!existing) throw error;
+      }
     }
 
     const updates: {
@@ -225,4 +233,8 @@ export class UsersService implements OnModuleInit {
       .findByIdAndUpdate(id, { $set: { deletedAt: new Date() } }, { new: true })
       .exec();
   }
+}
+
+function isDuplicateKeyError(error: unknown): boolean {
+  return error instanceof MongoServerError && error.code === 11000;
 }

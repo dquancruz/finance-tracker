@@ -20,6 +20,9 @@ enum Environment {
 }
 
 const KNOWN_EXAMPLE_SECRETS = new Set(['change-me-to-a-random-32-char-string']);
+const KNOWN_EXAMPLE_ADMIN_PASSWORDS = new Set([
+  'change-me-to-a-strong-password',
+]);
 
 /**
  * Startup env validation. Fails fast (throws before Nest finishes
@@ -128,6 +131,16 @@ export function validate(
   ) {
     throw new Error(
       'JWT_SECRET must not use the documented example value in production',
+    );
+  }
+
+  if (
+    validatedConfig.NODE_ENV === Environment.Production &&
+    validatedConfig.ADMIN_PASSWORD &&
+    KNOWN_EXAMPLE_ADMIN_PASSWORDS.has(validatedConfig.ADMIN_PASSWORD)
+  ) {
+    throw new Error(
+      'ADMIN_PASSWORD must not use the documented example value in production',
     );
   }
 

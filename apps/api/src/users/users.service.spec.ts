@@ -1,5 +1,6 @@
 import { ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { MongoServerError } from 'mongodb';
 import type { Model } from 'mongoose';
 import * as argon2 from 'argon2';
 import { UserDocument } from './schemas/user.schema';
@@ -240,6 +241,41 @@ describe('UsersService admin bootstrap', () => {
       role: 'admin',
     });
     expect(savedDocument.save).toHaveBeenCalled();
+  });
+
+  it('promotes an existing user when concurrent startup races on create', async () => {
+    const { service, model } = buildService({
+      ADMIN_EMAIL: 'admin@example.com',
+      ADMIN_PASSWORD: 'password12',
+    });
+    const racedUser = {
+      _id: 'user-1',
+      email: 'admin@example.com',
+      role: 'user',
+      passwordHash: 'existing-hash',
+    };
+    model.findOne
+      .mockReturnValueOnce({
+        exec: jest.fn().mockResolvedValue(null),
+      })
+      .mockReturnValueOnce({
+        exec: jest.fn().mockResolvedValue(racedUser),
+      });
+    const duplicateKeyError = new MongoServerError({
+      message: 'E11000 duplicate key error',
+      code: 11000,
+    });
+    const savedDocument = {
+      save: jest.fn().mockRejectedValue(duplicateKeyError),
+    };
+    model.mockImplementation(() => savedDocument);
+
+    await service.bootstrapAdminFromEnv();
+
+    expect(model.findByIdAndUpdate).toHaveBeenCalledWith(racedUser._id, {
+      $set: { role: 'admin', emailVerified: true },
+    });
+    expect(argon2.hash).toHaveBeenCalledTimes(1);
   });
 
   it('promotes an existing user to admin without changing an existing password', async () => {
