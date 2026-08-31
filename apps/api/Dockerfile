@@ -14,6 +14,12 @@ RUN turbo prune --scope=@finance-tracker/api --docker
 
 FROM node:20-slim AS installer
 WORKDIR /app
+# argon2 ships native bindings compiled via node-gyp during `npm ci`; slim
+# images omit Python and a C++ toolchain, so installs fail without these.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 make g++ \
+    && rm -rf /var/lib/apt/lists/*
+ENV PYTHON=/usr/bin/python3
 COPY --from=pruner /app/out/json/ .
 RUN npm ci
 
