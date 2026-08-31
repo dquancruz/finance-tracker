@@ -34,3 +34,8 @@ export class UpcomingPaymentsQueryDto {
   @Max(365)
   days?: number;
 }
+
+export class SummaryQueryDto {
+  @IsOptional()
+  displayCurrency?: string;
+}

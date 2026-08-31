@@ -3,6 +3,8 @@
 import type { ICategory, IInstallmentExpense } from '@finance-tracker/shared';
 import { useState } from 'react';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { useExchangeRates } from '@/lib/hooks/use-exchange-rates';
+import { usePreferredCurrency } from '@/lib/hooks/use-preferred-currency';
 import { summarizeInstallment } from '@/lib/installment-summary';
 import { InstallmentSchedule } from '../../expenses/_components/installment-schedule';
 
@@ -16,8 +18,11 @@ export function InstallmentPlanCard({
   category,
 }: InstallmentPlanCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const { currency: displayCurrency } = usePreferredCurrency();
+  const { convert } = useExchangeRates();
   const summary = summarizeInstallment(expense);
   const total = expense.paymentSchedule.length;
+  const showConverted = expense.currency !== displayCurrency;
 
   return (
     <li className="rounded-xl border border-zinc-200 bg-surface p-4 shadow-sm dark:border-zinc-800">
@@ -48,6 +53,16 @@ export function InstallmentPlanCard({
           </p>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             remaining of {formatCurrency(expense.totalAmount, expense.currency)}
+            {showConverted && (
+              <>
+                {' '}
+                · {formatCurrency(
+                  convert(summary.remainingBalance, expense.currency, displayCurrency),
+                  displayCurrency,
+                )}{' '}
+                in {displayCurrency}
+              </>
+            )}
           </p>
         </div>
       </div>

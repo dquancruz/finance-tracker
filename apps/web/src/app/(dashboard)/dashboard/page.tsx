@@ -82,15 +82,15 @@ function PageShell({ children }: { children: React.ReactNode }) {
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
+  const { currency } = usePreferredCurrency();
   const {
     data: summary,
     isLoading,
     isError,
     isFetching,
     refetch,
-  } = useDashboardSummary();
+  } = useDashboardSummary(currency);
 
-  const { currency } = usePreferredCurrency();
   const view = getDashboardView({
     sessionStatus: status,
     hasAccessToken: Boolean(session?.accessToken),

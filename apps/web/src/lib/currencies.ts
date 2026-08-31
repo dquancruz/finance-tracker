@@ -12,6 +12,7 @@ export const SUPPORTED_CURRENCIES: CurrencyOption[] = [
   { code: 'CAD', label: 'Canadian Dollar', symbol: 'CA$' },
   { code: 'AUD', label: 'Australian Dollar', symbol: 'A$' },
   { code: 'MXN', label: 'Mexican Peso', symbol: 'MX$' },
+  { code: 'GTQ', label: 'Guatemalan Quetzal', symbol: 'Q' },
   { code: 'JPY', label: 'Japanese Yen', symbol: '¥' },
   { code: 'CHF', label: 'Swiss Franc', symbol: 'CHF' },
   { code: 'INR', label: 'Indian Rupee', symbol: '₹' },

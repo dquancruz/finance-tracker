@@ -5,6 +5,7 @@ import { AnalyticsService } from './analytics.service';
 import {
   CategoryBreakdownQueryDto,
   MonthlyTrendsQueryDto,
+  SummaryQueryDto,
   UpcomingPaymentsQueryDto,
 } from './dto/query-analytics.dto';
 
@@ -15,8 +16,11 @@ export class AnalyticsController {
 
   /** Everything the dashboard needs, in a single round trip. */
   @Get('summary')
-  getSummary(@CurrentUser('userId') userId: string) {
-    return this.analyticsService.getSummary(userId);
+  getSummary(
+    @CurrentUser('userId') userId: string,
+    @Query() query: SummaryQueryDto,
+  ) {
+    return this.analyticsService.getSummary(userId, query.displayCurrency);
   }
 
   @Get('category-breakdown')

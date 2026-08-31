@@ -1,8 +1,9 @@
 'use client';
 
 import type { ICategory } from '@finance-tracker/shared';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useCategories } from '@/lib/hooks/use-categories';
+import { useDropdownKeyboard } from '@/lib/hooks/use-dropdown-keyboard';
 
 interface CategorySelectProps {
   id: string;
@@ -40,6 +41,7 @@ export function CategorySelect({
   id,
   value,
   onChange,
+  required = false,
   allowEmpty = false,
   emptyLabel = 'All categories',
   className = '',
@@ -50,6 +52,23 @@ export function CategorySelect({
   const listId = useId();
 
   const selected = categories?.find((category) => category._id === value);
+  const optionIds = useMemo(
+    () => [
+      ...(allowEmpty ? [''] : []),
+      ...(categories ?? []).map((category) => category._id),
+    ],
+    [allowEmpty, categories],
+  );
+
+  const { activeIndex, handleKeyDown, resetIndex } = useDropdownKeyboard({
+    itemCount: optionIds.length,
+    enabled: open,
+    onClose: () => setOpen(false),
+    onSelect: (index) => {
+      const categoryId = optionIds[index];
+      if (categoryId !== undefined) selectCategory(categoryId);
+    },
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -60,16 +79,8 @@ export function CategorySelect({
       }
     }
 
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setOpen(false);
-    }
-
     document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => document.removeEventListener('mousedown', handlePointerDown);
   }, [open]);
 
   function selectCategory(categoryId: string) {
@@ -85,6 +96,8 @@ export function CategorySelect({
         ? emptyLabel
         : 'Select a category';
 
+  const showRequiredError = required && !value && !allowEmpty;
+
   return (
     <div ref={rootRef} className={`relative ${className}`}>
       <button
@@ -94,8 +107,26 @@ export function CategorySelect({
         aria-expanded={open}
         aria-controls={listId}
         disabled={isLoading}
-        onClick={() => setOpen((current) => !current)}
-        className="mt-1 flex w-full items-center justify-between gap-2 rounded-lg border border-zinc-300 bg-surface px-3 py-2 text-left text-sm transition-colors hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+        onClick={() => {
+          setOpen((current) => {
+            if (!current) resetIndex();
+            return !current;
+          });
+        }}
+        onKeyDown={(event) => {
+          if (!open && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+            event.preventDefault();
+            setOpen(true);
+            resetIndex();
+            return;
+          }
+          handleKeyDown(event);
+        }}
+        className={`mt-1 flex w-full items-center justify-between gap-2 rounded-lg border bg-surface px-3 py-2 text-left text-sm transition-colors hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-zinc-800 ${
+          showRequiredError
+            ? 'border-red-300 dark:border-red-500/40'
+            : 'border-zinc-300 dark:border-zinc-700'
+        }`}
       >
         <span className="min-w-0">
           {selected ? (
@@ -115,6 +146,11 @@ export function CategorySelect({
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
+      {showRequiredError && (
+        <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+          Please select a category.
+        </p>
+      )}
 
       {open && (
         <ul
@@ -131,14 +167,19 @@ export function CategorySelect({
                 aria-selected={!value}
                 onClick={() => selectCategory('')}
                 className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-500 dark:hover:bg-zinc-800 ${
-                  !value ? 'bg-teal-50 text-teal-800 dark:bg-teal-500/10 dark:text-teal-200' : ''
+                  activeIndex === 0
+                    ? 'bg-teal-50 text-teal-900 dark:bg-teal-500/10 dark:text-teal-100'
+                    : !value
+                      ? 'bg-teal-50/60 text-teal-800 dark:bg-teal-500/10 dark:text-teal-200'
+                      : ''
                 }`}
               >
                 {emptyLabel}
               </button>
             </li>
           )}
-          {(categories ?? []).map((category: ICategory) => {
+          {(categories ?? []).map((category: ICategory, index) => {
+            const optionIndex = allowEmpty ? index + 1 : index;
             const isSelected = category._id === value;
             return (
               <li key={category._id} role="presentation">
@@ -148,7 +189,7 @@ export function CategorySelect({
                   aria-selected={isSelected}
                   onClick={() => selectCategory(category._id)}
                   className={`flex w-full items-center px-3 py-2 text-left text-sm transition-colors hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-500 dark:hover:bg-zinc-800 ${
-                    isSelected
+                    activeIndex === optionIndex || isSelected
                       ? 'bg-teal-50 text-teal-900 dark:bg-teal-500/10 dark:text-teal-100'
                       : 'text-zinc-900 dark:text-zinc-50'
                   }`}

@@ -6,6 +6,8 @@ import type { IInstallmentExpense } from '@finance-tracker/shared';
 import { useCategories } from '@/lib/hooks/use-categories';
 import { useExpenses } from '@/lib/hooks/use-expenses';
 import { formatCurrency } from '@/lib/format';
+import { sumConvertedAmounts } from '@finance-tracker/finance-utils';
+import { useExchangeRates } from '@/lib/hooks/use-exchange-rates';
 import { usePreferredCurrency } from '@/lib/hooks/use-preferred-currency';
 import { summarizeInstallment } from '@/lib/installment-summary';
 import { InstallmentPlanCard } from './_components/installment-plan-card';
@@ -20,6 +22,7 @@ const INSTALLMENT_FILTERS = {
 
 export default function InstallmentsPage() {
   const { currency: preferredCurrency } = usePreferredCurrency();
+  const { rates, isLoading: ratesLoading } = useExchangeRates();
   const { data: categories } = useCategories();
   const { data, isLoading, isError } = useExpenses(INSTALLMENT_FILTERS);
 
@@ -28,20 +31,26 @@ export default function InstallmentsPage() {
     [data],
   );
 
-  const { active, completed, totalRemaining } = useMemo(() => {
+  const { active, completed, totalRemaining, hasMixedCurrencies } = useMemo(() => {
     const withSummary = plans.map((expense) => ({
       expense,
       summary: summarizeInstallment(expense),
     }));
+    const currencies = new Set(plans.map((plan) => plan.currency ?? 'USD'));
     return {
       active: withSummary.filter((p) => !p.summary.isComplete),
       completed: withSummary.filter((p) => p.summary.isComplete),
-      totalRemaining: withSummary.reduce(
-        (sum, p) => sum + p.summary.remainingBalance,
-        0,
+      totalRemaining: sumConvertedAmounts(
+        withSummary.map(({ expense, summary }) => ({
+          amount: summary.remainingBalance,
+          currency: expense.currency ?? 'USD',
+        })),
+        preferredCurrency,
+        rates,
       ),
+      hasMixedCurrencies: currencies.size > 1,
     };
-  }, [plans]);
+  }, [plans, preferredCurrency, rates]);
 
   return (
     <div className="p-4 sm:p-6">
@@ -111,10 +120,12 @@ export default function InstallmentsPage() {
                 Remaining balance
               </p>
               <p className="mt-3 text-2xl font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
-                {formatCurrency(totalRemaining, preferredCurrency)}
+                {ratesLoading ? '…' : formatCurrency(totalRemaining, preferredCurrency)}
               </p>
               <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                Across all installment plans
+                {hasMixedCurrencies
+                  ? `Converted to ${preferredCurrency} across all plans`
+                  : 'Across all installment plans'}
               </p>
             </div>
           </div>
