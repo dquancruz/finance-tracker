@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.10.1] - 2026-09-03
+
+- chore(deps-dev): bump @types/supertest from 7.2.0 to 7.2.1 (#42)
+
+
 ## [0.10.0] - 2026-08-31
 
 - feat(web): UX/UI improvements — currency, category colors, emoji picker, teal theme (#39)
