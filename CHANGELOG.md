@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.10.2] - 2026-09-09
+
+- Merge pull request #46 from dquancruz/chore/document-pr-review-gate
+- docs: document the pr-review-gate quality gate before PR creation
+
+
 ## [0.10.1] - 2026-09-03
 
 - chore(deps-dev): bump @types/supertest from 7.2.0 to 7.2.1 (#42)
